@@ -51,6 +51,20 @@
  * Describe the architecture - what are the high level components or patterns you will use? Diagrams are useful here. 
  * Will you be using third party applications or APIs? If so, what are they?
 
+We have not completely decided how to build it quite yet, but we have some ideas of where to start and what we need.
+
+## Technology Stack
+
+For our backend, we're planning to use Python with Flask since it integrates well with AI/ML libraries and gives us the flexibility we need for voice processing. We'll most probably use SQLite for user management and voice sample metadata as recommended by our partner, along with a vector database like Chroma or Qdrant for storing voice embeddings. For the AI components, we're considering open-source TTS models. We arent sure which one yet, but preferably with librosa or some similar package for audio processing and resemblyzer for voice embedding extraction. We'll containerize everything using Docker with multi-stage builds and Docker Compose for local development, though we're still debating whether to use a single container or separate containers for the API server, AI processing, and databases.
+
+## Architecture and Deployment
+
+Our high-level architecture will include an API layer with Flask gRPC endpoints, an authentication service for user management, a voice processing service for handling uploads and embedding extraction, a TTS synthesis service for generating speech with timing data, and a storage layer combining SQLite, vector database, and cloud storage for audio files. We plan to deploy using cloud container services like AWS or GCP, with cloud storage for audio files and pre-trained models from Hugging Face. For CI/CD, we're looking at GitHub Actions with curl-based API testing as specified in the project requirements.
+
+## Development Process
+
+Our current rough-drafted plan for the development approach starts with defining API specifications, choosing our TTS model, and designing the database schema. Then we'll set up the Flask project with Docker and database configuration, followed by building API endpoints and integrating AI components. Finally, we'll implement security measures and CI/CD pipelines.
+
 ----
 ## Intellectual Property Confidentiality Agreement 
 > Note this section is **not marked** but must be completed briefly if you have a partner. If you have any questions, please ask on Piazza.
@@ -75,7 +89,16 @@ Briefly describe which option you have agreed to.
 Do a team-building activity in-person or online. This can be playing an online game, meeting for bubble tea, lunch, or any other activity you all enjoy.
 * Get to know each other on a more personal level.
 * Provide a few sentences on what you did and share a picture or other evidence of your team building activity.
-* Share at least three fun facts from members of you team (total not 3 for each member).
+* Share at least three fun facts from members of your team (total not 3 for each member).
+
+We have met online, and have had a bunch of conversations on discord together. We've done a team-building activity online in the form of solving a 300 piece puzzle together (see image below) as well as talked about interests such as video games and past U of T courses. We also (for a little while before tutorial) did an artboard together. See the image for that below as well.
+
+![image](https://github.com/user-attachments/assets/cfa197b9-0ad6-41d0-9752-a5769d54c201)
+![image](https://github.com/user-attachments/assets/60606252-59fb-447d-b0b2-ab8b0f25ace7)
+
+3 Fun facts about our team are that all of us have/do play League of Legends, around half of our team is currently working on completing a game design focus, and we all love cats!
+
+
 
 
 #### Q7: What are the roles & responsibilities on the team?
