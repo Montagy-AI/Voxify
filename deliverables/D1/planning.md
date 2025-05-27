@@ -125,16 +125,34 @@ List/describe the artifacts you will produce to organize your team. (We strongly
 ## Organisation Details
 
 #### Q11. How does your team fit within the overall team organisation of the partner?
-* Given the team structure of your partner, what role do you think your team will play?
-* Examples include product development that includes developing new features, or quality assurance that includes developing features that test the product reliability, or software maintenance that includes fixing crucial bugs in the product.
-* Provide examples of why you think you fit this role.
+
+[//]: # (* Given the team structure of your partner, what role do you think your team will play?)
+
+[//]: # (* Examples include product development that includes developing new features, or quality assurance that includes developing features that test the product reliability, or software maintenance that includes fixing crucial bugs in the product.)
+
+[//]: # (* Provide examples of why you think you fit this role.)
+
+Our team acts as the backend foundation of the Voxify project. While the partner is developing the frontend interface, we’re responsible for making sure the backend logic and systems work reliably and are ready to support user interactions.
+
+We're developing the actual core of the product: voice cloning, TTS generation, data storage, and APIs that tie everything together. In that sense, we’re positioned as a product development team focused on core functionality.
 
 #### Q12. How does your project fit within the overall product from the partner?
-* Look at the big picture of the product and think about how your project fits into this product.
-* Is your project the first step towards building this product? Is it the first prototype? Are you developing the frontend of a product whose backend is developed by the partner? Are you building the release pipelines for a product that is developed by the partner? Are you building a core feature set and take full ownership of these features?
-* You should also provide details of who else is contributing to what parts of the product, if you have this information. This is more important if the project that you will be working on has strong coupling with parts that will be contributed to by members other than your team (e.g., from a partner).
-* You can be creative for these questions and even use a graphical or pictorial representation to demonstrate the fit.
-* Briefly specify what your partner considers a success for this project. Do they want you to build specific features? Publish a usable product? Just a prototype? Be as specific as you can be at this point.
+
+[//]: # (* Look at the big picture of the product and think about how your project fits into this product.)
+
+[//]: # (* Is your project the first step towards building this product? Is it the first prototype? Are you developing the frontend of a product whose backend is developed by the partner? Are you building the release pipelines for a product that is developed by the partner? Are you building a core feature set and take full ownership of these features?)
+
+[//]: # (* You should also provide details of who else is contributing to what parts of the product, if you have this information. This is more important if the project that you will be working on has strong coupling with parts that will be contributed to by members other than your team &#40;e.g., from a partner&#41;.)
+
+[//]: # (* You can be creative for these questions and even use a graphical or pictorial representation to demonstrate the fit.)
+
+[//]: # (* Briefly specify what your partner considers a success for this project. Do they want you to build specific features? Publish a usable product? Just a prototype? Be as specific as you can be at this point.)
+
+Our project forms the first working prototype of the Voxify platform. It establishes the backend systems that enable the core functionality of the product: uploading voice samples, generating voice clones, and synthesizing speech with accurate word or syllable timing. This work lays the technical foundation that the partner’s frontend will build on.
+
+While we are fully responsible for the backend, the partner is developing the frontend interface separately. The two parts are strongly connected — the frontend depends on the API endpoints we provide, and our backend must be flexible and reliable enough to support real user interaction.
+
+According to our partner, success means delivering a backend that can pass a complete set of end-to-end API tests — including user registration, voice upload, clone generation, and speech synthesis with timestamped output. This will demonstrate that the platform’s key workflows are in place and functioning correctly.
 
 ## Potential Risks
 
