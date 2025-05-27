@@ -180,18 +180,15 @@ According to our partner, success means delivering a backend that can pass a com
 ## Potential Risks
 
 #### Q13. What are some potential risks to your project?
-* Now that you have defined your project, what risks can you identify that might impact it?
-* Some examples of risks at this planning stage could include:
-  * Uncertainties regarding a specific feature
-  * Misaligned expectations or conflicts
-  * Lack of clarity in execution or decision-making
-  * Limited access to data, systems, or other dependencies
-  * User stories that are too abstract or too simple
-* For each risk, provide a brief bullet point and then explain the risk in detail. 
+Vague or Incomplete Specifications
+Explanation: The project intentionally provides vague requirements, which can lead to different interpretations by team members. This could result in inconsistencies in implementation, missing features, or misaligned expectations with the partner.
+Different Paces or Misalignment Among Team Members
+Explanation: Team members may progress at different speeds or interpret tasks differently due to unclear requirements. This can cause integration issues, uneven workloads, and difficulty in meeting deadlines
+
 
 #### Q14. What are some potential mitigation strategies for the risks you identified?
-* Examples of mitigation strategies:
-  * More communication with the partner might help with improving clarity.
-  * Adding more details for an user story might make it less abstract.
-  * Adding an extra user story might increase the project complexity, making it less simple.
-* It's ok if you are unable to find mitigation strategies for all the risks right now.
+Vague or Incomplete Specifications
+Mitigation: Proactively collaborate with the partner and the team to create a detailed, shared specification document. Use diagrams, sample inputs/outputs, and clear definitions for each feature.
+Different Paces or Misalignment Among Team Members
+Mitigation: Hold regular stand-up meetings to sync progress and clarify misunderstandings. Use task tracking tools (e.g., Trello, GitHub Projects) to ensure visibility of who’s doing what. Encourage open communication and collaborative work sessions.chan
+
