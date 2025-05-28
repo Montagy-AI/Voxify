@@ -35,7 +35,7 @@ Specifications can be found at `Voxify/backend/Specifications`
 - **AI Frameworks**:
   - PyTorch (for model training/inference)
 - **Backend API**:
-  - Flask (REST API interface)
+  - Flask (REST API interface), gRPC
 - **Voice Model** (planned):
   - OpenVoice or Coqui-TTS (for voice cloning)
 
