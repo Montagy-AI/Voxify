@@ -80,6 +80,8 @@ Our current rough-drafted plan for the development approach starts with defining
 
 Briefly describe which option you have agreed to.
 
+We have agreed to option number 4, and the partner has specified that they do not mind sharing or giving access to systems outside, but the MIT license should be present. In their words, they don't mind us sharing the code as long as the MIT license is present.
+
 ----
 
 ## Teamwork Details
