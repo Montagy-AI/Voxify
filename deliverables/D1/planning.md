@@ -38,7 +38,7 @@ Example persona: Leo, a software engineer working on an AI-powered video editing
 
 #### Q5: Have you decided on how you will build it? Share what you know now or tell us the options you are considering.
 
-We have not completely decided how to build it quite yet, but we have some ideas of where to start and what we need.
+We have not completely decided how to build it quite yet, but we have some ideas of where to start and what we need:
 
 ## Technology Stack
 
