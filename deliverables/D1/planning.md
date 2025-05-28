@@ -95,7 +95,7 @@ We have met online, and have had a bunch of conversations on discord together. W
 * Rationale: Jaden expressed strong interest in both infrastructure and AI technologies.
   
 3. Kiko
-* Roles: API Developer, Database Engineer, Code reviewer
+* Roles: API Developer, Database Engineer, Code reviewer, develop manager
 * Responsibilities: Kiko will work on implementing API routes, managing database interactions, and ensuring that the backend adheres to gRPC standards. Also, she is going to do the code review job and help debugging.
 * Rationale: Kiko is also experienced in full-stack website dev and designing api endpoints. She also want to learn different tech stack by helping debugging.
 
@@ -115,7 +115,7 @@ We have met online, and have had a bunch of conversations on discord together. W
 * Rationale: Chelsey has experience working with machine learning models and is particularly interested in the AI pipeline.
 
 7. Amirali
-* Roles: AI Engineer, Code reviewer
+* Roles: AI Engineer, Code reviewer, develop manager
 * Responsibilities: Amirali will contribute to model selection, TTS pipeline integration, and help with fine-tuning models for voice synthesis. He is also responsible for reviewing code and debugging.
 * Rationale: Amirali is passionate about deep learning and has experience working with pre-trained AI models, making him a good fit for AI components.
 
