@@ -113,16 +113,54 @@ List each team member and:
  * A description of their role(s) and responsibilities including the components they'll work on and non-software related work
  * Why did you choose them to take that role? Specify if they are interested in learning that part, experienced in it, or any other reasons. Do no make things up. This part is not graded but may be reviewed later.
 
+Team Roles and Responsibilities
+1. Michael
+* Roles: API Developer, Database Engineer, DevOps Engineer
+* Responsibilities: Michael will contribute to designing and implementing API endpoints and database schemas, and will lead containerization efforts using Docker and CI/CD pipeline setup.
+* Rationale: Michael is eager to deepen his DevOps skills, making him a strong fit for infrastructure tasks. He's also willing to devote time like more than 20 hours per week for this project.
+
+2. Jaden
+* Roles: API Developer, AI Engineer, DevOps Engineer
+* Responsibilities: Jaden will assist in building gRPC interfaces, help containerize the backend system, and contribute to integrating voice synthesis models.
+* Rationale: Jaden expressed strong interest in both infrastructure and AI technologies.
+  
+3. Kiko
+* Roles: API Developer, Database Engineer, Code reviewer
+* Responsibilities: Kiko will work on implementing API routes, managing database interactions, and ensuring that the backend adheres to gRPC standards. Also, she is going to do the code review job and help debugging.
+* Rationale: Kiko is also experienced in full-stack website dev and designing api endpoints. She also want to learn different tech stack by helping debugging.
+
+4. Jun
+* Roles: API Developer, Partner Liaison, Database Engineer
+* Responsibilities: Jun will focus on writing efficient gRPC handlers and make sure it works well with database. He will also serve as the dedicated partner liaison, coordinating communications and maintaining meeting records.
+* Rationale: Jun has a background in systems programming and is interested in being an project manager.
+  
+5. Maddie
+* Roles: Security Lead, Containerization Support
+* Responsibilities: Maddie will lead the implementation of authentication, access control, and encryption, and help with containerization tasks. 
+* Rationale: Maddie is experienced with security aspect for developing and has experience in docker.
+
+6. Chelsey
+* Roles: AI Engineer, Database Engineer
+* Responsibilities: Chelsey will help integrate TTS and voice embedding models and contribute to vector database design and optimization.
+* Rationale: Chelsey has experience working with machine learning models and is particularly interested in the AI pipeline.
+
+7. Amirali
+* Roles: AI Engineer, Code reviewer
+* Responsibilities: Amirali will contribute to model selection, TTS pipeline integration, and help with fine-tuning models for voice synthesis. He is also responsible for reviewing code and debugging.
+* Rationale: Amirali is passionate about deep learning and has experience working with pre-trained AI models, making him a good fit for AI components.
+
 
 #### Q8: How will you work as a team?
 
-Describe meetings (and other events) you are planning to have. 
- * When and where? Recurring or ad hoc? In-person or online?
- * What's the purpose of each meeting?
- * Other events could be coding sessions, code reviews, quick weekly sync meeting online, etc.
- * You should have 2 meetings with your project partner (if you have one) before D1 is due. Describe them here:
-   * You must keep track of meeting minutes and add them to your repo under "deliverables/minutes" folder
-   * You must have a regular meeting schedule established for the rest of the term.  
+1. Our team will hold a weekly team meeting every Friday at 6:00 PM (ET) to discuss progress, share updates, assign tasks, and address any blockers. These meetings will be held online and serve as our main sync point throughout the term.
+
+2. In addition to formal meetings, we maintain two active group chats for the Voxify project — one on Slack and one on Discord. These are used for daily communication, informal discussions, task coordination, and quick Q&A. Task assignments and updates are frequently communicated in these channels to ensure smooth collaboration.
+
+3. Each meeting will last approximately 1 hour and include:
+ * Status updates from each member
+ * Roadblock sharing and group problem-solving
+ * Task reassignment and planning for the next sprint
+ * Discussion of upcoming deliverables or partner feedback
   
 #### Q9: How will you organize your team?
 
