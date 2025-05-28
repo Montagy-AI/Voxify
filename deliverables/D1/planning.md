@@ -1,4 +1,4 @@
-# YOUR PRODUCT/TEAM NAME
+# Voxify/ Majick
 > _Note:_ This document will evolve throughout your project. You commit regularly to this file while working on the project (especially edits/additions/deletions to the _Highlights_ section). 
  > **This document will serve as a master plan between your team, your partner and your TA.**
 
@@ -6,24 +6,17 @@
  
 #### Q1: What is the product?
 
- > Short (1 - 2 min' read)
- * Start with a single sentence, high-level description of the product.
- * Be clear - Describe the problem you are solving in simple terms.
- * Specify if you have a partner, who they are (role/title), and the organization information.
- * Be concrete. For example:
-    * What are you planning to build? Is it a website, mobile app, browser extension, command-line app, etc.?      
-    * When describing the problem/need, give concrete examples of common use cases.
-    * Assume the reader knows nothing about the partner or the problem domain and provide the necessary context. 
- * Focus on *what* your product does, and avoid discussing *how* you're going to implement it.      
-   For example: This is not the time or the place to talk about which programming language and/or framework you are planning to use.
- * **Feel free (and very much encouraged) to include useful diagrams, mock-ups and/or links**.
-
+We are building Voxify, a web-based tool and API that allows users to create voice clones and generate text-to-speech output using those voices. The platform supports multiple languages, emotional tone control, and zero-shot voice cloning, enabling both developers and content creators to generate expressive, customized speech effortlessly.
+![b58dbae6be53116497e7c3dd3b277d3](https://github.com/user-attachments/assets/70f7337f-fc43-48c0-bffc-93ae278359ae)
 
 #### Q2: Who are your target users?
 
-  > Short (1 - 2 min' read max)
- * Be specific (e.g. a 'a third-year university student taking CSC301 and studying Computer Science' and not 'a student')
- * **Feel free to use personas. You can create your personas as part of this Markdown file, or add a link to an external site (for example, [Xtensio](https://xtensio.com/user-persona/)).**
+1. Content creators and solo entrepreneurs who produce podcasts, videos, or social media content and want to create multilingual, expressive voiceovers using their own cloned voice.
+Example persona: Sarah, a freelance YouTuber and language tutor who wants to generate videos in multiple languages using her own voice, without recording each version manually.
+2. Developers and businesses that need to integrate text-to-speech or voice cloning into their applications via API.
+Example persona: Leo, a software engineer working on an AI-powered video editing tool (like CutSmart) who needs a backend TTS engine with personalized voice capabilities.
+
+![image](https://github.com/user-attachments/assets/1f50cd3f-8f29-4891-bebd-00600e5af9f0)
 
 #### Q3: Why would your users choose your product? What are they using today to solve their problem/need?
 
@@ -45,12 +38,6 @@
 
 #### Q5: Have you decided on how you will build it? Share what you know now or tell us the options you are considering.
 
-> Short (1-2 min' read max)
- * What is the technology stack? Specify languages, frameworks, libraries, PaaS products or tools to be used or being considered. 
- * How will you deploy the application?
- * Describe the architecture - what are the high level components or patterns you will use? Diagrams are useful here. 
- * Will you be using third party applications or APIs? If so, what are they?
-
 We have not completely decided how to build it quite yet, but we have some ideas of where to start and what we need.
 
 ## Technology Stack
@@ -67,18 +54,8 @@ Our current rough-drafted plan for the development approach starts with defining
 
 ----
 ## Intellectual Property Confidentiality Agreement 
-> Note this section is **not marked** but must be completed briefly if you have a partner. If you have any questions, please ask on Piazza.
->  
-**By default, you own any work that you do as part of your coursework.** However, some partners may want you to keep the project confidential after the course is complete. As part of your first deliverable, you should discuss and agree upon an option with your partner. Examples include:
-1. You can share the software and the code freely with anyone with or without a license, regardless of domain, for any use.
-2. You can upload the code to GitHub or other similar publicly available domains.
-3. You will only share the code under an open-source license with the partner but agree to not distribute it in any way to any other entity or individual. 
+
 4. You will share the code under an open-source license and distribute it as you wish but only the partner can access the system deployed during the course.
-5. You will only reference the work you did in your resume, interviews, etc. You agree to not share the code or software in any capacity with anyone unless your partner has agreed to it.
-
-**Your partner cannot ask you to sign any legal agreements or documents pertaining to non-disclosure, confidentiality, IP ownership, etc.**
-
-Briefly describe which option you have agreed to.
 
 We have agreed to option number 4, and the partner has specified that they do not mind sharing or giving access to systems outside, but the MIT license should be present. In their words, they don't mind us sharing the code as long as the MIT license is present.
 
@@ -87,11 +64,6 @@ We have agreed to option number 4, and the partner has specified that they do no
 ## Teamwork Details
 
 #### Q6: Have you met with your team?
-
-Do a team-building activity in-person or online. This can be playing an online game, meeting for bubble tea, lunch, or any other activity you all enjoy.
-* Get to know each other on a more personal level.
-* Provide a few sentences on what you did and share a picture or other evidence of your team building activity.
-* Share at least three fun facts from members of your team (total not 3 for each member).
 
 We have met online, and have had a bunch of conversations on discord together. We've done a team-building activity online in the form of solving a 300 piece puzzle together (see image below) as well as talked about interests such as video games and past U of T courses. We also (for a little while before tutorial) did an artboard together. See the image for that below as well.
 
@@ -116,7 +88,7 @@ We have met online, and have had a bunch of conversations on discord together. W
 * Rationale: Jaden expressed strong interest in both infrastructure and AI technologies.
   
 3. Kiko
-* Roles: API Developer, Database Engineer, Code reviewer
+* Roles: API Developer, Database Engineer, Code reviewer, develop manager
 * Responsibilities: Kiko will work on implementing API routes, managing database interactions, and ensuring that the backend adheres to gRPC standards. Also, she is going to do the code review job and help debugging.
 * Rationale: Kiko is also experienced in full-stack website dev and designing api endpoints. She also want to learn different tech stack by helping debugging.
 
@@ -136,7 +108,7 @@ We have met online, and have had a bunch of conversations on discord together. W
 * Rationale: Chelsey has experience working with machine learning models and is particularly interested in the AI pipeline.
 
 7. Amirali
-* Roles: AI Engineer, Code reviewer
+* Roles: AI Engineer, Code reviewer, develop manager
 * Responsibilities: Amirali will contribute to model selection, TTS pipeline integration, and help with fine-tuning models for voice synthesis. He is also responsible for reviewing code and debugging.
 * Rationale: Amirali is passionate about deep learning and has experience working with pre-trained AI models, making him a good fit for AI components.
 
@@ -154,26 +126,29 @@ We have met online, and have had a bunch of conversations on discord together. W
  * Discussion of upcoming deliverables or partner feedback
  * Records are found at project-2-Voxify/deliverables/team/minutes
   
-#### Q9: How will you organize your team?
+#### Q9: How will you organize your team?  
 
-List/describe the artifacts you will produce to organize your team. (We strongly recommend that you use standard collaboration tools like Linear.app, Jira, Slack, Discord, GitHub.)       
-
- * Artifacts can be To-Do lists, Task boards, schedule(s), meeting minutes, etc.
- * We want to understand:
-   * How do you keep track of what needs to get done? (You must grant your TA and partner access to systems you use to manage work)
-   * **How do you prioritize tasks?**
-   * How do tasks get assigned to team members?
+ * Artifacts for organizing the team:
+   * Meeting minutes posted on Github
+   * Github Backlog/Task Board to keep track of what needs to be completed —> provided by partner
+   * Announcements made on Discord
    * How do you determine the status of work from inception to completion?
+ * The team will usually prioritize tasks that our partner suggests for us to work on, but we will also discuss in our personal meetings the specific order of completion.
+ * Tasks are assigned to team members depending on who is interested in working on what, what our area of focus is, and how much time we have to allocate for this project weekly.
+ * The status of completion is determined by whether the feature we are implementing fulfills the requirements specified by the partner or not.
 
 #### Q10: What are the rules regarding how your team works?
 
 **Communications:**
- * What is the expected frequency? What methods/channels will be used? 
- * If you have a partner project, what is your process for communicating with your partner? Who is responsible?
+ * We will use:
+   * Slack for quick communication with the partner
+   * Discord for team communication and meetings
+   * Google Meet for our team calls with the partner (weekly)
+ * Our project manager, Jun, is responsible for representing the team through lengthier emails
  
-**Collaboration: (Share your responses to Q8 & Q9 from A1)**
- * How are people held accountable for attending meetings, completing action items? what is your process?
- * How will you address the issue if one person doesn't contribute or is not responsive?
+**Collaboration:**
+ * Each team member is expected to attend meetings and complete the action items assigned to them. Continuous failure to do so would result in bad peer evaluations and a report to our assigned TA.
+ * If a team member is unresponsive or not completing their work, the rest of the team will first try to understand the reason for this behavior. If it’s due to personal issues, they will offer support by reallocating tasks or extending deadlines. However, if the team member does not have a valid reason and refuses to change their behavior, the team will report the issue to the TA and/or address it in peer evaluations.
 
 ## Organisation Details
 
