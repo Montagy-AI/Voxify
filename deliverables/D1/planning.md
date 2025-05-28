@@ -20,21 +20,17 @@ Example persona: Leo, a software engineer working on an AI-powered video editing
 
 #### Q3: Why would your users choose your product? What are they using today to solve their problem/need?
 
-> Short (1 - 2 min' read max)
- * We want you to "connect the dots" for us - Why does your product (as described in your answer to Q1) fits the needs of your users (as described in your answer to Q2)?
- * Explain the benefits of your product explicitly & clearly. For example:
-    * Save users time (how and how much?)
-    * Allow users to discover new information (which information? And, why couldn't they discover it before?)
-    * Provide users with more accurate and/or informative data (what kind of data? Why is it useful to them?)
-    * Does this application exist in another form? If so, how does your differ and provide value to the users?
-    * How does this align with your partner's organization's values/mission/mandate?
+We hope for Voxify to adddress the issues surrounding recording and localizing audio content across languages and platforms. With Voxify using **zero-shot voice cloning**, users will be able to generate a realistic, emotionally expressive clone of a voice using audio recordings that can be as short as a few seconds. This will drastically reduce the amount of time spent recording from hours to a few minutes. Creators can instantly produce voiceovers in multiple languages, whilst maintaining any unique vocal tones and styles that are desired. Voxify can also change generated voices to match different languages, accents, or emotional tones - something that can typically be costly, technically difficult, or simply unavailable. This is especially valuable for content creators or education platforms enhancing accessibility. 
+
+Compared to traditional TTS tools or studio recordings, Voxify will offer scalable and developer-friendly APIs for seamless integration as a microservice, advanced features like word/syllable-to-time mapping, job tracking, and rate limiting, as well as robust security features like end-to-end encryption, secure authentication, and role-based access. These features would be critical for protecting voice data in enterprise environments. While some voice cloning and TTS platforms exist, we want Voxify to go beyond basic voice synthesis and deliver a combination of usability, flexibility, and scalability that is rare in the market.
 
 #### Q4: What are the user stories that make up the Minumum Viable Product (MVP)?
 
- * At least 5 user stories concerning the main features of the application - note that this can broken down further
- * You must follow proper user story format (as taught in lecture) ```As a <user of the app>, I want to <do something in the app> in order to <accomplish some goal>```
- * User stories must contain acceptance criteria. Examples of user stories with different formats can be found here: https://www.justinmind.com/blog/user-story-examples/. **It is important that you provide a link to an artifact containing your user stories**.
- * If you have a partner, these must be reviewed and accepted by them. You need to include the evidence of partner approval (e.g., screenshot from email) or at least communication to the partner (e.g., email you sent)
+1. **Multilingual Support and Emotion Control -** As an accessibility consultant, i want to use Voxify's API to translate our narrator's voice into another language (e.g., from English to Spanish) while keeping their original voice and emotions to maintain the original intended experience.
+2. **Zero-Shot and Natural Sounding Capabilities -** As a game developer, I want to use Voxify to create dynamic NPCs that can have realistic and natural dialogue with the player.
+3. **Low-Latency -**as a person with speech impairments, i want to upload my own voice and quickly generate speech that sounds like my natural voice so i can have normal conversations with others.
+4. **Security Capabilities and Role Access -** As a platform owner/system admin, i want to enforce rate limiting and have logged metadata with api calls, so i can audit usage and keep the system safe from malicious purposes.
+5. **Word/Syllable-To-Time Mapping -** As a developer creating synced subtitles, i want the api to return timestamps for each word so i can accurately display the correct words at the right time during playback.
 
 #### Q5: Have you decided on how you will build it? Share what you know now or tell us the options you are considering.
 
