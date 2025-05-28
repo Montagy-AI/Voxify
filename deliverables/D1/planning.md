@@ -103,17 +103,6 @@ We have met online, and have had a bunch of conversations on discord together. W
 
 #### Q7: What are the roles & responsibilities on the team?
 
-Describe the different roles on the team and the responsibilities associated with each role. 
- * Roles should reflect the structure of your team and be appropriate for your project. One person may have multiple roles.  
- * Add role(s) to your Team-[Team_Number]-[Team_Name].csv file on the main folder.
- * At least one person must be identified as the dedicated partner liaison. They need to have great organization and communication skills.
- * Everyone must contribute to code. Students who don't contribute to code enough will receive a lower mark at the end of the term.
-
-List each team member and:
- * A description of their role(s) and responsibilities including the components they'll work on and non-software related work
- * Why did you choose them to take that role? Specify if they are interested in learning that part, experienced in it, or any other reasons. Do no make things up. This part is not graded but may be reviewed later.
-
-Team Roles and Responsibilities
 1. Michael
 * Roles: API Developer, Database Engineer, DevOps Engineer
 * Responsibilities: Michael will contribute to designing and implementing API endpoints and database schemas, and will lead containerization efforts using Docker and CI/CD pipeline setup.
