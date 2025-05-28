@@ -1,3 +1,9 @@
+# Partner Information:
+Mehdi Zeinali  
+Engineer of Computer Vision, Network Security and Embedded Solutions  
+📧: mehdi@zeina.li  
+☎️️: 778-952-3223  
+
 # Voxify
 
 Voxify is an AI-powered backend service for voice cloning and text-to-speech generation. This project focuses on building the core infrastructure, including APIs, model pipelines, data handling, and security. The frontend is not included in this implementation scope and may be developed separately by the partner organization.
