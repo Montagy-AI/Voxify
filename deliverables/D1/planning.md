@@ -161,6 +161,7 @@ Team Roles and Responsibilities
  * Roadblock sharing and group problem-solving
  * Task reassignment and planning for the next sprint
  * Discussion of upcoming deliverables or partner feedback
+ * Records are found at project-2-Voxify/deliverables/team/minutes
   
 #### Q9: How will you organize your team?
 
