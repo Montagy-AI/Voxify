@@ -10,7 +10,7 @@ Voxify is an AI-powered backend service for voice cloning and text-to-speech gen
 
 ---
 
-## Task Management
+## Project Task Management
 
 We use **GitHub Projects** to manage tasks, sprints, and issue tracking. Project boards are updated regularly with development progress and assignments.
 
