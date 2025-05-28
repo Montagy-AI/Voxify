@@ -28,9 +28,9 @@ Compared to traditional TTS tools or studio recordings, Voxify will offer scalab
 
 1. **Multilingual Support and Emotion Control -** As an accessibility consultant, i want to use Voxify's API to translate our narrator's voice into another language (e.g., from English to Spanish) while keeping their original voice and emotions to maintain the original intended experience.
 2. **Zero-Shot and Natural Sounding Capabilities -** As a game developer, I want to use Voxify to create dynamic NPCs that can have realistic and natural dialogue with the player.
-3. **Low-Latency -**as a person with speech impairments, i want to upload my own voice and quickly generate speech that sounds like my natural voice so i can have normal conversations with others.
-4. **Security Capabilities and Role Access -** As a platform owner/system admin, i want to enforce rate limiting and have logged metadata with api calls, so i can audit usage and keep the system safe from malicious purposes.
-5. **Word/Syllable-To-Time Mapping -** As a developer creating synced subtitles, i want the api to return timestamps for each word so i can accurately display the correct words at the right time during playback.
+3. **Low-Latency -** As a person with speech impairments, I want to upload my own voice and quickly generate speech that sounds like my natural voice so I can have normal conversations with others.
+4. **Security Capabilities and Role Access -** As a platform owner/system admin, I want to enforce rate limiting and have logged metadata with api calls, so I can audit usage and keep the system safe from malicious purposes.
+5. **Word/Syllable-To-Time Mapping -** As a developer creating synced subtitles, I want the api to return timestamps for each word so I can accurately display the correct words at the right time during playback.
 
 #### Q5: Have you decided on how you will build it? Share what you know now or tell us the options you are considering.
 
