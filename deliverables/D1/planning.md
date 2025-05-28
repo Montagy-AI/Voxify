@@ -6,24 +6,15 @@
  
 #### Q1: What is the product?
 
- > Short (1 - 2 min' read)
- * Start with a single sentence, high-level description of the product.
- * Be clear - Describe the problem you are solving in simple terms.
- * Specify if you have a partner, who they are (role/title), and the organization information.
- * Be concrete. For example:
-    * What are you planning to build? Is it a website, mobile app, browser extension, command-line app, etc.?      
-    * When describing the problem/need, give concrete examples of common use cases.
-    * Assume the reader knows nothing about the partner or the problem domain and provide the necessary context. 
- * Focus on *what* your product does, and avoid discussing *how* you're going to implement it.      
-   For example: This is not the time or the place to talk about which programming language and/or framework you are planning to use.
- * **Feel free (and very much encouraged) to include useful diagrams, mock-ups and/or links**.
-
+We are building Voxify, a web-based tool and API that allows users to create voice clones and generate text-to-speech output using those voices. The platform supports multiple languages, emotional tone control, and zero-shot voice cloning, enabling both developers and content creators to generate expressive, customized speech effortlessly.
+![b58dbae6be53116497e7c3dd3b277d3](https://github.com/user-attachments/assets/70f7337f-fc43-48c0-bffc-93ae278359ae)
 
 #### Q2: Who are your target users?
-
-  > Short (1 - 2 min' read max)
- * Be specific (e.g. a 'a third-year university student taking CSC301 and studying Computer Science' and not 'a student')
- * **Feel free to use personas. You can create your personas as part of this Markdown file, or add a link to an external site (for example, [Xtensio](https://xtensio.com/user-persona/)).**
+1. Content creators and solo entrepreneurs who produce podcasts, videos, or social media content and want to create multilingual, expressive voiceovers using their own cloned voice.
+Example persona: Sarah, a freelance YouTuber and language tutor who wants to generate videos in multiple languages using her own voice, without recording each version manually.
+2. Developers and businesses that need to integrate text-to-speech or voice cloning into their applications via API.
+Example persona: Leo, a software engineer working on an AI-powered video editing tool (like CutSmart) who needs a backend TTS engine with personalized voice capabilities.
+![image](https://github.com/user-attachments/assets/1f50cd3f-8f29-4891-bebd-00600e5af9f0)
 
 #### Q3: Why would your users choose your product? What are they using today to solve their problem/need?
 
