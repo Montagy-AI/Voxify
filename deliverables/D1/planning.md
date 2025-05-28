@@ -154,26 +154,29 @@ We have met online, and have had a bunch of conversations on discord together. W
  * Discussion of upcoming deliverables or partner feedback
  * Records are found at project-2-Voxify/deliverables/team/minutes
   
-#### Q9: How will you organize your team?
+#### Q9: How will you organize your team?  
 
-List/describe the artifacts you will produce to organize your team. (We strongly recommend that you use standard collaboration tools like Linear.app, Jira, Slack, Discord, GitHub.)       
-
- * Artifacts can be To-Do lists, Task boards, schedule(s), meeting minutes, etc.
- * We want to understand:
-   * How do you keep track of what needs to get done? (You must grant your TA and partner access to systems you use to manage work)
-   * **How do you prioritize tasks?**
-   * How do tasks get assigned to team members?
+ * Artifacts for organizing the team:
+   * Meeting minutes posted on Github
+   * Github Backlog/Task Board to keep track of what needs to be completed —> provided by partner
+   * Announcements made on Discord
    * How do you determine the status of work from inception to completion?
+ * The team will usually prioritize tasks that our partner suggests for us to work on, but we will also discuss in our personal meetings the specific order of completion.
+ * Tasks are assigned to team members depending on who is interested in working on what, what our area of focus is, and how much time we have to allocate for this project weekly.
+ * The status of completion is determined by whether the feature we are implementing fulfills the requirements specified by the partner or not.
 
 #### Q10: What are the rules regarding how your team works?
 
 **Communications:**
- * What is the expected frequency? What methods/channels will be used? 
- * If you have a partner project, what is your process for communicating with your partner? Who is responsible?
+ * We will use:
+   * Slack for quick communication with the partner
+   * Discord for team communication and meetings
+   * Google Meet for our team calls with the partner (weekly)
+ * Our project manager, Jun, is responsible for representing the team through lengthier emails
  
-**Collaboration: (Share your responses to Q8 & Q9 from A1)**
- * How are people held accountable for attending meetings, completing action items? what is your process?
- * How will you address the issue if one person doesn't contribute or is not responsive?
+**Collaboration:**
+ * Each team member is expected to attend meetings and complete the action items assigned to them. Continuous failure to do so would result in bad peer evaluations and a report to our assigned TA.
+ * If a team member is unresponsive or not completing their work, the rest of the team will first try to understand the reason for this behavior. If it’s due to personal issues, they will offer support by reallocating tasks or extending deadlines. However, if the team member does not have a valid reason and refuses to change their behavior, the team will report the issue to the TA and/or address it in peer evaluations.
 
 ## Organisation Details
 
