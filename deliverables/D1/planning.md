@@ -10,10 +10,12 @@ We are building Voxify, a web-based tool and API that allows users to create voi
 ![b58dbae6be53116497e7c3dd3b277d3](https://github.com/user-attachments/assets/70f7337f-fc43-48c0-bffc-93ae278359ae)
 
 #### Q2: Who are your target users?
+
 1. Content creators and solo entrepreneurs who produce podcasts, videos, or social media content and want to create multilingual, expressive voiceovers using their own cloned voice.
 Example persona: Sarah, a freelance YouTuber and language tutor who wants to generate videos in multiple languages using her own voice, without recording each version manually.
 2. Developers and businesses that need to integrate text-to-speech or voice cloning into their applications via API.
 Example persona: Leo, a software engineer working on an AI-powered video editing tool (like CutSmart) who needs a backend TTS engine with personalized voice capabilities.
+
 ![image](https://github.com/user-attachments/assets/1f50cd3f-8f29-4891-bebd-00600e5af9f0)
 
 #### Q3: Why would your users choose your product? What are they using today to solve their problem/need?
