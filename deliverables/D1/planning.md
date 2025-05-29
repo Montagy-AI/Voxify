@@ -31,6 +31,8 @@ Compared to traditional TTS tools or studio recordings, Voxify will offer scalab
 3. **Low-Latency Voice Cloning -** As a healthcare app developer, I want to use the API to help my users with speech impairments quickly generate speech that matches their natural voice, so they can communicate more easily through my application.
 4. **Usage Tracking and Developer Dashboard -** As an enterprise software developer, I want to use the API to provide usage analytics and rate limiting controls so I can monitor my application's voice synthesis costs and ensure fair usage across my user base.
 5. **Word/Syllable-To-Time Mapping -** As a video editing app developer, I want the API to return precise timestamps for each word so I can automatically sync subtitles and visual effects with the generated speech in my application.
+   ![image](https://github.com/user-attachments/assets/dce68352-ca01-40c9-b44c-3df632d5d294)
+
 
 #### Q5: Have you decided on how you will build it? Share what you know now or tell us the options you are considering.
 
