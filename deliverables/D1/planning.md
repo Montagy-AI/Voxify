@@ -28,9 +28,9 @@ Compared to traditional TTS tools or studio recordings, Voxify will offer scalab
 
 1. **Multilingual Support and Emotion Control -** As an accessibility consultant, i want to use Voxify's API to translate our narrator's voice into another language (e.g., from English to Spanish) while keeping their original voice and emotions to maintain the original intended experience.
 2. **Zero-Shot and Natural Sounding Capabilities -** As a game developer, I want to use Voxify to create dynamic NPCs that can have realistic and natural dialogue with the player.
-3. **Low-Latency -** As a person with speech impairments, I want to upload my own voice and quickly generate speech that sounds like my natural voice so I can have normal conversations with others.
-4. **Security Capabilities and Role Access -** As a platform owner/system admin, I want to enforce rate limiting and have logged metadata with api calls, so I can audit usage and keep the system safe from malicious purposes.
-5. **Word/Syllable-To-Time Mapping -** As a developer creating synced subtitles, I want the api to return timestamps for each word so I can accurately display the correct words at the right time during playback.
+3. **Low-Latency Voice Cloning -** As a healthcare app developer, I want to use the API to help my users with speech impairments quickly generate speech that matches their natural voice, so they can communicate more easily through my application.
+4. **Usage Tracking and Developer Dashboard -** As an enterprise software developer, I want to use the API to provide usage analytics and rate limiting controls so I can monitor my application's voice synthesis costs and ensure fair usage across my user base.
+5. **Word/Syllable-To-Time Mapping -** As a video editing app developer, I want the API to return precise timestamps for each word so I can automatically sync subtitles and visual effects with the generated speech in my application.
 
 #### Q5: Have you decided on how you will build it? Share what you know now or tell us the options you are considering.
 
