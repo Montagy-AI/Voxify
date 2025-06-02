@@ -1,1 +1,17 @@
+#Python
+__pycache__/
+
+# Database
+*.db
+
+# Visual Studio/VS Code
 .vs/
+.vscode/
+
+# OS-specific
+.DS_Store
+
+# Environments
+.venv/
+venv/
+env/
