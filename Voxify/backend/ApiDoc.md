@@ -94,7 +94,7 @@ structlog==23.1.0
 
 ---
 
-## RESTful API Endpoints
+## RESTful API Endpoints 
 
 ### Authentication
 - POST /api/v1/auth/register
