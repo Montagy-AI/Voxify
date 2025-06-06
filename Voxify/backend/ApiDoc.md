@@ -103,10 +103,38 @@ structlog==23.1.0
 
 ### Voice Sample Management
 - POST /api/v1/voice/samples
+  - Upload and process voice samples
+  - Accepts audio files (WAV, MP3)
+  - Returns sample_id and processing status
 - GET /api/v1/voice/samples
+  - List all voice samples for the user
+  - Includes processing status and quality metrics
 - GET /api/v1/voice/samples/{sample_id}
+  - Get details of a specific voice sample
+  - Includes processing status, quality metrics, and validation results
 - DELETE /api/v1/voice/samples/{sample_id}
-- POST /api/v1/voice/samples/{sample_id}/train
+  - Remove a voice sample
+- POST /api/v1/voice/samples/{sample_id}/process
+  - Trigger processing of a voice sample
+  - Extracts features and prepares for clone generation
+  - Returns processing job ID
+
+### Voice Clone Management
+- POST /api/v1/voice/clones
+  - Generate a new voice clone from processed samples
+  - Accepts array of sample_ids and generation parameters
+  - Returns clone_id and generation job ID
+- GET /api/v1/voice/clones
+  - List all voice clones for the user
+  - Includes generation status and quality metrics
+- GET /api/v1/voice/clones/{clone_id}
+  - Get details of a specific voice clone
+  - Includes generation status, quality metrics, and sample references
+- DELETE /api/v1/voice/clones/{clone_id}
+  - Remove a voice clone
+- POST /api/v1/voice/clones/{clone_id}/select
+  - Set a voice clone as the active one for TTS
+  - Returns success status
 
 ### Text-to-Speech (TTS)
 - POST /api/v1/tts/synthesize
