@@ -9,6 +9,7 @@ from typing import Dict, List, Optional, Any
 import os
 from pathlib import Path
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +21,8 @@ class VectorDBConfig:
         "name": "voice_embeddings",
         "metadata": {
             "description": "Voice sample embeddings for similarity search and voice matching",
-            "embedding_model": "wav2vec2-base-960h",  # Facebook's wav2vec2 model
-            "dimension": 768,
+            "embedding_model": "coqui-vits-voice-encoder",  # ASSUMING WE'RE USING COQUI but could change
+            "dimension": 256,
             "distance_metric": "cosine",
             "feature_type": "voice_spectral",
             "created_version": "1.0"
@@ -32,8 +33,8 @@ class VectorDBConfig:
         "name": "speaker_embeddings", 
         "metadata": {
             "description": "Speaker identity embeddings for voice cloning and authentication",
-            "embedding_model": "resemblyzer",  # Resemblyzer speaker verification
-            "dimension": 256,
+            "embedding_model": "coqui-ecapa",  # ASSUMING WE'RE USING COQUI but could change
+            "dimension": 192,
             "distance_metric": "cosine",
             "feature_type": "speaker_identity",
             "created_version": "1.0"
@@ -44,7 +45,7 @@ class VectorDBConfig:
         "name": "text_embeddings",
         "metadata": {
             "description": "Text embeddings for synthesis caching and similar text matching",
-            "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+            "embedding_model": "sentence-transformers/all-MiniLM-L6-v2", #MIGHT CHANGE
             "dimension": 384,
             "distance_metric": "cosine", 
             "feature_type": "text_semantic",
@@ -57,13 +58,14 @@ class VectorDBConfig:
         "name": "quality_embeddings",
         "metadata": {
             "description": "Audio quality and content classification embeddings",
-            "embedding_model": "audio_quality_classifier",
+            "embedding_model": "audio_quality_classifier", #MIGHT CHANGE
             "dimension": 128,
-            "distance_metric": "euclidean",
+            "distance_metric": "cosine",
             "feature_type": "quality_metrics",
             "created_version": "1.0"
         }
     }
+
 
 class ChromaVectorDB:
     """Chroma vector database manager for Voxify platform"""
@@ -101,6 +103,7 @@ class ChromaVectorDB:
         self.collections = {}
         self._initialize_collections()
     
+
     def _initialize_collections(self):
         """Initialize all required collections"""
         configs = [
@@ -125,147 +128,174 @@ class ChromaVectorDB:
                 logger.error(f"Failed to initialize collection {collection_name}: {str(e)}")
                 raise
     
-    def get_collection(self, collection_name: str):
+
+    def get_collection(self, collection_name: str) -> chromadb.Collection:
         """Get a specific collection by name"""
         if collection_name not in self.collections:
             raise ValueError(f"Collection '{collection_name}' not found")
         return self.collections[collection_name]
     
-    def add_voice_embedding(self, 
-                           voice_sample_id: str,
-                           embedding: List[float],
-                           metadata: Dict[str, Any]) -> None:
+
+    # allow bulk-adding voice embeddings
+    def add_voice_embeddings(self, 
+                           voice_sample_ids: List[str], 
+                           embeddings: List[List[float]], 
+                           metadatas: List[Dict[str, Any]]) -> None:
         """
-        Add voice embedding to the voice_embeddings collection
-        
+        Add multiple voice embeddings to the voice_embeddings collection.
+
         Parameters
         ----------
-        voice_sample_id : str
-            Unique identifier for the voice sample (UUID)
-        embedding : List[float]
-            Voice feature vector (768 dimensions)
-        metadata : Dict[str, Any]
-            Associated metadata for the voice sample
+        voice_sample_ids : List[str]
+            Unique identifiers for the voice samples (UUIDs).
+        embeddings : List[List[float]]
+            Voice feature vectors (each 768 dimensions).
+        metadatas : List[Dict[str, Any]]
+            Associated metadata for each voice sample.
         """
         collection = self.get_collection("voice_embeddings")
-        
-        # Prepare document text for search
-        document = f"{metadata.get('name', '')} {metadata.get('description', '')} {metadata.get('language', '')}"
-        
-        # Enhanced metadata with additional fields
-        enhanced_metadata = {
-            "user_id": metadata.get("user_id"),
-            "language": metadata.get("language", "en-US"),
-            "duration": float(metadata.get("duration", 0.0)),
-            "quality_score": float(metadata.get("quality_score", 0.0)),
-            "sample_rate": int(metadata.get("sample_rate", 22050)),
-            "gender": metadata.get("gender"),
-            "age_group": metadata.get("age_group"),
-            "accent": metadata.get("accent"),
-            "is_public": metadata.get("is_public", False),
-            "created_at": metadata.get("created_at")
-        }
-        
-        # Remove None values
-        enhanced_metadata = {k: v for k, v in enhanced_metadata.items() if v is not None}
-        
+
+        documents = []
+        enhanced_metadatas = []
+
+        for metadata in metadatas:
+            document = f"{metadata.get('name', '')} {metadata.get('description', '')} {metadata.get('language', '')}"
+            documents.append(document)
+
+            enhanced_metadata = {
+                "user_id": metadata.get("user_id"),
+                "language": metadata.get("language", "en-US"),
+                "duration": float(metadata.get("duration", 0.0)),
+                "quality_score": float(metadata.get("quality_score", 0.0)),
+                "sample_rate": int(metadata.get("sample_rate", 22050)),
+                "gender": metadata.get("gender"),
+                "age_group": metadata.get("age_group"),
+                "accent": metadata.get("accent"),
+                "is_public": metadata.get("is_public", False),
+                "created_at": metadata.get("created_at"),
+                "tts_model_id": metadata.get("tts_model_id"),
+                "sample_rate": metadata.get("sample_rate")
+            }
+            # Remove None values
+            enhanced_metadatas.append({k: v for k, v in enhanced_metadata.items() if v is not None})
+
+        # bulk insert
         collection.add(
-            ids=[voice_sample_id],
-            embeddings=[embedding],
-            documents=[document],
-            metadatas=[enhanced_metadata]
+            ids=voice_sample_ids,
+            embeddings=embeddings,
+            documents=documents,
+            metadatas=enhanced_metadatas
         )
-        
-        logger.debug(f"Added voice embedding for sample: {voice_sample_id}")
+
+        logger.debug(f"Added {len(voice_sample_ids)} voice embeddings.")
+            
     
-    def add_speaker_embedding(self,
-                             speaker_embedding_id: str,
-                             voice_sample_id: str,
-                             embedding: List[float],
-                             metadata: Dict[str, Any]) -> None:
+    def add_speaker_embeddings(self,
+                            speaker_embedding_ids: List[str],
+                            voice_sample_ids: List[str],
+                            embeddings: List[List[float]],
+                            metadatas: List[Dict[str, Any]]) -> None:
         """
-        Add speaker identity embedding to the speaker_embeddings collection
-        
+        Add multiple speaker identity embeddings to the speaker_embeddings collection.
+
         Parameters
         ----------
-        speaker_embedding_id : str
-            Unique identifier for this speaker embedding
-        voice_sample_id : str
-            Reference to the source voice sample
-        embedding : List[float]
-            Speaker identity vector (256 dimensions)
-        metadata : Dict[str, Any]
-            Associated metadata
+        speaker_embedding_ids : List[str]
+            Unique identifier for each speaker embedding.
+        voice_sample_ids : List[str]
+            Corresponding voice sample IDs used to generate the speaker embedding.
+        embeddings : List[List[float]]
+            Speaker embeddings (each 768-dimensional).
+        metadatas : List[Dict[str, Any]]
+            Metadata associated with each embedding.
         """
         collection = self.get_collection("speaker_embeddings")
-        
-        document = f"Speaker identity for voice sample {voice_sample_id}"
-        
-        enhanced_metadata = {
-            "voice_sample_id": voice_sample_id,
-            "user_id": metadata.get("user_id"),
-            "confidence_score": float(metadata.get("confidence_score", 0.0)),
-            "gender": metadata.get("gender"),
-            "age_estimate": metadata.get("age_estimate"),
-            "accent_type": metadata.get("accent_type"),
-            "speaker_verification_model": metadata.get("model_version", "resemblyzer-v1"),
-            "created_at": metadata.get("created_at")
-        }
-        
-        enhanced_metadata = {k: v for k, v in enhanced_metadata.items() if v is not None}
-        
+
+        documents = []
+        enhanced_metadatas = []
+
+        for i in range(len(speaker_embedding_ids)):
+            voice_sample_id = voice_sample_ids[i]
+            metadata = metadatas[i]
+
+            document = f"Speaker identity for voice sample {voice_sample_id}"
+            documents.append(document)
+
+            enhanced_metadata = {
+                "voice_sample_id": voice_sample_id,
+                "user_id": metadata.get("user_id"),
+                "confidence_score": float(metadata.get("confidence_score", 0.0)),
+                "gender": metadata.get("gender"),
+                "age_estimate": metadata.get("age_estimate"),
+                "accent_type": metadata.get("accent_type"),
+                "speaker_verification_model": metadata.get("model_version", "resemblyzer-v1"),
+                "created_at": metadata.get("created_at")
+            }
+
+            enhanced_metadatas.append({k: v for k, v in enhanced_metadata.items() if v is not None})
+
         collection.add(
-            ids=[speaker_embedding_id],
-            embeddings=[embedding],
-            documents=[document],
-            metadatas=[enhanced_metadata]
+            ids=speaker_embedding_ids,
+            embeddings=embeddings,
+            documents=documents,
+            metadatas=enhanced_metadatas
         )
-        
-        logger.debug(f"Added speaker embedding: {speaker_embedding_id}")
+
+        logger.debug(f"Added {len(speaker_embedding_ids)} speaker embeddings.")
+
     
-    def add_text_embedding(self,
-                          text_hash: str,
-                          embedding: List[float],
-                          metadata: Dict[str, Any]) -> None:
+    def add_text_embeddings(self,
+                          text_hashes: List[str],
+                          embeddings: List[List[float]],
+                          metadatas: List[Dict[str, Any]]) -> None:
         """
-        Add text embedding for synthesis caching and similarity
+        Add text embeddings for synthesis caching and similarity
         
         Parameters
         ----------
-        text_hash : str
-            Hash of the text content
-        embedding : List[float]
-            Text semantic vector (384 dimensions)
-        metadata : Dict[str, Any]
-            Text and synthesis metadata
+        text_hashes : List[str]
+            Unique hash values for each text content.
+        embeddings : List[List[float]]
+            384-dimensional semantic embeddings for each text.
+        metadatas : List[Dict[str, Any]]
+            Metadata for each text, including content, language, and synthesis info.
         """
         collection = self.get_collection("text_embeddings")
+
+        documents=[]
+        enhanced_metadatas = []
         
-        # Use actual text content as document
-        document = metadata.get("text_content", "")
-        
-        enhanced_metadata = {
-            "text_hash": text_hash,
-            "text_length": int(metadata.get("text_length", len(document))),
-            "language": metadata.get("language", "en-US"),
-            "voice_model_id": metadata.get("voice_model_id"),
-            "synthesis_job_id": metadata.get("synthesis_job_id"),
-            "has_cache": metadata.get("has_cache", False),
-            "word_count": int(metadata.get("word_count", 0)),
-            "complexity_score": float(metadata.get("complexity_score", 0.0)),
-            "created_at": metadata.get("created_at")
-        }
-        
-        enhanced_metadata = {k: v for k, v in enhanced_metadata.items() if v is not None}
-        
+        for i in range(len(text_hashes)):
+            text_hash = text_hashes[i]
+            metadata = metadatas[i]
+
+            # Use actual text content as document
+            document = metadata.get("text_content", "")
+            documents.append(document)
+            
+            enhanced_metadata = {
+                "text_hash": text_hash,
+                "text_length": int(metadata.get("text_length", len(document))),
+                "language": metadata.get("language", "en-US"),
+                "voice_model_id": metadata.get("voice_model_id"),
+                "synthesis_job_id": metadata.get("synthesis_job_id"),
+                "has_cache": metadata.get("has_cache", False),
+                "word_count": int(metadata.get("word_count", 0)),
+                "complexity_score": float(metadata.get("complexity_score", 0.0)),
+                "created_at": metadata.get("created_at")
+            }
+            
+            enhanced_metadatas.append({k: v for k, v in enhanced_metadata.items() if v is not None})
+            
         collection.add(
-            ids=[text_hash],
-            embeddings=[embedding],
-            documents=[document],
-            metadatas=[enhanced_metadata]
+            ids=text_hashes,
+            embeddings=embeddings,
+            documents=documents,
+            metadatas=enhanced_metadatas
         )
         
-        logger.debug(f"Added text embedding for hash: {text_hash}")
+        logger.debug(f"Added {len(text_hashes)} text embeddings.")
+               
     
     def search_similar_voices(self,
                              query_embedding: List[float],
@@ -305,15 +335,9 @@ class ChromaVectorDB:
         if min_quality is not None:
             where_conditions["quality_score"] = {"$gte": min_quality}
         
-        results = collection.query(
-            query_embeddings=[query_embedding],
-            n_results=top_k,
-            where=where_conditions if where_conditions else None,
-            include=["metadatas", "distances", "documents"]
-        )
-        
-        return results
+        return self._query_collection("voice_embeddings", query_embedding, where_conditions, top_k)
     
+
     def search_similar_speakers(self,
                                query_embedding: List[float],
                                user_id: Optional[str] = None,
@@ -328,15 +352,9 @@ class ChromaVectorDB:
         if min_confidence is not None:
             where_conditions["confidence_score"] = {"$gte": min_confidence}
         
-        results = collection.query(
-            query_embeddings=[query_embedding],
-            n_results=top_k,
-            where=where_conditions if where_conditions else None,
-            include=["metadatas", "distances", "documents"]
-        )
-        
-        return results
+        return self._query_collection("speaker_embeddings", query_embedding, where_conditions, top_k)
     
+
     def search_similar_texts(self,
                             query_embedding: List[float],
                             voice_model_id: Optional[str] = None,
@@ -367,12 +385,7 @@ class ChromaVectorDB:
         if language:
             where_conditions["language"] = language
         
-        results = collection.query(
-            query_embeddings=[query_embedding],
-            n_results=top_k,
-            where=where_conditions if where_conditions else None,
-            include=["metadatas", "distances", "documents"]
-        )
+        results = self._query_collection("text_embeddings", query_embedding, where_conditions, top_k)
         
         # Filter by similarity threshold (distance < 1 - threshold)
         distance_threshold = 1.0 - similarity_threshold
@@ -393,6 +406,21 @@ class ChromaVectorDB:
         
         return filtered_results
     
+    
+    def _query_collection(self, collection_name: str, query_embedding: List[float], 
+                          filters: Optional[Dict[str, Any]] = None, top_k: int = 10) -> Dict[str, List]:
+        """
+        Helper for all the following search functions.
+        """
+        collection = self.get_collection(collection_name)
+        return collection.query(
+            query_embeddings=[query_embedding],
+            n_results=top_k,
+            where=filters if filters else None,
+            include=["metadatas", "distances", "documents"]
+        )
+           
+
     def update_embedding_metadata(self,
                                  collection_name: str,
                                  embedding_id: str,
@@ -416,12 +444,14 @@ class ChromaVectorDB:
         
         logger.debug(f"Updated metadata for {embedding_id} in {collection_name}")
     
+
     def delete_embedding(self, collection_name: str, embedding_id: str) -> None:
         """Delete an embedding from a collection"""
         collection = self.get_collection(collection_name)
         collection.delete(ids=[embedding_id])
         logger.debug(f"Deleted embedding {embedding_id} from {collection_name}")
     
+
     def get_collection_stats(self, collection_name: str) -> Dict[str, Any]:
         """Get statistics for a collection"""
         collection = self.get_collection(collection_name)
@@ -429,10 +459,11 @@ class ChromaVectorDB:
         
         return {
             "name": collection_name,
-            "count": count,
+            "item count": count,
             "metadata": collection.metadata
         }
     
+
     def cleanup_expired_cache(self, days_old: int = 30) -> int:
         """
         Clean up old text embeddings used for caching
@@ -468,34 +499,50 @@ class ChromaVectorDB:
         
         return len(old_ids)
     
+
     def close(self):
         """Close database connections and persist data"""
         if hasattr(self.client, 'persist'):
             self.client.persist()
         logger.info("Vector database connections closed and data persisted")
 
+
 # Factory function for easy initialization
 def create_vector_db(config_path: str = None) -> ChromaVectorDB:
     """
-    Create and initialize vector database instance
-    
+    Create and initialize vector database instance.
+
     Parameters
     ----------
     config_path : str, optional
-        Path to configuration file (for future use)
+        Path to configuration file (for future use).
         
     Returns
     -------
     ChromaVectorDB
-        Initialized vector database instance
+        Initialized vector database instance.
     """
-    # Default configuration from environment variables
-    persist_dir = os.getenv("VECTOR_DB_PATH", "data/chroma_db")
-    host = os.getenv("CHROMA_HOST")
-    port = int(os.getenv("CHROMA_PORT", 8000)) if os.getenv("CHROMA_PORT") else None
+    # Load configs
+    configs = load_config(config_path)
     
     return ChromaVectorDB(
-        persist_directory=persist_dir,
-        host=host,
-        port=port
+        persist_directory=configs.get("persist_directory"),
+        host=configs.get("host"),
+        port=configs.get("port")
     ) 
+
+# merging the config logic that controls where the config choices are coming from
+def load_config(config_path: str = None) -> Dict[str, Any]:
+    config = {}
+    if config_path:
+        with open(config_path, 'r') as f:
+            config = json.load(f)
+    
+    port = config.get("port") or os.getenv("CHROMA_PORT", "8000")
+    port = int(port)
+
+    return {
+        "persist_directory": config.get("persist_directory") or os.getenv("VECTOR_DB_PATH", "data/chroma_db"),
+        "host": config.get("host") or os.getenv("CHROMA_HOST", "localhost"),
+        "port": port,
+    }

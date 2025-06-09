@@ -123,7 +123,7 @@ CREATE TABLE synthesis_jobs (
 {
     "name": "voice_embeddings",
     "metadata": {
-        "embedding_model": "wav2vec2-base-960h",
+        "embedding_model": "coqui-vits-voice-encoder",
         "dimension": 768,
         "distance_metric": "cosine"
     }
@@ -151,7 +151,7 @@ CREATE TABLE synthesis_jobs (
 {
     "name": "speaker_embeddings",
     "metadata": {
-        "embedding_model": "resemblyzer",
+        "embedding_model": "coqui-ecapa",
         "dimension": 256,
         "distance_metric": "cosine"
     }
@@ -298,7 +298,7 @@ session.commit()
 # Add voice embedding
 vector_db.add_voice_embedding(
     voice_sample_id=voice_sample.id,
-    embedding=voice_features,  # 768-dim vector
+    embedding=voice_features,  # 256-dim vector
     metadata={
         "user_id": user.id,
         "language": "en-US",
