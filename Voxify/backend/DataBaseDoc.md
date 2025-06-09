@@ -30,6 +30,8 @@ CREATE TABLE users (
     id TEXT PRIMARY KEY,                    -- UUID
     email TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
+    first_name TEXT,                        -- Optional user first name
+    last_name TEXT,                         -- Optional user last name
     subscription_type TEXT DEFAULT 'free',  -- free, pro, enterprise
     quota_voice_samples INTEGER DEFAULT 5,
     quota_syntheses_daily INTEGER DEFAULT 100,
@@ -103,10 +105,15 @@ CREATE TABLE synthesis_jobs (
     word_timestamps TEXT,                   -- JSON: [{"word": "hello", "start": 0.0, "end": 0.5}]
     syllable_timestamps TEXT,               -- JSON: [{"syllable": "hel", "start": 0.0, "end": 0.25}]
     phoneme_timestamps TEXT,                -- JSON: [{"phoneme": "h", "start": 0.0, "end": 0.1}]
-    status TEXT DEFAULT 'pending',
+    config_json TEXT,                       -- JSON: API configuration (include_timestamps, timestamp_granularity, etc.)
+    output_format TEXT DEFAULT 'wav',       -- wav, mp3, flac
+    sample_rate INTEGER DEFAULT 22050,      -- Hz
+    status TEXT DEFAULT 'pending',          -- pending, processing, completed, failed
     progress REAL DEFAULT 0.0,
+    estimated_duration INTEGER,             -- seconds
     cache_hit BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP
 );
 ```
 
@@ -115,6 +122,36 @@ CREATE TABLE synthesis_jobs (
 - **Word-to-time mapping**: Enhanced synthesis control
 - **Phoneme alignment**: Detailed linguistic timing data
 - **Smart caching**: Avoid reprocessing identical requests
+- **API configuration storage**: Store include_timestamps, timestamp_granularity settings
+- **Audio format flexibility**: Support wav, mp3, flac output formats
+
+#### Audio Files Table
+Manages generated audio files and their metadata.
+
+```sql
+CREATE TABLE audio_files (
+    id TEXT PRIMARY KEY,                    -- UUID
+    synthesis_job_id TEXT NOT NULL REFERENCES synthesis_jobs(id),
+    file_path TEXT NOT NULL,               -- Local or cloud storage path
+    filename TEXT NOT NULL,                -- Original filename
+    format TEXT NOT NULL,                  -- wav, mp3, flac
+    file_size INTEGER NOT NULL,            -- bytes
+    duration REAL NOT NULL,                -- seconds
+    sample_rate INTEGER NOT NULL,          -- Hz
+    checksum TEXT,                         -- File integrity check
+    is_public BOOLEAN DEFAULT FALSE,       -- Public access flag
+    download_count INTEGER DEFAULT 0,      -- Usage tracking
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP,                  -- Auto-cleanup timestamp
+    last_accessed_at TIMESTAMP             -- For cleanup policies
+);
+```
+
+**Key Features:**
+- **File lifecycle management**: Automatic cleanup of expired files
+- **Integrity verification**: Checksum validation
+- **Usage tracking**: Download statistics
+- **Access control**: Public/private file access
 
 ### Vector Database Collections
 
@@ -123,7 +160,7 @@ CREATE TABLE synthesis_jobs (
 {
     "name": "voice_embeddings",
     "metadata": {
-        "embedding_model": "coqui-vits-voice-encoder",
+        "embedding_model": "wav2vec2-base-960h",
         "dimension": 768,
         "distance_metric": "cosine"
     }
@@ -151,7 +188,7 @@ CREATE TABLE synthesis_jobs (
 {
     "name": "speaker_embeddings",
     "metadata": {
-        "embedding_model": "coqui-ecapa",
+        "embedding_model": "resemblyzer",
         "dimension": 256,
         "distance_metric": "cosine"
     }
@@ -231,6 +268,10 @@ CREATE INDEX idx_voice_samples_user_id ON voice_samples(user_id);
 CREATE INDEX idx_voice_samples_status ON voice_samples(status);
 CREATE INDEX idx_synthesis_jobs_text_hash ON synthesis_jobs(text_hash);
 CREATE INDEX idx_synthesis_jobs_status ON synthesis_jobs(status);
+CREATE INDEX idx_synthesis_jobs_user_id ON synthesis_jobs(user_id);
+CREATE INDEX idx_audio_files_synthesis_job_id ON audio_files(synthesis_job_id);
+CREATE INDEX idx_audio_files_expires_at ON audio_files(expires_at);
+CREATE INDEX idx_users_email ON users(email);
 ```
 
 ### 2. Vector Search Optimization
@@ -298,7 +339,7 @@ session.commit()
 # Add voice embedding
 vector_db.add_voice_embedding(
     voice_sample_id=voice_sample.id,
-    embedding=voice_features,  # 256-dim vector
+    embedding=voice_features,  # 768-dim vector
     metadata={
         "user_id": user.id,
         "language": "en-US",
@@ -326,7 +367,85 @@ voices = session.query(VoiceSample).filter(
 ).all()
 ```
 
-### 4. TTS with Caching
+### 4. TTS Synthesis with Configuration Storage
+```python
+# Create synthesis job with API configuration
+synthesis_job = SynthesisJob(
+    user_id=user.id,
+    voice_model_id=model_id,
+    text_content=text,
+    text_hash=generate_text_hash(text),
+    config_json=json.dumps({
+        "include_timestamps": True,
+        "timestamp_granularity": "both",
+        "output_format": "wav",
+        "sample_rate": 22050,
+        "speed": 1.0,
+        "pitch": 1.0,
+        "volume": 1.0
+    }),
+    output_format="wav",
+    sample_rate=22050,
+    status="pending"
+)
+session.add(synthesis_job)
+session.commit()
+
+# After synthesis completion, create audio file record
+audio_file = AudioFile(
+    synthesis_job_id=synthesis_job.id,
+    file_path="/storage/audio/syn_123456.wav",
+    filename="synthesis_output.wav",
+    format="wav",
+    file_size=1048576,
+    duration=5.2,
+    sample_rate=22050,
+    checksum="sha256:abc123...",
+    expires_at=datetime.utcnow() + timedelta(days=30)
+)
+session.add(audio_file)
+session.commit()
+```
+
+### 5. File Management Operations
+```python
+# Get file information (for API endpoint /api/v1/files/{file_id}/info)
+def get_file_info(file_id):
+    audio_file = session.query(AudioFile).filter_by(id=file_id).first()
+    if audio_file:
+        # Update last accessed timestamp
+        audio_file.last_accessed_at = datetime.utcnow()
+        session.commit()
+        
+        return {
+            "file_id": audio_file.id,
+            "filename": audio_file.filename,
+            "content_type": f"audio/{audio_file.format}",
+            "size": audio_file.file_size,
+            "duration": audio_file.duration,
+            "created_at": audio_file.created_at.isoformat(),
+            "expires_at": audio_file.expires_at.isoformat() if audio_file.expires_at else None
+        }
+    return None
+
+# Download audio file (for API endpoint /api/v1/files/audio/{file_id})
+def download_audio_file(file_id, user_id):
+    audio_file = session.query(AudioFile).join(SynthesisJob).filter(
+        AudioFile.id == file_id,
+        SynthesisJob.user_id == user_id  # Ensure user owns the file
+    ).first()
+    
+    if audio_file:
+        # Increment download counter
+        audio_file.download_count += 1
+        audio_file.last_accessed_at = datetime.utcnow()
+        session.commit()
+        
+        return audio_file.file_path
+    return None
+```
+
+### 6. TTS with Caching
 ```python
 # Check for cached synthesis
 cached = vector_db.search_similar_texts(
@@ -362,75 +481,9 @@ else:
 - Secure file storage paths
 - Audit trails for data access
 
-## Monitoring and Maintenance
 
-### 1. Database Health Checks
-```python
-# Check database integrity
-def health_check():
-    return {
-        "sqlite_connection": test_sqlite_connection(),
-        "vector_db_connection": test_vector_connection(),
-        "disk_usage": get_disk_usage(),
-        "cache_hit_rate": calculate_cache_hit_rate()
-    }
-```
 
-### 2. Cleanup Procedures
-```python
-# Regular maintenance tasks
-def cleanup_old_data():
-    # Remove expired cache entries
-    vector_db.cleanup_expired_cache(days_old=30)
-    
-    # Archive completed synthesis jobs
-    archive_old_synthesis_jobs(days_old=90)
-    
-    # Optimize database
-    db.engine.execute("VACUUM")
-```
 
-### 3. Backup Strategy
-```bash
-# SQLite backup
-sqlite3 data/voxify.db ".backup backup/voxify_$(date +%Y%m%d).db"
-
-# Chroma backup
-tar -czf backup/chroma_$(date +%Y%m%d).tar.gz data/chroma_db/
-```
-
-## Migration and Versioning
-
-### 1. Schema Versioning
-```sql
--- Track schema versions
-CREATE TABLE schema_version (
-    version TEXT PRIMARY KEY,
-    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    description TEXT
-);
-```
-
-### 2. Migration Scripts
-```python
-def migrate_to_v1_1():
-    """Add gender detection fields"""
-    db.engine.execute("""
-        ALTER TABLE voice_samples 
-        ADD COLUMN gender TEXT,
-        ADD COLUMN age_group TEXT,
-        ADD COLUMN accent TEXT
-    """)
-    
-    # Update schema version
-    session.add(SchemaVersion(
-        version="1.1.0",
-        description="Added demographic detection fields"
-    ))
-    session.commit()
-```
-
-## Troubleshooting
 
 ### Common Issues
 
