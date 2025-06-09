@@ -42,7 +42,7 @@
 - **Lighter resource requirements** - Could be better for containerization
 - **More straightforward** - Less configuration needed
 
-### ❌ **Downsides:**
+### **Downsides:**
 
 **Maturity & Support:**
 - **Newer/less established** - Smaller community, fewer resources
@@ -56,6 +56,7 @@
 
 
 ## **My recommendations:**
-- Begin with Coqui TTS using pre-trained models
-- Test with containerization strategy
-- If performance becomes an issue, use OpenVoice as an alternative
+- We can test Coqui TTS first, if we can manage to get a smaller model from it running fast enough and capable of few-shotting we go with it
+- If we run into an issue there, try out OpenVoice since it will offer better containerization and a faster model
+- If OpenVoice clones dont sound good or are too slow, we should look for fine tuning OpenVoice for different use cases
+- If that still performs poorly, we can try to create a distilled Coqui model or a static embedding model using Model2Vec
