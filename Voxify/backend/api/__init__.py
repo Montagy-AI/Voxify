@@ -55,9 +55,11 @@ def create_app(test_config=None):
     # Register blueprints
     from .v1.auth import auth_bp
     from .v1.admin import admin_bp
+    from .v1.voice import voice_bp
     
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(admin_bp, url_prefix='/api/v1/admin')
+    app.register_blueprint(voice_bp, url_prefix='/api/v1/voice')
     
     # Simple index route
     @app.route('/')
