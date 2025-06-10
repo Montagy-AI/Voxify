@@ -6,7 +6,7 @@ This package provides the complete database layer for the Voxify platform,
 including relational data management and vector similarity search capabilities.
 """
 
-from .models import (
+from Voxify.backend.database.models import (
     # Database Manager
     DatabaseManager,
     get_database_manager,
@@ -28,7 +28,7 @@ from .models import (
     TimestampMixin
 )
 
-from .vector_config import (
+from Voxify.backend.database.vector_config import (
     # Vector Database
     ChromaVectorDB,
     VectorDBConfig,
@@ -83,11 +83,15 @@ def initialize_database(database_url: str = None, vector_db_path: str = None):
     tuple
         (DatabaseManager, ChromaVectorDB) instances
     """
+    if not database_url:
+        import os
+        database_url = os.getenv('DATABASE_URL', 'sqlite:///data/voxify.db')
+        print("Using DATABASE_URL:", database_url)
+
     # Initialize SQLite database
     db_manager = get_database_manager(database_url)
     db_manager.create_tables()
     db_manager.init_default_data()
-    
     # Initialize vector database
     vector_db = create_vector_db()
     

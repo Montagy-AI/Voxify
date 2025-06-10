@@ -148,3 +148,34 @@ def login():
         return jsonify({"error": str(e)}), 500
     finally:
         session.close()
+
+@auth_bp.route('/refresh', methods=['POST'])
+@jwt_required(refresh=True)
+def refresh():
+    """
+    Refresh the access token using a valid refresh token
+
+    Requires a valid refresh token in the Authorization header.
+
+    Returns:
+    - 200: New access token (and optionally a new refresh token)
+    - 401: Invalid or expired refresh token
+    """
+    try:
+        # Get the identity of the user from the current refresh token
+        current_user = get_jwt_identity()
+
+        # Generate a new access token
+        new_access_token = create_access_token(identity=current_user)
+
+        # Optionally, generate a new refresh token (optional logic if needed)
+        new_refresh_token = create_refresh_token(identity=current_user)
+
+        # Return the new tokens
+        return jsonify({
+            "access_token": new_access_token,
+            "refresh_token": new_refresh_token
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": "Failed to refresh token", "message": str(e)}), 500
