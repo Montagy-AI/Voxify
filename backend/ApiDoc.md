@@ -2,9 +2,10 @@
 
 ## Architecture Overview
 
-Voxify adopts a pure RESTful architecture design, providing a unified, easy-to-use, and scalable HTTP/JSON API for all clients and internal services. All service-to-service and client-to-service communication is performed via RESTful API. There is no gRPC in the system.
+Voxify adopts a pure RESTful architecture design, providing a unified, easy-to-use, and scalable HTTP/JSON API for all clients and internal services. The system features a three-layer voice processing architecture: Voice Clone Management for creating custom voice models, Voice Model Library for organizing and selecting voices, and Job Management for synthesis execution.
 
 - **Flask REST API Gateway**: Provides HTTP/REST interfaces for web clients, mobile applications, admin interfaces, and internal service communication.
+- **Voice Processing Pipeline**: Voice Sample → Voice Clone → Voice Model Library → Synthesis Job → Audio Output
 - **RESTful Client Support**: All clients and internal services use RESTful API (HTTP/JSON) for communication.
 
 ### Architecture Layers
@@ -133,13 +134,27 @@ structlog==23.1.0
 - DELETE /api/v1/voice/clones/{clone_id}
   - Remove a voice clone
 - POST /api/v1/voice/clones/{clone_id}/select
-  - Set a voice clone as the active one for TTS
+  - Set a voice clone as the active one for synthesis
   - Returns success status
 
-### Text-to-Speech (TTS)
-- POST /api/v1/tts/synthesize
-- POST /api/v1/tts/synthesize/async
-- GET /api/v1/tts/synthesize/stream
+### Voice Model Library
+- GET /api/v1/voice/models
+  - Get all available voice models (preset + custom clones)
+  - Supports filtering by tags, language, type, and owner
+  - Includes preview samples and quality scores
+  - Returns paginated list with metadata
+- GET /api/v1/voice/models/{model_id}
+  - Get detailed information about a specific voice model
+  - Includes model metadata, tags, and sample audio
+  - Returns model configuration and usage statistics
+- GET /api/v1/voice/models/{model_id}/preview
+  - Get preview audio sample for a voice model
+  - Returns audio file or streaming URL
+  - Used for voice model auditioning before selection
+- POST /api/v1/voice/models/{model_id}/favorite
+  - Add a voice model to user's favorites
+  - Supports both preset and custom models
+  - Returns updated favorite status
 
 ### Job Management
 - GET /api/v1/job
@@ -160,6 +175,7 @@ structlog==23.1.0
   - Update a synthesis job (only allowed for pending jobs)
   - Can update text_content, speed, pitch, volume, output_format, sample_rate, config
   - Returns updated job details
+
 - PATCH /api/v1/job/{job_id}
   - Partial update of a synthesis job
   - Supports status updates and progress tracking
@@ -392,10 +408,10 @@ backend/
 │   ├── api/
 │   │   ├── __init__.py
 │   │   ├── auth.py          # Authentication endpoints
-│   │   ├── voice.py         # Voice endpoints
-│   │   ├── tts.py           # TTS endpoints
-│   │   ├── jobs.py          # Job endpoints
-│   │   ├── files.py         # File endpoints
+│   │   ├── voice.py         # Voice sample & clone endpoints
+│   │   ├── models.py        # Voice model library endpoints
+│   │   ├── jobs.py          # Job management endpoints
+│   │   ├── files.py         # File management endpoints
 │   │   └── admin.py         # Admin endpoints
 │   ├── models/
 │   │   ├── __init__.py
@@ -416,178 +432,169 @@ backend/
 
 ---
 
-#### Synchronous Text-to-Speech with Word/Syllable Mapping
-```http
-POST /api/v1/tts/synthesize
-Content-Type: application/json
-Authorization: Bearer <access_token>
+## Voice Model Library API Examples
 
+### Get Available Voice Models with Filtering
+```http
+GET /api/v1/voice/models?tags=female,gentle&language=zh-CN&type=preset&limit=10&offset=0
+Authorization: Bearer <access_token>
+```
+
+**Response:**
+```json
 {
-    "text": "Hello world, this is a test.",
-    "voice_id": "vs_1234567890",
-    "config": {
-        "output_format": "wav",
-        "sample_rate": 22050,
-        "include_timestamps": true,
-        "timestamp_granularity": "both"
-    }
+    "success": true,
+    "data": [
+        {
+            "voice_model_id": "preset_gentle_female_001",
+            "name": "Gentle Female Voice",
+            "type": "preset",
+            "tags": ["female", "gentle", "sweet", "young"],
+            "language": "zh-CN",
+            "description": "A soft and warm female voice suitable for storytelling and meditation",
+            "sample_audio_url": "/api/v1/files/audio/samples/gentle_female.wav",
+            "preview_text": "Hello, this is a preview of the gentle female voice.",
+            "quality_score": 0.95,
+            "usage_count": 1250,
+            "is_favorite": false,
+            "created_at": "2024-01-01T00:00:00Z"
+        },
+        {
+            "voice_model_id": "custom_user123_clone",
+            "name": "My Personal Voice",
+            "type": "custom",
+            "tags": ["personal", "custom"],
+            "language": "en-US",
+            "description": "Personal voice clone created from user samples",
+            "owner_id": "user123",
+            "clone_id": "vc_456",
+            "quality_score": 0.88,
+            "usage_count": 25,
+            "is_favorite": true,
+            "created_at": "2024-01-15T10:30:00Z"
+        }
+    ],
+    "meta": {
+        "pagination": {
+            "total_count": 45,
+            "limit": 10,
+            "offset": 0,
+            "has_more": true
+        },
+        "filters": {
+            "available_tags": ["female", "male", "gentle", "energetic", "mature", "young"],
+            "available_languages": ["zh-CN", "en-US", "ja-JP", "ko-KR"],
+            "available_types": ["preset", "custom"]
+        }
+    },
+    "timestamp": "2024-01-15T10:30:00Z"
 }
 ```
 
-**Response**:
+### Get Voice Model Details
+```http
+GET /api/v1/voice/models/preset_gentle_female_001
+Authorization: Bearer <access_token>
+```
+
+**Response:**
 ```json
 {
     "success": true,
     "data": {
-        "synthesis_id": "syn_1234567890",
-        "audio_url": "https://api.voxify.com/files/audio/syn_1234567890.wav",
+        "voice_model_id": "preset_gentle_female_001",
+        "name": "Gentle Female Voice",
+        "type": "preset",
+        "tags": ["female", "gentle", "sweet", "young"],
+        "language": "zh-CN",
+        "description": "A soft and warm female voice suitable for storytelling and meditation",
+        "sample_audio_url": "/api/v1/files/audio/samples/gentle_female.wav",
+        "preview_text": "Hello, this is a preview of the gentle female voice.",
+        "quality_score": 0.95,
+        "usage_count": 1250,
+        "is_favorite": false,
+        "model_config": {
+            "sample_rate": 22050,
+            "supported_formats": ["wav", "mp3", "flac"],
+            "max_text_length": 10000,
+            "supports_emotions": ["neutral", "happy", "sad", "excited"],
+            "supports_speed_range": [0.5, 3.0],
+            "supports_pitch_range": [0.5, 2.0]
+        },
+        "statistics": {
+            "average_synthesis_time": 2.3,
+            "success_rate": 0.992,
+            "user_rating": 4.7
+        },
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-15T08:00:00Z"
+    },
+    "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+### Get Voice Model Preview
+```http
+GET /api/v1/voice/models/preset_gentle_female_001/preview
+Authorization: Bearer <access_token>
+```
+
+**Response:**
+```json
+{
+    "success": true,
+    "data": {
+        "preview_audio_url": "/api/v1/files/audio/previews/preset_gentle_female_001.wav",
+        "preview_text": "Hello, this is a preview of the gentle female voice.",
         "duration": 3.2,
         "format": "wav",
-        "sample_rate": 22050,
-        "word_timestamps": [
-            {
-                "word": "Hello",
-                "start_time": 0.0,
-                "end_time": 0.5
-            },
-            {
-                "word": "world",
-                "start_time": 0.6,
-                "end_time": 1.1
-            },
-            {
-                "word": "this",
-                "start_time": 1.3,
-                "end_time": 1.6
-            },
-            {
-                "word": "is",
-                "start_time": 1.7,
-                "end_time": 1.9
-            },
-            {
-                "word": "a",
-                "start_time": 2.0,
-                "end_time": 2.1
-            },
-            {
-                "word": "test",
-                "start_time": 2.2,
-                "end_time": 2.7
-            }
-        ],
-        "syllable_timestamps": [
-            {
-                "syllable": "Hel",
-                "start_time": 0.0,
-                "end_time": 0.2
-            },
-            {
-                "syllable": "lo",
-                "start_time": 0.2,
-                "end_time": 0.5
-            },
-            {
-                "syllable": "wor",
-                "start_time": 0.6,
-                "end_time": 0.8
-            },
-            {
-                "syllable": "ld",
-                "start_time": 0.8,
-                "end_time": 1.1
-            },
-            {
-                "syllable": "this",
-                "start_time": 1.3,
-                "end_time": 1.6
-            },
-            {
-                "syllable": "is",
-                "start_time": 1.7,
-                "end_time": 1.9
-            },
-            {
-                "syllable": "a",
-                "start_time": 2.0,
-                "end_time": 2.1
-            },
-            {
-                "syllable": "test",
-                "start_time": 2.2,
-                "end_time": 2.7
-            }
-        ]
+        "sample_rate": 22050
     },
-    "message": "Speech synthesis completed with timestamps"
+    "timestamp": "2024-01-15T10:30:00Z"
 }
 ```
 
-#### Configuration Options for Timestamp Granularity
-
-**Word-only timestamps**:
-```json
-{
-    "config": {
-        "timestamp_granularity": "word",
-        "include_timestamps": true
-    }
-}
-```
-
-**Syllable-only timestamps**:
-```json
-{
-    "config": {
-        "timestamp_granularity": "syllable",
-        "include_timestamps": true
-    }
-}
-```
-
-**Both word and syllable timestamps**:
-```json
-{
-    "config": {
-        "timestamp_granularity": "both",
-        "include_timestamps": true
-    }
-}
-```
-
-#### Asynchronous TTS with Timestamps
+### Add Voice Model to Favorites
 ```http
-POST /api/v1/tts/synthesize/async
-Content-Type: application/json
+POST /api/v1/voice/models/preset_gentle_female_001/favorite
 Authorization: Bearer <access_token>
-
-{
-    "text": "This is a longer text that requires asynchronous processing with detailed timestamp mapping for each word and syllable.",
-    "voice_id": "vs_1234567890",
-    "config": {
-        "output_format": "mp3",
-        "sample_rate": 44100,
-        "include_timestamps": true,
-        "timestamp_granularity": "both"
-    }
-}
 ```
 
-**Response**:
+**Response:**
 ```json
 {
     "success": true,
     "data": {
-        "synthesis_id": "syn_1234567890",
-        "job_id": "job_syn_1234567890",
-        "estimated_duration": 45,
-        "status": "pending"
+        "voice_model_id": "preset_gentle_female_001",
+        "is_favorite": true,
+        "favorites_count": 1
     },
-    "message": "Asynchronous speech synthesis job created with timestamp mapping"
+    "message": "Voice model added to favorites",
+    "timestamp": "2024-01-15T10:30:00Z"
 }
 ```
 
-When the async job completes, the result (via GET /api/v1/jobs/{job_id}) will include the same timestamp structure as the synchronous endpoint.
+### Create Synthesis Job with Selected Voice Model
+```http
+POST /api/v1/job
+Content-Type: application/json
+Authorization: Bearer <access_token>
+
+{
+    "text_content": "Hello world, this synthesis uses a selected voice model from the library.",
+    "voice_model_id": "preset_gentle_female_001",
+    "text_language": "en-US",
+    "output_format": "wav",
+    "sample_rate": 22050,
+    "speed": 1.0,
+    "pitch": 1.0,
+    "volume": 1.0,
+    "config": {
+        "emotion": "happy",
+        "include_timestamps": true
+    }
+}
+```
 
 ---
 
@@ -628,63 +635,175 @@ Authorization: Bearer <access_token>
 
 ---
 
-## User Story Examples
+## Complete API Workflows
 
-### Complete User Workflow
+### Workflow 1: Text-to-Speech with Preset Voice Models
+
+**Overview**: User selects from pre-trained voice models in the library and synthesizes speech.
 
 1. **User Registration**
 ```bash
-curl -X POST http://localhost:8080/api/v1/auth/register \
+curl -X POST http://localhost:5000/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email": "user@example.com", "password": "SecurePass123!", "first_name": "John", "last_name": "Doe"}'
 ```
 
 2. **User Login**
 ```bash
-curl -X POST http://localhost:8080/api/v1/auth/login \
+curl -X POST http://localhost:5000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "SecurePass123!"}'
+```
+
+3. **Create Synthesis Job (using default voice model)**
+```bash
+curl -X POST http://localhost:5000/api/v1/job \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text_content": "Hello world, this uses the default voice model!",
+    "voice_model_id": "default_voice_001",
+    "output_format": "wav",
+    "speed": 1.0,
+    "pitch": 1.0,
+    "volume": 1.0
+  }'
+```
+
+> **Note**: Voice Model Library (`/api/v1/voice/models/`) for browsing and previewing voices will be implemented in future versions. Currently using default voice models.
+
+4. **Monitor Synthesis Progress (Real-time)**
+```bash
+curl -X GET "http://localhost:5000/api/v1/job/job_1234567890/progress" \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Accept: text/event-stream"
+```
+
+5. **Get Synthesis Result**
+```bash
+curl -X GET "http://localhost:5000/api/v1/job/job_1234567890" \
+  -H "Authorization: Bearer <access_token>"
+```
+
+6. **Download Audio File via File Management**
+```bash
+curl -X GET "http://localhost:5000/api/v1/files/audio/job_1234567890" \
+  -H "Authorization: Bearer <access_token>" \
+  -o synthesized_audio.wav
+```
+
+
+
+---
+
+### Workflow 2: Custom Voice Cloning and Synthesis
+
+**Overview**: User uploads voice samples, creates a custom voice clone, and synthesizes speech using their cloned voice.
+
+1. **User Registration**
+```bash
+curl -X POST http://localhost:5000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "SecurePass123!", "first_name": "Jane", "last_name": "Smith"}'
+```
+
+2. **User Login**
+```bash
+curl -X POST http://localhost:5000/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email": "user@example.com", "password": "SecurePass123!"}'
 ```
 
 3. **Upload Voice Sample**
 ```bash
-curl -X POST http://localhost:8080/api/v1/voice/samples \
+curl -X POST http://localhost:5000/api/v1/voice/samples \
   -H "Authorization: Bearer <access_token>" \
   -F "file=@voice_sample.wav" \
-  -F "name=My Voice Sample" \
-  -F "description=High quality recording" \
+  -F "name=My Personal Voice Sample" \
+  -F "description=High quality recording for voice cloning" \
   -F "language=en-US"
 ```
 
-4. **Train Voice Clone**
+4. **Process Voice Sample**
 ```bash
-curl -X POST http://localhost:8080/api/v1/voice/samples/vs_1234567890/train \
+curl -X POST http://localhost:5000/api/v1/voice/samples/vs_1234567890/process \
   -H "Authorization: Bearer <access_token>" \
   -H "Content-Type: application/json" \
-  -d '{"config": {"epochs": 100, "enable_timestamp_alignment": true}}'
+  -d '{}'
 ```
 
-5. **List Cloned Voices**
+5. **Monitor Processing Progress**
 ```bash
-curl -X GET "http://localhost:8080/api/v1/voice/samples?status=ready" \
+curl -X GET "http://localhost:5000/api/v1/voice/samples/vs_1234567890" \
   -H "Authorization: Bearer <access_token>"
 ```
 
-6. **Text-to-Speech with Timestamps**
+6. **Create Voice Clone (after processing completes)**
 ```bash
-curl -X POST http://localhost:8080/api/v1/tts/synthesize \
+curl -X POST http://localhost:5000/api/v1/voice/clones \
   -H "Authorization: Bearer <access_token>" \
   -H "Content-Type: application/json" \
   -d '{
-    "text": "Hello world, this is my cloned voice!",
-    "voice_id": "vs_1234567890",
-    "config": {
-      "output_format": "wav",
-      "include_timestamps": true,
-      "timestamp_granularity": "both"
-    }
+    "sample_ids": ["vs_1234567890"],
+    "name": "My Personal Voice Clone",
+    "description": "Custom voice clone from my samples"
   }'
 ```
+
+7. **Monitor Clone Creation**
+```bash
+curl -X GET "http://localhost:5000/api/v1/voice/clones/vc_1234567890" \
+  -H "Authorization: Bearer <access_token>"
+```
+
+8. **Create Synthesis Job with Custom Cloned Voice**
+```bash
+curl -X POST http://localhost:5000/api/v1/job \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text_content": "Hello world, this is my personal cloned voice speaking!",
+    "voice_model_id": "vc_1234567890",
+    "output_format": "wav",
+    "speed": 1.0,
+    "pitch": 1.0,
+    "volume": 1.0
+  }'
+```
+
+9. **Monitor Synthesis Progress (Real-time)**
+```bash
+curl -X GET "http://localhost:5000/api/v1/job/job_2345678901/progress" \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Accept: text/event-stream"
+```
+
+10. **Get Synthesis Result**
+```bash
+curl -X GET "http://localhost:5000/api/v1/job/job_2345678901" \
+  -H "Authorization: Bearer <access_token>"
+```
+
+11. **Download Custom Voice Audio via File Management**
+```bash
+curl -X GET "http://localhost:5000/api/v1/files/audio/job_2345678901" \
+  -H "Authorization: Bearer <access_token>" \
+  -o custom_voice_audio.wav
+```
+
+
+---
+
+### Workflow Comparison
+
+| Step | Preset Voice Workflow | Custom Voice Workflow |
+|------|----------------------|----------------------|
+| **Setup** | Register → Login | Register → Login |
+| **Voice Selection** | Use Default Voice | Upload Samples → Process → Create Clone |
+| **Synthesis** | Create Job → Monitor → Download | Create Job → Monitor → Download |
+| **Time Required** | ~5 minutes | ~30+ minutes (includes processing & cloning) |
+| **Quality** | Standard, reliable | Personalized, unique |
+| **Use Case** | Quick prototyping, testing | Personal branding, custom applications |
 
 ---
 
@@ -699,7 +818,7 @@ services:
   voxify-backend:
     build: ./backend
     ports:
-      - "8080:8080"
+      - "5000:5000"
     environment:
       - JWT_SECRET=your-secret-key
       - DATABASE_URL=sqlite:///data/voxify.db
@@ -744,13 +863,17 @@ volumes:
 
 ---
 
-## API Best Practices
 
-- All endpoints are RESTful and use HTTP/JSON.
-- Unified error and response format.
-- JWT authentication for all user and service requests.
-- Pagination for all list endpoints.
-- Rate limiting and security best practices. 
+```
+
+## Key Features
+
+- **Preset Voice Library**: Ready-to-use professional voice models with various characteristics
+- **Custom Voice Cloning**: Create personalized voice models from user audio samples  
+- **Unified Voice Selection**: Browse and select from both preset and custom voices in one interface
+- **Advanced Synthesis Control**: Fine-tune speed, pitch, volume, and emotional expression
+- **Real-time Progress Tracking**: Monitor synthesis jobs with Server-Sent Events
+- **Quality Assurance**: Built-in quality scoring and validation for all voice models
 
 ## AI Acknowledgment
 This file was completed with the help of Cursor, which significantly streamlined the process by handling repetitive formatting and ad hoc tasks efficiently. Tools like Cursor reduce the need for manual, repetitive work—something most people understandably want to avoid：）
