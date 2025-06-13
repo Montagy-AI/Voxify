@@ -25,17 +25,43 @@ def upload_voice_sample():
     
     Request:
         - file: Audio file (WAV, MP3)
-        - name: Optional sample name
+        - name: Sample name (required)
     
     Returns:
         JSON response with sample_id and processing status
     """
+    # Get the current user's ID
+    user_id = get_jwt_identity()
+    
+    # Validate name parameter
+    name = request.form.get('name')
+    if not name:
+        return jsonify({
+            'success': False,
+            'error': 'Name is required for voice samples'
+        }), 400
+    
+    # Validate file
+    if 'file' not in request.files:
+        return jsonify({
+            'success': False,
+            'error': 'No file provided'
+        }), 400
+        
+    file = request.files['file']
+    if not file or not allowed_file(file.filename):
+        return jsonify({
+            'success': False,
+            'error': 'Invalid file type. Only WAV and MP3 files are allowed'
+        }), 400
+
     # TODO: Implement file upload and processing
     sample_id = str(uuid.uuid4())
     return jsonify({
         'success': True,
         'data': {
             'sample_id': sample_id,
+            'name': name,
             'status': 'uploaded',
             'message': 'Voice sample uploaded successfully'
         }
