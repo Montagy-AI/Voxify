@@ -15,3 +15,7 @@ __pycache__/
 .venv/
 venv/
 env/
+
+# Experiment voices and results
+modelTesting/outputs/
+modelTesting/voices/
