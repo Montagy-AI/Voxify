@@ -5,7 +5,7 @@ SQLAlchemy models for the Voxify platform hybrid storage system
 
 from sqlalchemy import (
     create_engine, Column, String, Integer, Float, Boolean, Text, 
-    DateTime, ForeignKey, CheckConstraint, Index, func
+    DateTime, ForeignKey, CheckConstraint, Index, func, UniqueConstraint
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
@@ -35,9 +35,6 @@ class User(Base, TimestampMixin):
     password_hash = Column(String, nullable=False)
     first_name = Column(String)
     last_name = Column(String)
-    subscription_type = Column(String, default='free', nullable=False)
-    quota_voice_samples = Column(Integer, default=5, nullable=False)
-    quota_syntheses_daily = Column(Integer, default=100, nullable=False)
     storage_used_bytes = Column(Integer, default=0, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     email_verified = Column(Boolean, default=False, nullable=False)
@@ -50,12 +47,8 @@ class User(Base, TimestampMixin):
     
     # Constraints
     __table_args__ = (
-        CheckConstraint('subscription_type IN ("free", "pro", "enterprise")', name='check_subscription_type'),
-        CheckConstraint('quota_voice_samples >= 0', name='check_quota_voice_samples'),
-        CheckConstraint('quota_syntheses_daily >= 0', name='check_quota_syntheses_daily'),
         CheckConstraint('storage_used_bytes >= 0', name='check_storage_used_bytes'),
         Index('idx_users_email', 'email'),
-        Index('idx_users_subscription', 'subscription_type'),
         Index('idx_users_active', 'is_active'),
     )
     
@@ -74,9 +67,6 @@ class User(Base, TimestampMixin):
             'first_name': self.first_name,
             'last_name': self.last_name,
             'full_name': self.full_name,
-            'subscription_type': self.subscription_type,
-            'quota_voice_samples': self.quota_voice_samples,
-            'quota_syntheses_daily': self.quota_syntheses_daily,
             'storage_used_bytes': self.storage_used_bytes,
             'is_active': self.is_active,
             'email_verified': self.email_verified,
@@ -362,7 +352,7 @@ class SynthesisJob(Base, TimestampMixin):
     
     # Constraints
     __table_args__ = (
-        CheckConstraint('status IN ("pending", "processing", "completed", "failed")', name='check_synthesis_status'),
+        CheckConstraint('status IN ("pending", "processing", "completed", "failed", "cancelled")', name='check_synthesis_status'),
         CheckConstraint('progress >= 0.0 AND progress <= 1.0', name='check_synthesis_progress'),
         CheckConstraint('speed >= 0.1 AND speed <= 3.0', name='check_speed_range'),
         CheckConstraint('pitch >= 0.1 AND pitch <= 3.0', name='check_pitch_range'),
@@ -464,9 +454,10 @@ class SynthesisCache(Base, TimestampMixin):
     __table_args__ = (
         CheckConstraint('duration > 0', name='check_cache_duration_positive'),
         CheckConstraint('hit_count >= 0', name='check_hit_count_positive'),
-        Index('idx_synthesis_cache_unique', 'text_hash', 'voice_model_id', 'config_hash', unique=True),
+        UniqueConstraint('text_hash', 'voice_model_id', 'config_hash', name='unique_cache_key'),
+        Index('idx_synthesis_cache_hash', 'text_hash'),
+        Index('idx_synthesis_cache_model', 'voice_model_id'),
         Index('idx_synthesis_cache_expires', 'expires_at'),
-        Index('idx_synthesis_cache_accessed', 'last_accessed'),
     )
 
 class PhonemeAlignment(Base):

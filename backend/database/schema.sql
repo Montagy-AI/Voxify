@@ -16,9 +16,6 @@ CREATE TABLE users (
     password_hash TEXT NOT NULL,
     first_name TEXT,
     last_name TEXT,
-    subscription_type TEXT DEFAULT 'free',  -- free, pro, enterprise
-    quota_voice_samples INTEGER DEFAULT 5,  -- Voice sample quota
-    quota_syntheses_daily INTEGER DEFAULT 100, -- Daily synthesis quota
     storage_used_bytes INTEGER DEFAULT 0,   -- Current storage usage
     is_active BOOLEAN DEFAULT TRUE,
     email_verified BOOLEAN DEFAULT FALSE,
@@ -26,15 +23,11 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_login_at TIMESTAMP,
     
-    CHECK (subscription_type IN ('free', 'pro', 'enterprise')),
-    CHECK (quota_voice_samples >= 0),
-    CHECK (quota_syntheses_daily >= 0),
     CHECK (storage_used_bytes >= 0)
 );
 
 -- Indexes for users table
 CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_subscription ON users(subscription_type);
 CREATE INDEX idx_users_active ON users(is_active);
 
 -- =============================================================================
@@ -200,7 +193,7 @@ CREATE TABLE synthesis_jobs (
     phoneme_timestamps TEXT,                -- JSON: [{"phoneme": "h", "start": 0.0, "end": 0.1}]
     
     -- Job status and progress
-    status TEXT DEFAULT 'pending',          -- pending, processing, completed, failed
+    status TEXT DEFAULT 'pending',          -- pending, processing, completed, failed, cancelled
     progress REAL DEFAULT 0.0,             -- 0.0-1.0 progress
     error_message TEXT,
     processing_node TEXT,                  -- Which worker processed this job
@@ -220,7 +213,7 @@ CREATE TABLE synthesis_jobs (
     
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     FOREIGN KEY (voice_model_id) REFERENCES voice_models (id) ON DELETE CASCADE,
-    CHECK (status IN ('pending', 'processing', 'completed', 'failed')),
+    CHECK (status IN ('pending', 'processing', 'completed', 'failed', 'cancelled')),
     CHECK (progress >= 0.0 AND progress <= 1.0),
     CHECK (speed >= 0.1 AND speed <= 3.0),
     CHECK (pitch >= 0.1 AND pitch <= 3.0),
@@ -388,7 +381,6 @@ CREATE VIEW user_summary AS
 SELECT 
     u.id,
     u.email,
-    u.subscription_type,
     COUNT(DISTINCT vs.id) as voice_samples_count,
     COUNT(DISTINCT vm.id) as models_count,
     COUNT(DISTINCT sj.id) as synthesis_jobs_count,
@@ -461,8 +453,8 @@ END;
 -- =============================================================================
 
 -- Create default admin user (password should be changed immediately)
-INSERT INTO users (id, email, password_hash, first_name, last_name, subscription_type) VALUES
-('admin-000-000-000-000', 'admin@voxify.com', '$2b$12$placeholder_hash', 'System', 'Administrator', 'enterprise');
+INSERT INTO users (id, email, password_hash, first_name, last_name) VALUES
+('admin-000-000-000-000', 'admin@voxify.com', '$2b$12$placeholder_hash', 'System', 'Administrator');
 
 -- Add any additional initialization data here
 

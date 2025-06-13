@@ -142,10 +142,36 @@ structlog==23.1.0
 - GET /api/v1/tts/synthesize/stream
 
 ### Job Management
-- GET /api/v1/jobs
-- GET /api/v1/jobs/{job_id}
-- POST /api/v1/jobs/{job_id}/cancel
-- GET /api/v1/jobs/{job_id}/progress/ws
+- GET /api/v1/job
+  - List synthesis jobs with filtering, sorting, and pagination
+  - Query parameters: status, user_id, voice_model_id, text_search, limit, offset, sort_by, sort_order, include_text
+  - Supports filtering by status (pending, processing, completed, failed, cancelled)
+  - Returns paginated list with metadata
+- POST /api/v1/job
+  - Create a new synthesis job
+  - Requires text_content and voice_model_id
+  - Supports configuration for speed, pitch, volume, output format, sample rate
+  - Returns job details with unique job_id
+- GET /api/v1/job/{job_id}
+  - Get detailed information about a specific synthesis job
+  - Includes job status, progress, configuration, and results
+  - Access control: users can only see their own jobs
+- PUT /api/v1/job/{job_id}
+  - Update a synthesis job (only allowed for pending jobs)
+  - Can update text_content, speed, pitch, volume, output_format, sample_rate, config
+  - Returns updated job details
+- PATCH /api/v1/job/{job_id}
+  - Partial update of a synthesis job
+  - Supports status updates and progress tracking
+  - Can update status, progress, error_message, output_file_path, duration
+- DELETE /api/v1/job/{job_id}
+  - Delete a synthesis job
+  - Only allowed for jobs with status: pending, completed, failed, cancelled
+  - Cannot delete jobs that are currently processing
+- GET /api/v1/job/{job_id}/progress
+  - Stream real-time progress updates for a synthesis job
+  - Returns Server-Sent Events (SSE) stream
+  - Provides continuous progress updates until job completion
 
 ### File Management
 - GET /api/v1/files/audio/{file_id}
@@ -155,6 +181,158 @@ structlog==23.1.0
 - GET /api/v1/admin/stats
 - GET /api/v1/admin/users
 - GET/PUT /api/v1/admin/config
+
+---
+
+## Job Management API Examples
+
+### List Jobs with Filtering and Pagination
+```http
+GET /api/v1/job?status=completed&limit=10&offset=0&sort_by=created_at&sort_order=desc&include_text=false
+Authorization: Bearer <access_token>
+```
+
+**Response:**
+```json
+{
+    "success": true,
+    "data": [
+        {
+            "id": "job_1234567890",
+            "user_id": "user_123",
+            "voice_model_id": "vm_456",
+            "text_content": "Hello world...",
+            "text_hash": "a1b2c3d4...",
+            "text_language": "en-US",
+            "text_length": 123,
+            "word_count": 20,
+            "status": "completed",
+            "progress": 100.0,
+            "config": {
+                "speed": 1.0,
+                "pitch": 1.0,
+                "volume": 1.0
+            },
+            "output_format": "wav",
+            "sample_rate": 22050,
+            "output_file_path": "/audio/job_1234567890.wav",
+            "duration": 5.2,
+            "created_at": "2024-01-15T10:30:00Z",
+            "updated_at": "2024-01-15T10:35:00Z"
+        }
+    ],
+    "meta": {
+        "pagination": {
+            "total_count": 45,
+            "limit": 10,
+            "offset": 0,
+            "has_more": true
+        }
+    },
+    "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+### Create New Synthesis Job
+```http
+POST /api/v1/job
+Content-Type: application/json
+Authorization: Bearer <access_token>
+
+{
+    "text_content": "Hello world, this is a test synthesis job.",
+    "voice_model_id": "vm_456",
+    "text_language": "en-US",
+    "output_format": "wav",
+    "sample_rate": 22050,
+    "speed": 1.2,
+    "pitch": 1.0,
+    "volume": 1.0,
+    "config": {
+        "include_timestamps": true,
+        "timestamp_granularity": "word"
+    }
+}
+```
+
+**Response:**
+```json
+{
+    "success": true,
+    "data": {
+        "id": "job_1234567890",
+        "user_id": "user_123",
+        "voice_model_id": "vm_456",
+        "text_content": "Hello world, this is a test synthesis job.",
+        "text_hash": "a1b2c3d4e5f6...",
+        "text_language": "en-US",
+        "text_length": 43,
+        "word_count": 8,
+        "status": "pending",
+        "progress": 0.0,
+        "config": "{\"include_timestamps\": true, \"timestamp_granularity\": \"word\"}",
+        "output_format": "wav",
+        "sample_rate": 22050,
+        "speed": 1.2,
+        "pitch": 1.0,
+        "volume": 1.0,
+        "created_at": "2024-01-15T10:30:00Z",
+        "updated_at": "2024-01-15T10:30:00Z"
+    },
+    "message": "Synthesis job created successfully",
+    "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+### Update Job Configuration
+```http
+PUT /api/v1/job/job_1234567890
+Content-Type: application/json
+Authorization: Bearer <access_token>
+
+{
+    "speed": 1.5,
+    "pitch": 1.1,
+    "volume": 0.9,
+    "output_format": "mp3",
+    "sample_rate": 44100
+}
+```
+
+### Stream Job Progress (Server-Sent Events)
+```http
+GET /api/v1/job/job_1234567890/progress
+Authorization: Bearer <access_token>
+Accept: text/event-stream
+```
+
+**Response Stream:**
+```
+data: {"progress": 0.0, "status": "pending", "message": "Job queued for processing"}
+
+data: {"progress": 25.0, "status": "processing", "message": "Text preprocessing completed"}
+
+data: {"progress": 75.0, "status": "processing", "message": "Audio synthesis in progress"}
+
+data: {"progress": 100.0, "status": "completed", "message": "Synthesis completed", "output_file_path": "/audio/job_1234567890.wav", "duration": 5.2}
+
+data: {"event": "complete"}
+```
+
+### Delete Job
+```http
+DELETE /api/v1/job/job_1234567890
+Authorization: Bearer <access_token>
+```
+
+**Response:**
+```json
+{
+    "success": true,
+    "message": "Job deleted successfully",
+    "timestamp": "2024-01-15T10:30:00Z"
+}
+```
 
 ---
 
@@ -237,9 +415,6 @@ backend/
 ```
 
 ---
-
-
-
 
 #### Synchronous Text-to-Speech with Word/Syllable Mapping
 ```http
