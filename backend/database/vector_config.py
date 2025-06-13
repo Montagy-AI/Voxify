@@ -10,6 +10,8 @@ import os
 from pathlib import Path
 import logging
 import json
+import numpy as np
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -66,38 +68,46 @@ class VectorDBConfig:
         }
     }
 
+    def __init__(
+        self,
+        persist_directory: str = "data/chroma_db",
+        embedding_function: Optional[Any] = None,
+        collection_name: str = "voice_embeddings",
+        distance_metric: str = "cosine"
+    ):
+        self.persist_directory = persist_directory
+        self.embedding_function = embedding_function
+        self.collection_name = collection_name
+        self.distance_metric = distance_metric
 
 class ChromaVectorDB:
     """Chroma vector database manager for Voxify platform"""
     
-    def __init__(self, 
-                 persist_directory: str = "data/chroma_db",
-                 host: Optional[str] = None,
-                 port: Optional[int] = None):
-        """
-        Initialize Chroma vector database client
+    def __init__(
+        self,
+        config: Optional[VectorDBConfig] = None,
+        persist_directory: str = "data/chroma_db"
+    ):
+        self.config = config or VectorDBConfig(persist_directory=persist_directory)
+        self.persist_directory = self.config.persist_directory
         
-        Parameters
-        ----------
-        persist_directory : str
-            Local directory for persistent storage
-        host : str, optional
-            Remote Chroma server host (for production deployment)
-        port : int, optional
-            Remote Chroma server port
-        """
-        self.persist_directory = Path(persist_directory)
-        self.persist_directory.mkdir(parents=True, exist_ok=True)
+        # ensure directory exists
+        os.makedirs(self.persist_directory, exist_ok=True)
         
-        # Initialize Chroma client
-        if host and port:
-            # Remote Chroma server configuration
-            self.client = chromadb.HttpClient(host=host, port=port)
-            logger.info(f"Connected to remote Chroma server at {host}:{port}")
-        else:
-            # Local persistent storage
-            self.client = chromadb.PersistentClient(path=str(self.persist_directory))
-            logger.info(f"Initialized local Chroma database at {self.persist_directory}")
+        # initialize ChromaDB client (using persistent mode)
+        self.client = chromadb.PersistentClient(
+            path=self.persist_directory,
+            settings=Settings(
+                anonymized_telemetry=False,
+                allow_reset=True
+            )
+        )
+        
+        # get or create collection
+        self.collection = self.client.get_or_create_collection(
+            name=self.config.collection_name,
+            metadata={"hnsw:space": self.config.distance_metric}
+        )
         
         # Initialize collections
         self.collections = {}
@@ -526,9 +536,8 @@ def create_vector_db(config_path: str = None) -> ChromaVectorDB:
     configs = load_config(config_path)
     
     return ChromaVectorDB(
-        persist_directory=configs.get("persist_directory"),
-        host=configs.get("host"),
-        port=configs.get("port")
+        config=configs.get("config"),
+        persist_directory=configs.get("persist_directory")
     ) 
 
 # merging the config logic that controls where the config choices are coming from
@@ -542,6 +551,12 @@ def load_config(config_path: str = None) -> Dict[str, Any]:
     port = int(port)
 
     return {
+        "config": VectorDBConfig(
+            persist_directory=config.get("persist_directory") or os.getenv("VECTOR_DB_PATH", "data/chroma_db"),
+            embedding_function=None,
+            collection_name="voice_embeddings",
+            distance_metric="cosine"
+        ),
         "persist_directory": config.get("persist_directory") or os.getenv("VECTOR_DB_PATH", "data/chroma_db"),
         "host": config.get("host") or os.getenv("CHROMA_HOST", "localhost"),
         "port": port,
