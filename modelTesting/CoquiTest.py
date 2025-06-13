@@ -9,4 +9,4 @@ tts.tts_to_file(text="Technology and voice cloning. Can the system handle questi
                 speaker_wav=["voices/input.wav"], # and this is the input voice file
                 language="en",
                 split_sentences=True
-                )   
+                )

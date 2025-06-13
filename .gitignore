@@ -17,5 +17,4 @@ venv/
 env/
 
 # Experiment voices and results
-modelTesting/outputs/
-modelTesting/voices/
+*.wav
