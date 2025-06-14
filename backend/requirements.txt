@@ -107,6 +107,4 @@ mypy==1.5.1
 # Monitoring & Logging
 # ============================================================================
 structlog==23.1.0
-# prometheus-client==0.17.1
-
-minio==7.2.0 
+# prometheus-client==0.17.1 
