@@ -156,6 +156,11 @@ structlog==23.1.0
   - Supports both preset and custom models
   - Returns updated favorite status
 
+### Text-to-Speech (TTS)
+- POST /api/v1/tts/synthesize
+- POST /api/v1/tts/synthesize/async
+- GET /api/v1/tts/synthesize/stream
+
 ### Job Management
 - GET /api/v1/job
   - List synthesis jobs with filtering, sorting, and pagination
