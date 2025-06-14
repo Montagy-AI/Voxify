@@ -90,6 +90,7 @@ def start_flask_app(skip_db_init=False):
     print(f"Starting Voxify API Server...")
     print(f"Server: http://{host}:{port}")
     print(f"Auth endpoints: http://{host}:{port}/api/v1/auth")
+    print(f"Voice endpoints: http://{host}:{port}/api/v1/voice")
     print(f"Job endpoints: http://{host}:{port}/api/v1/jobs")
     print("\nServer started! Press Ctrl+C to stop the server")
     print("=" * 50)

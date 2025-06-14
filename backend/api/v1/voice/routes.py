@@ -18,7 +18,7 @@ def allowed_file(filename: str) -> bool:
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @voice_bp.route('/samples', methods=['POST'])
-@jwt_required()
+# @jwt_required()
 def upload_voice_sample():
     """
     Upload and process a voice sample.
@@ -68,7 +68,7 @@ def upload_voice_sample():
     }), 201
 
 @voice_bp.route('/samples', methods=['GET'])
-@jwt_required()
+# @jwt_required()
 def list_voice_samples():
     """
     List all voice samples for the authenticated user.
@@ -95,7 +95,7 @@ def list_voice_samples():
     })
 
 @voice_bp.route('/samples/<sample_id>', methods=['GET'])
-@jwt_required()
+# @jwt_required()
 def get_voice_sample(sample_id: str):
     """
     Get details of a specific voice sample.
@@ -121,7 +121,7 @@ def get_voice_sample(sample_id: str):
     })
 
 @voice_bp.route('/samples/<sample_id>', methods=['DELETE'])
-@jwt_required()
+# @jwt_required()
 def delete_voice_sample(sample_id: str):
     """
     Remove a voice sample.
@@ -141,7 +141,7 @@ def delete_voice_sample(sample_id: str):
     })
 
 @voice_bp.route('/samples/<sample_id>/process', methods=['POST'])
-@jwt_required()
+# @jwt_required()
 def process_voice_sample(sample_id: str):
     """
     Trigger processing of a voice sample.
