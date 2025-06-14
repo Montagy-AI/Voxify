@@ -61,13 +61,13 @@ def create_app(test_config=None):
     # Import blueprints
     from .v1.auth import auth_bp
     # from .v1.admin import admin_bp
-    # from .v1.voice import voice_bp
+    from .v1.voice import voice_bp
     from .v1.job import job_bp
 
     # Register blueprints
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     # app.register_blueprint(admin_bp, url_prefix='/api/v1/admin')
-    # app.register_blueprint(voice_bp, url_prefix='/api/v1/voice')
+    app.register_blueprint(voice_bp, url_prefix='/api/v1/voice')
     app.register_blueprint(job_bp, url_prefix='/api/v1/job')
 
     # Simple index route
