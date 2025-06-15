@@ -104,38 +104,50 @@ structlog==23.1.0
 
 ### Voice Sample Management
 - POST /api/v1/voice/samples
-  - Upload and process voice samples
+  - Upload voice sample for processing
   - Accepts audio files (WAV, MP3)
+  - Stores file temporarily and metadata in SQLite
   - Returns sample_id and processing status
+
 - GET /api/v1/voice/samples
-  - List all voice samples for the user
-  - Includes processing status and quality metrics
+  - List all voice samples for the authenticated user
+  - Includes pagination support
+  - Returns sample metadata and processing status
+
 - GET /api/v1/voice/samples/{sample_id}
   - Get details of a specific voice sample
-  - Includes processing status, quality metrics, and validation results
+  - Includes processing status and metadata
+
 - DELETE /api/v1/voice/samples/{sample_id}
   - Remove a voice sample
-- POST /api/v1/voice/samples/{sample_id}/process
-  - Trigger processing of a voice sample
-  - Extracts features and prepares for clone generation
-  - Returns processing job ID
+  - Deletes both metadata from SQLite and embedding from ChromaDB
 
 ### Voice Clone Management
 - POST /api/v1/voice/clones
   - Generate a new voice clone from processed samples
-  - Accepts array of sample_ids and generation parameters
-  - Returns clone_id and generation job ID
+  - Uses embeddings from ChromaDB
+  - Accepts array of sample_ids
+  - Returns clone_id and generation status
+
 - GET /api/v1/voice/clones
   - List all voice clones for the user
-  - Includes generation status and quality metrics
+  - Includes generation status and metadata
+
 - GET /api/v1/voice/clones/{clone_id}
   - Get details of a specific voice clone
-  - Includes generation status, quality metrics, and sample references
+  - Includes generation status and sample references
+
 - DELETE /api/v1/voice/clones/{clone_id}
   - Remove a voice clone
+
 - POST /api/v1/voice/clones/{clone_id}/select
   - Set a voice clone as the active one for synthesis
   - Returns success status
+
+### Storage Architecture
+- **Temporary File Storage**: Audio files stored temporarily during processing
+- **SQLite Database**: Stores voice sample and clone metadata
+- **ChromaDB**: Stores voice embeddings for similarity search and voice matching
 
 ### Voice Model Library
 - GET /api/v1/voice/models
