@@ -30,8 +30,8 @@ def upload_voice_sample():
     Returns:
         JSON response with sample_id and processing status
     """
-    # Get the current user's ID
-    user_id = get_jwt_identity()
+    # # Get the current user's ID
+    # user_id = get_jwt_identity()
     
     # Validate name parameter
     name = request.form.get('name')
@@ -159,4 +159,4 @@ def process_voice_sample(sample_id: str):
             'job_id': str(uuid.uuid4()),
             'message': 'Processing job created successfully'
         }
-    })
+    }) 
