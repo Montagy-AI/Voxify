@@ -168,7 +168,6 @@ structlog==23.1.0
   - Supports both preset and custom models
   - Returns updated favorite status
 
-
 ### Job Management
 - GET /api/v1/job
   - List synthesis jobs with filtering, sorting, and pagination
