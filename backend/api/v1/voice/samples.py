@@ -13,6 +13,7 @@ from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from database import get_database_manager
 from database.models import VoiceSample
+from .embeddings import generate_voice_embedding, delete_voice_embedding
 
 # Import the blueprint from __init__.py
 from . import voice_bp
@@ -84,6 +85,9 @@ def upload_voice_sample():
         # Extract audio metadata
         metadata = extract_audio_metadata(temp_path)
         
+        # Generate voice embedding
+        embedding_id, embedding = generate_voice_embedding(temp_path)
+        
         # Get database session
         db = get_database_manager()
         
@@ -100,17 +104,13 @@ def upload_voice_sample():
                 duration=metadata['duration'],
                 sample_rate=metadata['sample_rate'],
                 channels=metadata['channels'],
-                status='uploaded',
-                processing_start_time=datetime.utcnow()
+                status='ready',  # Changed from 'uploaded' to 'ready' since we generate embedding immediately
+                processing_start_time=datetime.utcnow(),
+                processing_end_time=datetime.utcnow(),
+                voice_embedding_id=embedding_id  # Store the embedding ID
             )
             session.add(voice_sample)
             session.commit()
-        
-        # TODO: Send to TTS service for embedding generation
-        # The TTS service will:
-        # 1. Generate the voice embedding
-        # 2. Store it in ChromaDB
-        # 3. Update the VoiceSample status to 'ready'
         
         # Clean up temporary file
         os.unlink(temp_path)
@@ -122,8 +122,8 @@ def upload_voice_sample():
                 'name': name,
                 'duration': metadata['duration'],
                 'format': metadata['format'],
-                'status': 'uploaded',
-                'message': 'Voice sample uploaded successfully. Processing started.'
+                'status': 'ready',
+                'message': 'Voice sample uploaded and processed successfully.'
             }
         }), 201
         
@@ -132,6 +132,13 @@ def upload_voice_sample():
         if 'temp_path' in locals():
             try:
                 os.unlink(temp_path)
+            except:
+                pass
+        
+        # Clean up embedding if it was created
+        if 'embedding_id' in locals():
+            try:
+                delete_voice_embedding(embedding_id)
             except:
                 pass
         
@@ -241,6 +248,10 @@ def delete_voice_sample(sample_id: str):
                 'success': False,
                 'error': 'Voice sample not found'
             }), 404
+        
+        # Delete the voice embedding from ChromaDB
+        if sample.voice_embedding_id:
+            delete_voice_embedding(sample.voice_embedding_id)
         
         # Delete from SQLite
         session.delete(sample)
