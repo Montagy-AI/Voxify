@@ -10,10 +10,38 @@ from . import auth_bp
 from datetime import datetime
 
 # Import database models
-from Voxify.backend.database.models import User, get_database_manager
+from database.models import User, get_database_manager
 
 # Import utility functions
-from Voxify.backend.api.utils.password import hash_password, verify_password, validate_password_strength, validate_email
+from api.utils.password import hash_password, verify_password, validate_password_strength, validate_email
+
+# Standard error response format
+def error_response(message: str, code: str = None, details: dict = None, status_code: int = 400):
+    """Create standardized error response"""
+    response = {
+        "success": False,
+        "error": {
+            "message": message,
+            "code": code or f"ERROR_{status_code}",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    }
+    if details:
+        response["error"]["details"] = details
+    return jsonify(response), status_code
+
+# Standard success response format
+def success_response(data=None, message: str = None, status_code: int = 200):
+    """Create standardized success response"""
+    response = {
+        "success": True,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+    if data is not None:
+        response["data"] = data
+    if message:
+        response["message"] = message
+    return jsonify(response), status_code
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
@@ -34,24 +62,24 @@ def register():
     # Get request data
     data = request.get_json()
     if not data:
-        return jsonify({"error": "No data provided"}), 400
+        return error_response("Request body is required", "MISSING_BODY")
 
     # Validate required fields
     email = data.get('email')
     password = data.get('password')
 
     if not email or not password:
-        return jsonify({"error": "Email and password are required"}), 400
+        return error_response("Email and password are required", "MISSING_FIELDS")
 
     # Validate email format
     is_valid, error_message = validate_email(email)
     if not is_valid:
-        return jsonify({"error": error_message}), 400
+        return error_response(error_message, "INVALID_EMAIL")
 
     # Validate password strength
     is_valid, error_message = validate_password_strength(password)
     if not is_valid:
-        return jsonify({"error": error_message}), 400
+        return error_response(error_message, "WEAK_PASSWORD")
 
     # Hash password
     password_hash = hash_password(password)
@@ -73,17 +101,26 @@ def register():
         session.commit()
 
         # Return success response
-        return jsonify({
-            "message": "User registered successfully",
-            "user": new_user.to_dict()
-        }), 201
+        user_data = {
+            "id": new_user.id,
+            "email": new_user.email,
+            "first_name": new_user.first_name,
+            "last_name": new_user.last_name,
+            "created_at": new_user.created_at.isoformat() if new_user.created_at else None
+        }
+        
+        return success_response(
+            data={"user": user_data},
+            message="User registered successfully",
+            status_code=201
+        )
 
     except IntegrityError:
         session.rollback()
-        return jsonify({"error": "Email already exists"}), 409
+        return error_response("Email already exists", "EMAIL_EXISTS", status_code=409)
     except Exception as e:
         session.rollback()
-        return jsonify({"error": str(e)}), 500
+        return error_response(f"Registration failed: {str(e)}", "REGISTRATION_ERROR", status_code=500)
     finally:
         session.close()
 
@@ -104,14 +141,14 @@ def login():
     # Get request data
     data = request.get_json()
     if not data:
-        return jsonify({"error": "No data provided"}), 400
+        return error_response("Request body is required", "MISSING_BODY")
 
     # Validate required fields
     email = data.get('email')
     password = data.get('password')
 
     if not email or not password:
-        return jsonify({"error": "Email and password are required"}), 400
+        return error_response("Email and password are required", "MISSING_FIELDS")
 
     # Get user from database
     db_manager = get_database_manager()
@@ -122,11 +159,11 @@ def login():
 
         # Check if user exists and password is correct
         if not user or not verify_password(password, user.password_hash):
-            return jsonify({"error": "Invalid email or password"}), 401
+            return error_response("Invalid email or password", "INVALID_CREDENTIALS", status_code=401)
 
         # Check if user is active
         if not user.is_active:
-            return jsonify({"error": "Account is disabled"}), 403
+            return error_response("Account is disabled", "ACCOUNT_DISABLED", status_code=403)
 
         # Update last login timestamp
         user.last_login_at = datetime.utcnow()
@@ -137,15 +174,26 @@ def login():
         refresh_token = create_refresh_token(identity=user.id)
 
         # Return tokens and user data
-        return jsonify({
+        response_data = {
             "access_token": access_token,
             "refresh_token": refresh_token,
-            "user": user.to_dict()
-        }), 200
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "last_login_at": user.last_login_at.isoformat()
+            }
+        }
+        
+        return success_response(
+            data=response_data,
+            message="Login successful"
+        )
 
     except Exception as e:
         session.rollback()
-        return jsonify({"error": str(e)}), 500
+        return error_response(f"Login failed: {str(e)}", "LOGIN_ERROR", status_code=500)
     finally:
         session.close()
 
@@ -172,10 +220,15 @@ def refresh():
         new_refresh_token = create_refresh_token(identity=current_user)
 
         # Return the new tokens
-        return jsonify({
+        response_data = {
             "access_token": new_access_token,
             "refresh_token": new_refresh_token
-        }), 200
+        }
+        
+        return success_response(
+            data=response_data,
+            message="Token refreshed successfully"
+        )
 
     except Exception as e:
-        return jsonify({"error": "Failed to refresh token", "message": str(e)}), 500
+        return error_response(f"Failed to refresh token: {str(e)}", "TOKEN_REFRESH_ERROR", status_code=500)

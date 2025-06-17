@@ -23,7 +23,7 @@ Voxify uses a **hybrid storage architecture** combining SQLite for structured da
 ### Core Tables
 
 #### Users Table
-Manages user accounts and subscription information.
+Manages user accounts and basic information.
 
 ```sql
 CREATE TABLE users (
@@ -32,10 +32,7 @@ CREATE TABLE users (
     password_hash TEXT NOT NULL,
     first_name TEXT,                        -- Optional user first name
     last_name TEXT,                         -- Optional user last name
-    subscription_type TEXT DEFAULT 'free',  -- free, pro, enterprise
-    quota_voice_samples INTEGER DEFAULT 5,
-    quota_syntheses_daily INTEGER DEFAULT 100,
-    storage_used_bytes INTEGER DEFAULT 0,
+    storage_used_bytes INTEGER DEFAULT 0,   -- Current storage usage
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -43,7 +40,6 @@ CREATE TABLE users (
 
 **Key Features:**
 - UUID primary keys for security
-- Subscription-based quotas
 - Storage usage tracking
 - Soft delete support
 

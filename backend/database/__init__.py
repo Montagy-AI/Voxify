@@ -6,7 +6,7 @@ This package provides the complete database layer for the Voxify platform,
 including relational data management and vector similarity search capabilities.
 """
 
-from Voxify.backend.database.models import (
+from .models import (
     # Database Manager
     DatabaseManager,
     get_database_manager,
@@ -28,7 +28,7 @@ from Voxify.backend.database.models import (
     TimestampMixin
 )
 
-from Voxify.backend.database.vector_config import (
+from .vector_config import (
     # Vector Database
     ChromaVectorDB,
     VectorDBConfig,

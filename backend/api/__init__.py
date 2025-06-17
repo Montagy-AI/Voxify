@@ -42,7 +42,7 @@ def create_app(test_config=None):
         JWT_SECRET_KEY=os.getenv('JWT_SECRET_KEY', 'Majick'),
         JWT_ACCESS_TOKEN_EXPIRES=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES', 3600)),
         JWT_REFRESH_TOKEN_EXPIRES=int(os.getenv('JWT_REFRESH_TOKEN_EXPIRES', 2592000)),
-        DATABASE_URL=os.getenv('DATABASE_URL', 'sqlite:///C:/Users/Jun/Desktop/Voxify/Specifications/Voxify/backend/data/voxify.db')
+        DATABASE_URL=os.getenv('DATABASE_URL', 'sqlite:///data/voxify.db')
     )
 
     # Override with test config if provided
@@ -58,13 +58,17 @@ def create_app(test_config=None):
         default_limits=["200 per day", "50 per hour"]
     )
     
+    # Import blueprints
     from .v1.auth import auth_bp
-    from .v1.admin import admin_bp
+    # from .v1.admin import admin_bp
     from .v1.voice import voice_bp
+    from .v1.job import job_bp
 
+    # Register blueprints
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
-    app.register_blueprint(admin_bp, url_prefix='/api/v1/admin')
+    # app.register_blueprint(admin_bp, url_prefix='/api/v1/admin')
     app.register_blueprint(voice_bp, url_prefix='/api/v1/voice')
+    app.register_blueprint(job_bp, url_prefix='/api/v1/job')
 
     # Simple index route
     @app.route('/')
