@@ -3,8 +3,6 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.pyc
-
 # Bytecode/build artifacts
 *.egg-info/
 .eggs/
