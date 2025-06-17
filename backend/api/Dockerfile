@@ -1,10 +1,11 @@
-FROM python:3.11-slim
+FROM backend-base:latest
 
-WORKDIR /app
+WORKDIR /app/backend/api
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
+# TODO: Consider removing curl, git, build-essntial if not needed.
 RUN apt-get update && apt-get install -y \
     build-essential \
     ffmpeg \
@@ -13,10 +14,6 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 

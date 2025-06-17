@@ -15,38 +15,50 @@ services:
       - DATABASE_URL=sqlite:///data/voxify.db
       - VECTOR_DB_PATH=data/chroma_db
     volumes:
-      - ./backend:/app
-      - data_volume:/app/data
+      - data_volume:/app/backend/data
     restart: unless-stopped
     command: flask run --host=0.0.0.0
 
   db-init:
     build:
-      context: ./backend/database
+      context: ./backend/scripts
       dockerfile: Dockerfile
     container_name: voxify_db_init
     volumes:
-      - ./backend:/app
-      - data_volume:/app/data
+      - data_volume:/app/backend/data
     environment:
       - DATABASE_URL=sqlite:///data/voxify.db
       - VECTOR_DB_PATH=data/chroma_db
-    entrypoint: ["python3", "database/init_db.py"]
+    entrypoint: ["python", "init_db.py"]
     restart: "no"
 
-  ai:
+  tests:
     build:
-      context: ./ai
+      context: ./backend/tests
       dockerfile: Dockerfile
-    container_name: voxify_ai
-    ports:
-      - "6000:6000"
-    environment:
-      - MODEL_CACHE=/models
+    container_name: voxify_tests
+    depends_on:
+      - db-init
     volumes:
-      - ./ai:/app
-      - model_cache:/models
-    restart: unless-stopped
+      - data_volume:/app/backend/data
+    environment:
+      - DATABASE_URL=sqlite:///data/voxify.db
+      - VECTOR_DB_PATH=data/chroma_db
+    command: ["python", "-m", "unittest", "discover", "-s", "test"]
+    restart: "no"
+
+  # ai:
+  #   build:
+  #     context: ./ai
+  #     dockerfile: Dockerfile
+  #   container_name: voxify_ai
+  #   ports:
+  #     - "6000:6000"
+  #   environment:
+  #     - MODEL_CACHE=/models
+  #   volumes:
+  #     - model_cache:/models
+  #   restart: unless-stopped
 
 volumes:
   data_volume:
