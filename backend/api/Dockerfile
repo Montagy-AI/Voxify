@@ -5,7 +5,7 @@ WORKDIR /app/backend/api
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# TODO: Consider removing curl, git, build-essntial if not needed.
+# TODO: Consider removing curl, git, build-essential if not needed.
 RUN apt-get update && apt-get install -y \
     build-essential \
     ffmpeg \
