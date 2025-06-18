@@ -42,7 +42,8 @@ def create_app(test_config=None):
         JWT_SECRET_KEY=os.getenv('JWT_SECRET_KEY', 'Majick'),
         JWT_ACCESS_TOKEN_EXPIRES=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES', 3600)),
         JWT_REFRESH_TOKEN_EXPIRES=int(os.getenv('JWT_REFRESH_TOKEN_EXPIRES', 2592000)),
-        DATABASE_URL=os.getenv('DATABASE_URL', 'sqlite:///data/voxify.db')
+        DATABASE_URL=os.getenv('DATABASE_URL', 'sqlite:///data/voxify.db'),
+        MAX_CONTENT_LENGTH=16 * 1024 * 1024  # 限制上传文件大小为16MB
     )
 
     # Override with test config if provided
@@ -63,12 +64,14 @@ def create_app(test_config=None):
     # from .v1.admin import admin_bp
     from .v1.voice import voice_bp
     from .v1.job import job_bp
+    from .v1.file import file_bp
 
     # Register blueprints
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     # app.register_blueprint(admin_bp, url_prefix='/api/v1/admin')
     app.register_blueprint(voice_bp, url_prefix='/api/v1/voice')
     app.register_blueprint(job_bp, url_prefix='/api/v1/job')
+    app.register_blueprint(file_bp, url_prefix='/api/v1/file')
 
     # Simple index route
     @app.route('/')
