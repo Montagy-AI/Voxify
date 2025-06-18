@@ -12,6 +12,37 @@ from api import create_app
 # Add the backend directory to Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+def init_file_storage():
+    """Initialize file storage directories"""
+    print("Initializing file storage...")
+    
+    # Define storage paths
+    storage_paths = {
+        'data': 'data',
+        'files': 'data/files',
+        'synthesis': 'data/files/synthesis',
+        'samples': 'data/files/samples',
+        'temp': 'data/files/temp'
+    }
+    
+    # Create directories
+    for path_name, path in storage_paths.items():
+        try:
+            os.makedirs(path, exist_ok=True)
+            print(f"✓ {path_name} directory: {path}")
+        except OSError as e:
+            print(f"Error creating {path_name} directory ({path}): {e}")
+            return False
+    
+    # Set environment variables for file storage
+    os.environ['VOXIFY_FILE_STORAGE'] = storage_paths['files']
+    os.environ['VOXIFY_SYNTHESIS_STORAGE'] = storage_paths['synthesis']
+    os.environ['VOXIFY_SAMPLES_STORAGE'] = storage_paths['samples']
+    os.environ['VOXIFY_TEMP_STORAGE'] = storage_paths['temp']
+    
+    print("File storage initialization successful!")
+    return True
+
 def init_database():
     """Initialize database"""
     print("Initializing database...")
@@ -69,8 +100,15 @@ def init_database():
         traceback.print_exc()
         return False
 
-def start_flask_app(skip_db_init=False):
+def start_flask_app(skip_db_init=False, skip_file_init=False):
     """Start Flask application"""
+    
+    # Initialize file storage (unless skipped)
+    if not skip_file_init:
+        if not init_file_storage():
+            print("File storage initialization failed, cannot start application")
+            return
+        print()  # Empty line separator
     
     # Initialize database (unless skipped)
     if not skip_db_init:
@@ -92,6 +130,7 @@ def start_flask_app(skip_db_init=False):
     print(f"Auth endpoints: http://{host}:{port}/api/v1/auth")
     print(f"Voice endpoints: http://{host}:{port}/api/v1/voice")
     print(f"Job endpoints: http://{host}:{port}/api/v1/jobs")
+    print(f"File endpoints: http://{host}:{port}/api/v1/file")
     print("\nServer started! Press Ctrl+C to stop the server")
     print("=" * 50)
     
@@ -113,8 +152,10 @@ def main():
     parser = argparse.ArgumentParser(description='Voxify One-Click Startup Script')
     parser.add_argument('--skip-db-init', action='store_true', 
                        help='Skip database initialization, start server directly')
+    parser.add_argument('--skip-file-init', action='store_true',
+                       help='Skip file storage initialization')
     parser.add_argument('--init-only', action='store_true',
-                       help='Initialize database only, do not start server')
+                       help='Initialize database and file storage only, do not start server')
     
     args = parser.parse_args()
     
@@ -122,15 +163,24 @@ def main():
     print("=" * 50)
     
     if args.init_only:
-        # Initialize database only
-        if init_database():
-            print("Database initialization completed")
+        # Initialize database and file storage only
+        success = True
+        if not args.skip_file_init:
+            success = success and init_file_storage()
+        if not args.skip_db_init:
+            success = success and init_database()
+        
+        if success:
+            print("Initialization completed successfully")
         else:
-            print("Database initialization failed")
+            print("Initialization failed")
             sys.exit(1)
     else:
-        # Start complete application (including database initialization unless skipped)
-        start_flask_app(skip_db_init=args.skip_db_init)
+        # Start complete application
+        start_flask_app(
+            skip_db_init=args.skip_db_init,
+            skip_file_init=args.skip_file_init
+        )
 
 if __name__ == '__main__':
     main() 
