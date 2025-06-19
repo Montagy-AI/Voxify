@@ -9,7 +9,8 @@ import sys
 
 # Add the project root directory to the Python path to import the database module
 # This assumes init_db.py is in the backend directory, and the database module is in its subdirectory
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+SCRIPT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # If init_db.py is in the backend/scripts/ directory, adjust to SCRIPT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Or, a more robust way is to ensure PYTHONPATH is set correctly when running this script, or run from the project root
 # For the current structure (init_db.py in backend/ directory):
