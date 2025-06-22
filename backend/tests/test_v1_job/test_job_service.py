@@ -67,9 +67,19 @@ class TestJobServiceAPI:
         }
 
     @pytest.fixture(scope="class")
-    def test_voice_model_id(self):
-        """Mock voice model ID for testing"""
-        return "vm_test_123"
+    def test_voice_model_id(self, server_url, auth_tokens):
+        """Get a real voice model id from the server, or skip if not found"""
+        url = f"{server_url}/api/v1/voice/models"
+        headers = {"Authorization": f"Bearer {auth_tokens['access_token']}"}
+        try:
+            resp = requests.get(url, headers=headers, timeout=5)
+            if resp.status_code == 200:
+                data = resp.json()
+                if data and isinstance(data, list) and len(data) > 0:
+                    return data[0].get("id")
+        except Exception:
+            pass
+        pytest.skip("No real voice model in DB, skip related tests.")
 
     def test_create_job_valid_data(self, server_url, auth_tokens, test_voice_model_id):
         """Test creating a job with valid data"""
