@@ -46,6 +46,9 @@ jobs:
       - name: Build backend base image
         run: docker build -f backend/Dockerfile.base -t backend-base:latest backend
 
+      - name: Verify base image exists
+        run: docker images | grep backend-base
+
       - name: Build containers
         run: docker compose -f docker-compose.yml build
 
