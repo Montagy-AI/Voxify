@@ -1,10 +1,10 @@
 FROM backend-base:latest
 
-WORKDIR /app/backend
+WORKDIR /backend
 
-COPY ../api ./api
-COPY ../data ./data
-COPY ../database ./database
+COPY backend/api ./api
+COPY backend/data ./data
+COPY backend/database ./database
 
 COPY . ./test
 
