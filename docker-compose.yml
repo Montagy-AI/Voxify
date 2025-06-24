@@ -19,21 +19,21 @@ services:
 
   db-init:
     build:
-      context: ./backend
-      dockerfile: scripts/Dockerfile
+      context: .
+      dockerfile: backend/scripts/Dockerfile
     container_name: voxify_db_init
     volumes:
       - data_volume:/backend/data
     environment:
       - DATABASE_URL=sqlite:///data/voxify.db
       - VECTOR_DB_PATH=data/chroma_db
-    entrypoint: ["python", "scripts/init_db.py"]
+    entrypoint: ["python", "init_db.py"]
     restart: "no"
 
   tests:
     build:
-      context: ./backend
-      dockerfile: tests/Dockerfile
+      context: .
+      dockerfile: backend/tests/Dockerfile
     container_name: voxify_tests
     depends_on:
       - db-init
@@ -42,8 +42,21 @@ services:
     environment:
       - DATABASE_URL=sqlite:///data/voxify.db
       - VECTOR_DB_PATH=data/chroma_db
-    command: ["python", "-m", "unittest", "discover", "-s", "tests"]
+    command: ["python", "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py", "-v"]
     restart: "no"
+
+    # ai:
+    #   build:
+    #     context: ./ai
+    #     dockerfile: Dockerfile
+    #   container_name: voxify_ai
+    #   ports:
+    #     - "6000:6000"
+    #   environment:
+    #     - MODEL_CACHE=/models
+    #   volumes:
+    #     - model_cache:/models
+    #   restart: unless-stopped
 
 volumes:
   data_volume:

@@ -6,7 +6,7 @@ COPY backend/api ./api
 COPY backend/data ./data
 COPY backend/database ./database
 
-COPY . ./test
+COPY backend/tests ./tests
 
 # Run tests by default (override with docker run if needed)
 CMD ["python", "-m", "unittest", "discover", "-s", "test"]
