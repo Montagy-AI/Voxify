@@ -1,0 +1,60 @@
+import axios from 'axios';
+import authService from './auth.service';
+
+const api = axios.create({
+  baseURL: 'http://localhost:5000/api/v1',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor: Add token to request headers
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor: Handle token expiration
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // If error is 401 and not a refresh token request
+    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/refresh')) {
+      originalRequest._retry = true;
+
+      try {
+        // Try to refresh token
+        const refreshResult = await authService.refreshToken();
+        if (!refreshResult.success) {
+          throw new Error('Token refresh failed');
+        }
+
+        // Get new token and retry original request
+        const newToken = localStorage.getItem('access_token');
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return api(originalRequest);
+      } catch (refreshError) {
+        // If refresh fails, clear tokens and redirect to login
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export default api; 
