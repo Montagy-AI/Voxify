@@ -43,14 +43,10 @@ jobs:
       - name: Verify Docker Compose availability
         run: docker compose version
 
-      - name: Build backend base image
-        run: docker build -f backend/Dockerfile.base -t backend-base:latest backend
-
-      - name: Verify base image exists
-        run: docker images | grep backend-base
-
-      - name: Build containers
-        run: docker compose -f docker-compose.yml build
+      - name: Build and start services
+        run: |
+          docker build -f backend/Dockerfile.base -t backend-base:latest backend
+          DOCKER_BUILDKIT=0 docker compose -f docker-compose.yml build
 
       - name: Run DB init
         run: docker compose -f docker-compose.yml run --rm db-init
