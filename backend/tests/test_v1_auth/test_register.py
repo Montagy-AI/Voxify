@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from flask import Flask
-from Voxify.backend.api.v1.auth.routes import auth_bp
+from backend.api.v1.auth.routes import auth_bp
 from sqlalchemy.exc import IntegrityError
 
 
