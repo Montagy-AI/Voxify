@@ -50,8 +50,18 @@ def create_app(test_config=None):
     if test_config is not None:
         app.config.from_mapping(test_config)
     
-    # Initialize extensions
-    CORS(app)
+    # Configure CORS to allow frontend access
+    CORS(app, 
+         origins=[
+             "http://localhost:3000",  # React development server
+             "http://127.0.0.1:3000",
+             "http://localhost:3001",  # Alternative ports
+             "http://127.0.0.1:3001"
+         ],
+         methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+         allow_headers=["Content-Type", "Authorization", "Accept"],
+         supports_credentials=True)
+    
     jwt = JWTManager(app)
     limiter = Limiter(
         get_remote_address,
