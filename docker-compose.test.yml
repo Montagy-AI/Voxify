@@ -3,34 +3,31 @@ version: '3.9'
 services:
   db-init:
     build:
-      context: ./backend/scripts
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: scripts/Dockerfile
     container_name: voxify_db_init_test
     volumes:
-      - data_volume:/app/backend/data
+      - data_volume:/app/data
     environment:
       - DATABASE_URL=sqlite:///data/voxify.db
       - VECTOR_DB_PATH=data/chroma_db
+    working_dir: /app/scripts
     command: ["python", "init_db.py"]
     restart: "no"
-
   tests:
     build:
-      context: ./backend/tests
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: tests/Dockerfile
     container_name: voxify_tests
     depends_on:
       - db-init
     volumes:
-      - data_volume:/app/backend/data
+      - data_volume:/app/data
     environment:
       - DATABASE_URL=sqlite:///data/voxify.db
       - VECTOR_DB_PATH=data/chroma_db
-    command: ["python", "-m", "unittest", "discover", "-s", "test"]
+    working_dir: /app/tests
+    command: ["python", "-m", "unittest", "discover", "-s", "."]
     restart: "no"
-
 volumes:
   data_volume:
-
-# Run test-only with cleanup:
-# docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit

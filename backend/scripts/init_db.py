@@ -44,8 +44,8 @@ def main():
 
     # Ensure the data directory exists (SQLite and ChromaDB usually create files in this directory)
     try:
-        os.makedirs("data", exist_ok=True)
-        print("✅ 'data' directory confirmed/created.")
+        os.makedirs("/data", exist_ok=True)
+        print("✅ '/data' directory confirmed/created.")
     except OSError as e:
         print(f"⚠️  Could not create 'data' directory: {e}. This might not be an issue if database files are not in this directory.")
 

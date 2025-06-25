@@ -1,9 +1,10 @@
 FROM backend-base:latest
-WORKDIR /app/backend/database
 
-COPY . .
+WORKDIR /backend
 
-VOLUME ["/app/data"]
+COPY ../database ./database
+COPY ../scripts ./scripts
 
-# Default command for init (TODO: Adjust as needed)
-CMD ["python", "-c", "from models import initialize_database; initialize_database()"]
+VOLUME ["/backend/data"]
+
+CMD ["python", "scripts/init_db.py"]
