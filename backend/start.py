@@ -100,7 +100,71 @@ def init_database():
         traceback.print_exc()
         return False
 
-def start_flask_app(skip_db_init=False, skip_file_init=False):
+def seed_database():
+    """Seed database with test data"""
+    print("Seeding database with test data...")
+    
+    try:
+        # Import seed script functions
+        from scripts.seed_db import (
+            create_test_users, create_voice_samples, create_voice_models,
+            create_synthesis_jobs, create_usage_stats
+        )
+        from database import get_database_manager
+        
+        # Get database connection
+        db = get_database_manager()
+        session = db.get_session()
+        
+        try:
+            # Create test data
+            print("👤 Creating test users...")
+            users = create_test_users(session)
+            session.commit()
+            
+            print("🎤 Creating voice samples...")
+            samples = create_voice_samples(session, users)
+            session.commit()
+            
+            print("🤖 Creating voice models...")
+            models = create_voice_models(session, samples)
+            session.commit()
+            
+            print("🎯 Creating synthesis jobs...")
+            jobs = create_synthesis_jobs(session, users, models)
+            session.commit()
+            
+            print("📊 Creating usage statistics...")
+            create_usage_stats(session, users)
+            session.commit()
+            
+            print("✅ Test data creation successful!")
+            
+            # Print summary
+            print("\n📝 Data Summary:")
+            print(f"- Users: {len(users)}")
+            print(f"- Voice Samples: {len(samples)}")
+            print(f"- Voice Models: {len(models)}")
+            print(f"- Synthesis Jobs: {len(jobs)}")
+            print(f"- Usage Stats per User: 7 days")
+            
+            return True
+            
+        except Exception as e:
+            session.rollback()
+            print(f"❌ Error during seeding: {str(e)}")
+            return False
+        finally:
+            session.close()
+            
+    except ImportError as e:
+        print(f"Error: Could not import seed module: {e}")
+        return False
+    except Exception as e:
+        print(f"Error during database seeding: {e}")
+        return False
+
+def start_flask_app(skip_db_init=False, skip_file_init=False, seed_data=False):
     """Start Flask application"""
     
     # Initialize file storage (unless skipped)
@@ -115,6 +179,12 @@ def start_flask_app(skip_db_init=False, skip_file_init=False):
         if not init_database():
             print("Database initialization failed, cannot start application")
             return
+        print()  # Empty line separator
+    
+    # Seed database if requested
+    if seed_data:
+        if not seed_database():
+            print("Database seeding failed, but continuing with server startup")
         print()  # Empty line separator
     
     # Create Flask app
@@ -156,19 +226,32 @@ def main():
                        help='Skip file storage initialization')
     parser.add_argument('--init-only', action='store_true',
                        help='Initialize database and file storage only, do not start server')
+    parser.add_argument('--seed', action='store_true',
+                       help='Seed database with test data during startup')
+    parser.add_argument('--seed-only', action='store_true',
+                       help='Only seed the database with test data, do not start server')
     
     args = parser.parse_args()
     
     print("Welcome to Voxify!")
     print("=" * 50)
     
-    if args.init_only:
+    if args.seed_only:
+        # Only seed the database
+        if not seed_database():
+            print("Database seeding failed")
+            sys.exit(1)
+        else:
+            print("Database seeding completed successfully")
+    elif args.init_only:
         # Initialize database and file storage only
         success = True
         if not args.skip_file_init:
             success = success and init_file_storage()
         if not args.skip_db_init:
             success = success and init_database()
+        if args.seed:
+            success = success and seed_database()
         
         if success:
             print("Initialization completed successfully")
@@ -179,7 +262,8 @@ def main():
         # Start complete application
         start_flask_app(
             skip_db_init=args.skip_db_init,
-            skip_file_init=args.skip_file_init
+            skip_file_init=args.skip_file_init,
+            seed_data=args.seed
         )
 
 if __name__ == '__main__':

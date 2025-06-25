@@ -232,3 +232,154 @@ def refresh():
 
     except Exception as e:
         return error_response(f"Failed to refresh token: {str(e)}", "TOKEN_REFRESH_ERROR", status_code=500)
+
+@auth_bp.route('/profile', methods=['GET'])
+@jwt_required()
+def get_profile():
+    """
+    Get current user's profile information
+
+    Requires a valid access token in the Authorization header.
+
+    Returns:
+    - 200: User profile information
+    - 401: Invalid or expired access token
+    - 404: User not found
+    """
+    try:
+        # Get the current user's ID from the JWT token
+        current_user_id = get_jwt_identity()
+
+        # Get user from database
+        db_manager = get_database_manager()
+        session = db_manager.get_session()
+
+        try:
+            user = session.query(User).filter_by(id=current_user_id).first()
+
+            if not user:
+                return error_response("User not found", "USER_NOT_FOUND", status_code=404)
+
+            # Return user profile data
+            user_data = {
+                "id": user.id,
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "is_active": user.is_active,
+                "email_verified": user.email_verified,
+                "created_at": user.created_at.isoformat() if user.created_at else None,
+                "updated_at": user.updated_at.isoformat() if user.updated_at else None,
+                "last_login_at": user.last_login_at.isoformat() if user.last_login_at else None
+            }
+            
+            return success_response(
+                data={"user": user_data},
+                message="Profile retrieved successfully"
+            )
+
+        finally:
+            session.close()
+
+    except Exception as e:
+        return error_response(f"Failed to get profile: {str(e)}", "PROFILE_ERROR", status_code=500)
+
+@auth_bp.route('/profile', methods=['PUT', 'PATCH'])
+@jwt_required()
+def update_profile():
+    """
+    Update current user's profile information
+
+    Requires a valid access token in the Authorization header.
+
+    Request Body:
+    - first_name: User's first name (optional)
+    - last_name: User's last name (optional)
+    - email: User's email address (optional)
+
+    Returns:
+    - 200: Profile updated successfully
+    - 400: Invalid request data
+    - 401: Invalid or expired access token
+    - 404: User not found
+    - 409: Email already exists
+    """
+    try:
+        # Get the current user's ID from the JWT token
+        current_user_id = get_jwt_identity()
+
+        # Get request data
+        data = request.get_json()
+        if not data:
+            return error_response("Request body is required", "MISSING_BODY")
+
+        # Get user from database
+        db_manager = get_database_manager()
+        session = db_manager.get_session()
+
+        try:
+            user = session.query(User).filter_by(id=current_user_id).first()
+
+            if not user:
+                return error_response("User not found", "USER_NOT_FOUND", status_code=404)
+
+            # Update fields if provided
+            updated_fields = []
+            
+            if 'first_name' in data:
+                user.first_name = data['first_name']
+                updated_fields.append('first_name')
+            
+            if 'last_name' in data:
+                user.last_name = data['last_name']
+                updated_fields.append('last_name')
+            
+            if 'email' in data:
+                new_email = data['email']
+                # Validate email format
+                is_valid, error_message = validate_email(new_email)
+                if not is_valid:
+                    return error_response(error_message, "INVALID_EMAIL")
+                
+                # Check if email is already taken by another user
+                existing_user = session.query(User).filter_by(email=new_email).filter(User.id != current_user_id).first()
+                if existing_user:
+                    return error_response("Email already exists", "EMAIL_EXISTS", status_code=409)
+                
+                user.email = new_email
+                user.email_verified = False  # Reset email verification when email changes
+                updated_fields.append('email')
+
+            if not updated_fields:
+                return error_response("No valid fields provided for update", "NO_FIELDS_TO_UPDATE")
+
+            # Update timestamp
+            user.updated_at = datetime.utcnow()
+            session.commit()
+
+            # Return updated user profile data
+            user_data = {
+                "id": user.id,
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "is_active": user.is_active,
+                "email_verified": user.email_verified,
+                "created_at": user.created_at.isoformat() if user.created_at else None,
+                "updated_at": user.updated_at.isoformat() if user.updated_at else None,
+                "last_login_at": user.last_login_at.isoformat() if user.last_login_at else None
+            }
+            
+            return success_response(
+                data={"user": user_data, "updated_fields": updated_fields},
+                message="Profile updated successfully"
+            )
+
+        except IntegrityError:
+            session.rollback()
+            return error_response("Email already exists", "EMAIL_EXISTS", status_code=409)
+        finally:
+            session.close()
+
+    except Exception as e:
+        return error_response(f"Failed to update profile: {str(e)}", "PROFILE_UPDATE_ERROR", status_code=500)

@@ -112,7 +112,12 @@ class AuthService {
   async getUserProfile() {
     try {
       const response = await api.get('/auth/profile');
-      return response.data;
+      if (response.data.success && response.data.data && response.data.data.user) {
+        return {
+          data: response.data.data.user
+        };
+      }
+      throw new Error('Invalid response format');
     } catch (error) {
       throw error;
     }
@@ -121,7 +126,13 @@ class AuthService {
   async updateUserProfile(userData) {
     try {
       const response = await api.put('/auth/profile', userData);
-      return response.data;
+      if (response.data.success && response.data.data) {
+        return {
+          data: response.data.data.user || response.data.data,
+          message: response.data.message
+        };
+      }
+      throw new Error('Invalid response format');
     } catch (error) {
       throw error;
     }
