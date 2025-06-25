@@ -1,5 +1,4 @@
 import api from './api';
-import authService from './auth.service';
 
 class JobService {
   async getSynthesisJobs() {
@@ -111,4 +110,5 @@ class JobService {
   }
 }
 
-export default new JobService(); 
+const jobService = new JobService();
+export default jobService; 

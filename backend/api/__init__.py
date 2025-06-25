@@ -66,7 +66,7 @@ def create_app(test_config=None):
     limiter = Limiter(
         get_remote_address,
         app=app,
-        default_limits=["200 per day", "50 per hour"]
+        default_limits=["5000 per day", "1000 per hour"]
     )
     
     # Import blueprints

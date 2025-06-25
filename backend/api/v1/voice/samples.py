@@ -8,7 +8,7 @@ import uuid
 import tempfile
 import soundfile as sf
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from database import get_database_manager
@@ -51,9 +51,14 @@ def upload_voice_sample():
     # Get the current user's ID
     user_id = get_jwt_identity()
     
+    print(f"[DEBUG] Voice sample upload request from user: {user_id}")
+    print(f"[DEBUG] Request files: {request.files}")
+    print(f"[DEBUG] Request form: {request.form}")
+    
     # Validate name parameter
     name = request.form.get('name')
-    if not name:
+    print(f"[DEBUG] Extracted name from form: '{name}'")
+    if not name or not name.strip():
         return jsonify({
             'success': False,
             'error': 'Name is required for voice samples'
@@ -67,7 +72,8 @@ def upload_voice_sample():
         }), 400
     
     file = request.files['file']
-    if not file or not allowed_file(file.filename):
+    print(f"[DEBUG] Uploaded file: {file.filename if file else 'None'}")
+    if not file or not file.filename or not allowed_file(file.filename):
         return jsonify({
             'success': False,
             'error': 'Invalid file type. Only WAV and MP3 files are allowed'
@@ -77,16 +83,25 @@ def upload_voice_sample():
         # Generate unique sample ID
         sample_id = str(uuid.uuid4())
         
-        # Save file temporarily
-        with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_file:
-            file.save(temp_file.name)
-            temp_path = temp_file.name
+        # Create permanent storage directory
+        storage_dir = Path(f"data/files/samples/{user_id}")
+        storage_dir.mkdir(parents=True, exist_ok=True)
+        print(f"[DEBUG] Created storage directory: {storage_dir}")
+        
+        # Define permanent file path
+        file_extension = Path(file.filename).suffix.lower() or '.wav'
+        permanent_path = storage_dir / f"{sample_id}{file_extension}"
+        print(f"[DEBUG] Saving file to: {permanent_path}")
+        
+        # Save file to permanent location
+        file.save(str(permanent_path))
+        print(f"[DEBUG] File saved successfully, size: {os.path.getsize(str(permanent_path))} bytes")
         
         # Extract audio metadata
-        metadata = extract_audio_metadata(temp_path)
+        metadata = extract_audio_metadata(str(permanent_path))
         
         # Generate voice embedding
-        embedding_id, embedding = generate_voice_embedding(temp_path)
+        embedding_id, embedding = generate_voice_embedding(str(permanent_path))
         
         # Get database session
         db = get_database_manager()
@@ -97,23 +112,20 @@ def upload_voice_sample():
                 id=sample_id,
                 name=name,
                 user_id=user_id,
-                file_path=temp_path,  # Temporary path
-                file_size=os.path.getsize(temp_path),
+                file_path=str(permanent_path),  # Permanent path
+                file_size=os.path.getsize(str(permanent_path)),
                 original_filename=file.filename,
                 format=metadata['format'],
                 duration=metadata['duration'],
                 sample_rate=metadata['sample_rate'],
                 channels=metadata['channels'],
                 status='ready',  # Changed from 'uploaded' to 'ready' since we generate embedding immediately
-                processing_start_time=datetime.utcnow(),
-                processing_end_time=datetime.utcnow(),
+                processing_start_time=datetime.now(timezone.utc),
+                processing_end_time=datetime.now(timezone.utc),
                 voice_embedding_id=embedding_id  # Store the embedding ID
             )
             session.add(voice_sample)
             session.commit()
-        
-        # Clean up temporary file
-        os.unlink(temp_path)
         
         return jsonify({
             'success': True,
@@ -128,10 +140,10 @@ def upload_voice_sample():
         }), 201
         
     except Exception as e:
-        # Clean up temporary file if it exists
-        if 'temp_path' in locals():
+        # Clean up permanent file if it exists and was created
+        if 'permanent_path' in locals() and permanent_path.exists():
             try:
-                os.unlink(temp_path)
+                permanent_path.unlink()
             except:
                 pass
         

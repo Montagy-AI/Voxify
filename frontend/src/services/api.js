@@ -15,6 +15,12 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // For FormData, remove Content-Type to let browser set it with boundary
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+    
     return config;
   },
   (error) => {
@@ -56,5 +62,12 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Helper function to create audio URL for playback
+export const createAudioUrl = (jobId, isVoiceClone = false) => {
+  const token = localStorage.getItem('access_token');
+  const endpoint = isVoiceClone ? `/file/voice-clone/${jobId}` : `/file/synthesis/${jobId}`;
+  return `${api.defaults.baseURL}${endpoint}?token=${token}`;
+};
 
 export default api; 
