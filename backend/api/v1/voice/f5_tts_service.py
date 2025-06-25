@@ -1,6 +1,6 @@
 """
 F5-TTS Service Integration
-Handles voice cloning and TTS synthesis using F5-TTS
+Handles voice cloning and TTS synthesis using F5-TTS (Local or Remote)
 """
 
 import os
@@ -9,6 +9,9 @@ import tempfile
 import torch
 import torchaudio
 import soundfile as sf
+import requests
+import base64
+import json
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
@@ -27,7 +30,7 @@ class VoiceCloneConfig:
     ref_audio_path: str
     ref_text: str
     description: Optional[str] = None
-    language: str = "zh-CN"
+    language: str = "en-US"
     speed: float = 1.0
     
 @dataclass
@@ -36,28 +39,44 @@ class TTSConfig:
     text: str
     ref_audio_path: str
     ref_text: str
-    language: str = "zh-CN"
+    language: str = "en-US"
     speed: float = 1.0
     output_format: str = "wav"
     sample_rate: int = 24000
 
 class F5TTSService:
-    """F5-TTS service for voice cloning and synthesis"""
+    """F5-TTS service for voice cloning and synthesis (Local or Remote)"""
     
-    def __init__(self, model_name: str = "F5TTS_v1_Base"):
+    def __init__(self, model_name: str = "F5TTS_v1_Base", use_remote: bool = True):
         self.model_name = model_name
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = None
-        self.initialized = False
+        self.use_remote = use_remote
+        self.remote_api_url = os.getenv(
+            'F5_TTS_REMOTE_URL', 
+            'https://avltg--f5-tts-voxify-fastapi-app.modal.run/synthesize'
+        )
+        self.request_timeout = int(os.getenv('F5_TTS_TIMEOUT', '120'))  # 2 minutes default
+        
+        # Local model setup (only if not using remote)
+        if not self.use_remote:
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            self.model = None
+            self.initialized = False
+            logger.info(f"F5TTS Service initialized with LOCAL device: {self.device}")
+        else:
+            self.device = "remote"
+            self.model = None
+            self.initialized = True
+            logger.info(f"F5TTS Service initialized with REMOTE API: {self.remote_api_url}")
         
         # Storage paths
         self.base_path = Path("data/voice_clones")
         self.base_path.mkdir(parents=True, exist_ok=True)
-        
-        logger.info(f"F5TTS Service initialized with device: {self.device}")
     
     def _lazy_load_model(self):
-        """Lazy load F5-TTS model when needed"""
+        """Lazy load F5-TTS model when needed (only for local mode)"""
+        if self.use_remote:
+            return  # Skip model loading for remote mode
+            
         if not self.initialized:
             try:
                 # Import F5-TTS components
@@ -93,7 +112,79 @@ class F5TTSService:
                 self.vocoder = None
                 self.initialized = True
                 logger.warning("Using mock F5-TTS model for development")
-    
+
+    def _synthesize_remote(self, config: TTSConfig) -> str:
+        """Synthesize speech using remote F5-TTS API"""
+        try:
+            # Read reference audio and encode to base64
+            logger.info(f"Reading reference audio: {config.ref_audio_path}")
+            with open(config.ref_audio_path, "rb") as f:
+                audio_b64 = base64.b64encode(f.read()).decode()
+            
+            # Prepare request payload
+            payload = {
+                "text": config.text,
+                "reference_audio_b64": audio_b64,
+                "reference_text": config.ref_text or ""  # Use ref_text or empty for auto-transcription
+            }
+            
+            logger.info(f"Sending request to remote F5-TTS API...")
+            logger.info(f"Text length: {len(config.text)} characters")
+            logger.info(f"Reference text: {config.ref_text[:50]}..." if config.ref_text else "Auto-transcription")
+            
+            # Make API request
+            response = requests.post(
+                self.remote_api_url,
+                json=payload,
+                timeout=self.request_timeout
+            )
+            
+            logger.info(f"API response status: {response.status_code}")
+            
+            # Parse response
+            if response.status_code != 200:
+                raise Exception(f"API request failed with status {response.status_code}: {response.text}")
+            
+            try:
+                result = response.json()
+            except json.JSONDecodeError:
+                raise Exception(f"Invalid JSON response: {response.text}")
+            
+            # Check if synthesis was successful
+            if not result.get("success", False):
+                error_msg = result.get("error") or result.get("detail") or "Unknown error"
+                raise Exception(f"Remote synthesis failed: {error_msg}")
+            
+            # Decode audio data
+            if "audio_data" not in result:
+                raise Exception("No audio data in response")
+            
+            try:
+                audio_data = base64.b64decode(result["audio_data"])
+            except Exception as e:
+                raise Exception(f"Failed to decode audio data: {e}")
+            
+            # Generate unique output filename
+            output_id = str(uuid.uuid4())
+            output_path = self.base_path / f"synthesis_{output_id}.wav"
+            
+            # Save audio file
+            with open(output_path, "wb") as f:
+                f.write(audio_data)
+            
+            file_size = os.path.getsize(output_path)
+            logger.info(f"Remote synthesis completed: {output_path} ({file_size} bytes)")
+            
+            return str(output_path)
+            
+        except requests.exceptions.Timeout:
+            raise Exception(f"Remote API request timed out after {self.request_timeout} seconds")
+        except requests.exceptions.RequestException as e:
+            raise Exception(f"Remote API request failed: {e}")
+        except Exception as e:
+            logger.error(f"Remote synthesis error: {e}")
+            raise
+
     def create_voice_clone(self, config: VoiceCloneConfig, sample_ids: List[str]) -> Dict:
         """
         Create a voice clone from voice samples
@@ -134,7 +225,6 @@ class F5TTSService:
             clone_info['ref_audio_path'] = str(ref_audio_dest)
             
             # Save clone info as JSON
-            import json
             with open(clone_path / "clone_info.json", 'w', encoding='utf-8') as f:
                 json.dump(clone_info, f, ensure_ascii=False, indent=2)
             
@@ -166,7 +256,6 @@ class F5TTSService:
                     raise ValueError(f"Voice clone not found: {clone_id}")
                 
                 # Load clone info
-                import json
                 with open(clone_path / "clone_info.json", 'r', encoding='utf-8') as f:
                     clone_info = json.load(f)
                 
@@ -181,8 +270,13 @@ class F5TTSService:
             output_path = self.base_path / f"synthesis_{output_id}.wav"
             
             logger.info(f"Synthesizing speech with F5-TTS...")
+            logger.info(f"Mode: {'REMOTE API' if self.use_remote else 'LOCAL GPU'}")
             logger.info(f"Text: {config.text[:50]}...")
             logger.info(f"Reference audio: {config.ref_audio_path}")
+            
+            # Use remote API or local model
+            if self.use_remote:
+                return self._synthesize_remote(config)
             
             if self.model is None:
                 # Mock mode for development
@@ -274,7 +368,6 @@ class F5TTSService:
             if not clone_path.exists():
                 raise ValueError(f"Voice clone not found: {clone_id}")
             
-            import json
             with open(clone_path / "clone_info.json", 'r', encoding='utf-8') as f:
                 return json.load(f)
                 
@@ -347,5 +440,7 @@ def get_f5_tts_service() -> F5TTSService:
     """Get the global F5-TTS service instance"""
     global _f5_tts_service
     if _f5_tts_service is None:
-        _f5_tts_service = F5TTSService()
+        # Check environment variable for remote/local mode
+        use_remote = os.getenv('F5_TTS_USE_REMOTE', 'true').lower() == 'true'
+        _f5_tts_service = F5TTSService(use_remote=use_remote)
     return _f5_tts_service 
