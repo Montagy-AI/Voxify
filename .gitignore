@@ -16,6 +16,10 @@ __pycache__/
 venv/
 env/
 
+
+# Experiment voices and results
+*.wav
+
 # Environment variables
 .env
 .env.*
