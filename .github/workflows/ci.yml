@@ -43,14 +43,19 @@ jobs:
       - name: Verify Docker Compose availability
         run: docker compose version
 
-      - name: Build backend base image
-        run: docker build -f backend/Dockerfile.base -t backend-base:latest backend
-
-      - name: Build containers
-        run: docker compose -f docker-compose.yml build
+      - name: Build services
+        run: |
+          docker build -f backend/Dockerfile.base -t backend-base:latest backend
+          DOCKER_BUILDKIT=0 docker compose -f docker-compose.yml build
 
       - name: Run DB init
         run: docker compose -f docker-compose.yml run --rm db-init
+
+      - name: Start API in background
+        run: | 
+          docker compose -f docker-compose.yml up -d api
+          echo "Waiting for API to start..."
+          sleep 10
 
       - name: Run tests
         run: docker compose -f docker-compose.yml run --rm tests

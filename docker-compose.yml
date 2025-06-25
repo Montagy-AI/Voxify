@@ -1,8 +1,8 @@
 services:
   api:
     build:
-      context: ./backend/api
-      dockerfile: Dockerfile
+      context: ./backend/
+      dockerfile: api/Dockerfile
     container_name: voxify_api
     depends_on:
       - db-init
@@ -10,10 +10,10 @@ services:
       - "5000:5000"
     environment:
       - FLASK_ENV=development
-      - DATABASE_URL=sqlite:///data/voxify.db
+      - DATABASE_URL=sqlite:////data/voxify.db
       - VECTOR_DB_PATH=data/chroma_db
     volumes:
-      - data_volume:/backend/data
+      - data_volume:/data
     restart: unless-stopped
     command: flask run --host=0.0.0.0
 
@@ -23,9 +23,9 @@ services:
       dockerfile: backend/scripts/Dockerfile
     container_name: voxify_db_init
     volumes:
-      - data_volume:/backend/data
+      - data_volume:/data
     environment:
-      - DATABASE_URL=sqlite:///data/voxify.db
+      - DATABASE_URL=sqlite:////data/voxify.db
       - VECTOR_DB_PATH=data/chroma_db
     entrypoint: ["python", "init_db.py"]
     restart: "no"
@@ -37,10 +37,11 @@ services:
     container_name: voxify_tests
     depends_on:
       - db-init
+      - api
     volumes:
-      - data_volume:/backend/data
+      - data_volume:/data
     environment:
-      - DATABASE_URL=sqlite:///data/voxify.db
+      - DATABASE_URL=sqlite:////data/voxify.db
       - VECTOR_DB_PATH=data/chroma_db
     command: ["python", "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py", "-v"]
     restart: "no"
