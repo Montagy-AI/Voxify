@@ -99,8 +99,9 @@ isort==5.12.0
 mypy==1.5.1
 
 # ============================================================================
-# Production Deployment (select based on actual needs)
+# Production Deployment
 # ============================================================================
+waitress==2.1.2
 # gunicorn==21.2.0
 # uvicorn==0.23.2
 
