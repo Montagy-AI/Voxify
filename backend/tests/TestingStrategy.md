@@ -139,12 +139,6 @@
    - Record test tokens
    - Set up test environment variables
 
-3. Temporary Modal Setup
-   - Set up two functions on modal
-   - Allow calls to the model on T4 GPU
-   - Deploy command: `modal deploy modal_f5_tts.py`
-   - Then change wav, url to what modal gives you, and output desire.
-
 #### Test Validation Points
 1. Response Validation
    - Status code verification (200, 201, 400, 401, 403, etc.)

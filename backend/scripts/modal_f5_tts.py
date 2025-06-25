@@ -2,9 +2,7 @@ import modal
 import os
 import tempfile
 import base64
-import torch
-import torchaudio
-from pathlib import Path
+import json
 
 # Create Modal app
 app = modal.App("f5-tts-voxify")
@@ -12,11 +10,10 @@ app = modal.App("f5-tts-voxify")
 # Define the container image with F5-TTS
 image = (
     modal.Image.debian_slim(python_version="3.10")
-    .apt_install("git", "ffmpeg", "sox")
+    .apt_install("git", "ffmpeg")
     .pip_install([
-        # Core dependencies that F5-TTS needs
-        "torch",
-        "torchaudio",
+        "torch==2.0.1",
+        "torchaudio==2.0.2",
         "transformers",
         "accelerate",
         "librosa",
@@ -24,28 +21,18 @@ image = (
         "numpy",
         "scipy",
         "einops",
-        "cached-path",
+        "tensorboard",
+        "matplotlib",
+        "jieba",
         "fastapi",
-        "pydantic"
+        "pydantic",
+        "cached-path"
     ])
     .run_commands([
-        # Follow the exact installation instructions from F5-TTS
         "git clone https://github.com/SWivid/F5-TTS.git /app/F5-TTS",
-        "cd /app/F5-TTS && pip install -e .",
-        # Debug: Check what got installed
-        "ls -la /app/F5-TTS/",
-        "ls -la /app/F5-TTS/src/",
-        "ls -la /app/F5-TTS/src/f5_tts/",
-        "find /app/F5-TTS -name '*.yaml' -o -name '*.yml'",
-        # Create the configs directory and copy config files if they exist elsewhere
-        "mkdir -p /app/F5-TTS/src/f5_tts/configs/",
-        # Look for config files in the repo and copy them
-        "find /app/F5-TTS -name '*F5-TTS*.yaml' -exec cp {} /app/F5-TTS/src/f5_tts/configs/ \\;",
-        "find /app/F5-TTS -name 'model*.yaml' -exec cp {} /app/F5-TTS/src/f5_tts/configs/ \\;",
-        # If still no config, create a basic one
-        "if [ ! -f /app/F5-TTS/src/f5_tts/configs/F5-TTS.yaml ]; then echo 'Creating basic config...'; fi"
+        "cd /app/F5-TTS && pip install -e ."
     ])
-    .env({"PYTHONPATH": "/app/F5-TTS:/app"})
+    .env({"PYTHONPATH": "/app/F5-TTS"})
 )
 
 
@@ -53,283 +40,164 @@ image = (
     image=image,
     gpu="T4",
     timeout=600,
-    container_idle_timeout=120,
-    memory=8192  # 8GB memory for model loading
+    container_idle_timeout=120
 )
 @modal.asgi_app()
 def fastapi_app():
     from fastapi import FastAPI, HTTPException
     from pydantic import BaseModel
     import sys
-    import subprocess
-    import os
-
-    # Add F5-TTS to path
     sys.path.insert(0, '/app/F5-TTS')
 
-    # Initialize FastAPI
-    fastapi_app = FastAPI()
-
-    print("F5-TTS setup complete, ready to handle requests!")
+    app = FastAPI()
 
     class SynthesisRequest(BaseModel):
         text: str
         reference_audio_b64: str
-        reference_text: str = ""  # Optional transcription of reference audio
 
-    @fastapi_app.post("/synthesize")
+    @app.post("/synthesize")
     async def synthesize_speech(request: SynthesisRequest):
         try:
             print(f"Received synthesis request for text: {request.text[:50]}...")
 
-            text = request.text.strip()
+            # Import F5-TTS modules
+            import sys
+            sys.path.insert(0, '/app/F5-TTS')
+
+            # More specific imports
+            from f5_tts.model import DiT
+            from f5_tts.infer.utils_infer import load_model, load_vocoder
+            import torchaudio
+            import torch
+
+            text = request.text
             reference_audio_b64 = request.reference_audio_b64
-            ref_text = request.reference_text.strip()
 
             if not text or not reference_audio_b64:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Missing text or reference_audio_b64"
+                return {
+                    "success": False,
+                    "error": "Missing text or reference_audio_b64"
+                }
+
+            print("Loading F5-TTS models...")
+
+            # Try more explicit model loading
+            try:
+                # Load model with explicit parameters
+                model, vocab_char_map, vocab_size = load_model(
+                    model_type="F5-TTS",
+                    model_name="F5-TTS",
+                    device="cuda"
                 )
+                vocoder = load_vocoder(vocoder_name="vocos")
+                print("Models loaded successfully!")
+            except Exception as model_error:
+                print(f"Model loading error: {model_error}")
+                return {
+                    "success": False,
+                    "error": f"Model loading failed: {str(model_error)}"
+                }
 
             print("Decoding reference audio...")
-            # Create temporary file for reference audio
+            # Decode reference audio
             with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as ref_file:
-                try:
-                    audio_data = base64.b64decode(reference_audio_b64)
-                    ref_file.write(audio_data)
-                    ref_file.flush()
-                    ref_path = ref_file.name
-                except Exception as e:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=f"Invalid base64 audio data: {str(e)}"
-                    )
+                audio_data = base64.b64decode(reference_audio_b64)
+                ref_file.write(audio_data)
+                ref_path = ref_file.name
 
+            print("Starting speech synthesis...")
+
+            # Try manual inference instead of infer_process
             try:
-                print("Starting speech synthesis using high-level API...")
+                from f5_tts.infer.utils_infer import infer_process
 
-                # Try the simple high-level API first
-                sys.path.insert(0, '/app/F5-TTS/src')
+                # Call with explicit arguments
+                generated_audio = infer_process(
+                    ref_file=ref_path,
+                    gen_text=text,
+                    model=model,
+                    vocoder=vocoder,
+                    vocab_char_map=vocab_char_map,
+                    vocab_size=vocab_size,
+                    speed=1.0,
+                    show_info=print,
+                    progress=print,
+                    target_sample_rate=24000,
+                    n_mel_channels=100,
+                    hop_length=256,
+                    win_length=1024,
+                    n_fft=1024,
+                    mel_spec_type="vocos"
+                )
 
-                # Try importing the simple API
+            except Exception as synth_error:
+                print(f"Synthesis error: {synth_error}")
+                # Try simpler approach
                 try:
-                    from f5_tts.api import F5TTS
-                    print("Using F5TTS API class...")
-
-                    # Initialize F5-TTS
-                    f5tts = F5TTS()
-
-                    # Generate speech
-                    wav, sr, spect = f5tts.infer(
-                        ref_file=ref_path,
-                        ref_text=ref_text if ref_text else "",
-                        gen_text=text
+                    generated_audio = infer_process(
+                        ref_path,
+                        text,
+                        model,
+                        vocoder,
+                        vocab_char_map,
+                        vocab_size
                     )
-
-                    print(
-                        f"Generated audio shape: {wav.shape if hasattr(wav, 'shape') else len(wav)}, sample rate: {sr}")
-
-                except ImportError:
-                    print("F5TTS API not available, using manual approach...")
-
-                    # Fall back to manual imports
-                    import subprocess
-
-                    # Create a simple Python script to run F5-TTS
-                    script_content = f'''
-import sys
-sys.path.insert(0, '/app/F5-TTS/src')
-
-from f5_tts.infer.utils_infer import infer_process
-import torchaudio
-
-# Run inference
-wav, sr = infer_process(
-    ref_file="{ref_path}",
-    ref_text="{ref_text}",
-    gen_text="{text}",
-    model_type="F5-TTS",
-    remove_silence=True
-)
-
-# Save output
-torchaudio.save("/tmp/f5_output.wav", wav, sr)
-print(f"Saved audio with shape {{wav.shape}} and sr {{sr}}")
-'''
-
-                    # Write and execute the script
-                    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as script_file:
-                        script_file.write(script_content)
-                        script_path = script_file.name
-
-                    # Run the script
-                    result = subprocess.run([
-                        "python", script_path
-                    ], cwd="/app/F5-TTS", capture_output=True, text=True, timeout=300)
-
-                    if result.returncode != 0:
-                        print(f"Script stderr: {result.stderr}")
-                        print(f"Script stdout: {result.stdout}")
-                        raise Exception(f"F5-TTS script failed: {result.stderr}")
-
-                    print(f"Script output: {result.stdout}")
-
-                    # Read the generated file
-                    if not os.path.exists("/tmp/f5_output.wav"):
-                        raise Exception("No output file was generated")
-
-                    with open("/tmp/f5_output.wav", 'rb') as f:
-                        result_audio = f.read()
-
-                    # Clean up
-                    os.unlink(script_path)
-                    os.unlink("/tmp/f5_output.wav")
-
-                    print("Synthesis completed successfully via script!")
-
-                    # Encode result as base64
-                    result_b64 = base64.b64encode(result_audio).decode()
-
+                except Exception as simple_error:
                     return {
-                        "success": True,
-                        "audio_data": result_b64,
-                        "sample_rate": 24000,  # F5-TTS default
-                        "message": "Speech synthesized successfully"
+                        "success": False,
+                        "error": f"Both synthesis methods failed: {str(simple_error)}"
                     }
 
-                # If F5TTS API worked, process the result
-                if 'wav' in locals():
-                    # Save generated audio to temporary file
-                    with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as output_file:
-                        # Convert to proper format for saving
-                        if torch.is_tensor(wav):
-                            wav_np = wav.cpu().numpy()
-                        else:
-                            wav_np = wav
+            print("Saving generated audio...")
+            # Generate speech
+            with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as output_file:
+                # Save and read result
+                torchaudio.save(output_file.name, generated_audio, 24000)
 
-                        # Ensure correct shape for torchaudio
-                        if len(wav_np.shape) == 1:
-                            wav_tensor = torch.from_numpy(wav_np).unsqueeze(0)
-                        else:
-                            wav_tensor = torch.from_numpy(wav_np)
+                with open(output_file.name, 'rb') as f:
+                    result_audio = f.read()
 
-                        # Save audio
-                        torchaudio.save(output_file.name, wav_tensor, sr)
+            # Cleanup
+            os.unlink(ref_path)
+            os.unlink(output_file.name)
 
-                        # Read the saved audio file
-                        with open(output_file.name, 'rb') as f:
-                            result_audio = f.read()
+            print("Synthesis completed successfully!")
+            return {
+                "success": True,
+                "audio_data": base64.b64encode(result_audio).decode(),
+                "message": "Speech synthesized successfully"
+            }
 
-                        generated_file = output_file.name
-
-                    print("Synthesis completed successfully!")
-
-                    # Encode result as base64
-                    result_b64 = base64.b64encode(result_audio).decode()
-
-                    return {
-                        "success": True,
-                        "audio_data": result_b64,
-                        "sample_rate": sr,
-                        "message": "Speech synthesized successfully"
-                    }
-
-            except subprocess.TimeoutExpired:
-                raise HTTPException(
-                    status_code=500,
-                    detail="Speech synthesis timed out"
-                )
-            except Exception as synthesis_error:
-                print(f"Synthesis error: {synthesis_error}")
-                import traceback
-                traceback.print_exc()
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Synthesis failed: {str(synthesis_error)}"
-                )
-
-            finally:
-                # Cleanup temporary files
-                try:
-                    os.unlink(ref_path)
-                    if 'generated_file' in locals() and os.path.exists(generated_file):
-                        os.unlink(generated_file)
-                except:
-                    pass
-
-        except HTTPException:
-            raise
         except Exception as e:
-            print(f"Unexpected error: {str(e)}")
+            print(f"Error during synthesis: {str(e)}")
             import traceback
             traceback.print_exc()
-            raise HTTPException(
-                status_code=500,
-                detail=f"Internal server error: {str(e)}"
-            )
+            return {
+                "success": False,
+                "error": f"Synthesis failed: {str(e)}"
+            }
 
-    @fastapi_app.get("/health")
+    @app.get("/health")
     async def health_check():
-        return {
-            "status": "healthy",
-            "model": "F5-TTS",
-            "cuda_available": torch.cuda.is_available()
-        }
+        return {"status": "healthy", "model": "F5-TTS", "python_version": "3.10"}
 
-    @fastapi_app.get("/debug")
+    @app.get("/debug")
     async def debug_info():
         """Debug endpoint to check F5-TTS installation"""
         try:
-            # Check if F5-TTS CLI is available
-            result = subprocess.run(
-                ["python", "-m", "f5_tts.infer.infer_cli", "--help"],
-                cwd="/app/F5-TTS",
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
+            import sys
+            sys.path.insert(0, '/app/F5-TTS')
+
+            from f5_tts.infer.utils_infer import load_model
+            import torch
 
             return {
                 "cuda_available": torch.cuda.is_available(),
                 "cuda_device_count": torch.cuda.device_count(),
-                "f5_tts_cli_available": result.returncode == 0,
-                "f5_tts_help_output": result.stdout[:500] if result.returncode == 0 else result.stderr[:500]
+                "f5_tts_path": "/app/F5-TTS",
+                "python_path": sys.path[:3]
             }
         except Exception as e:
             return {"error": str(e)}
 
-    return fastapi_app
-
-
-# Optional: Function to test Python API
-@app.function(image=image)
-def test_f5tts_python():
-    """Test function to verify F5-TTS Python API works"""
-    import sys
-
-    sys.path.insert(0, '/app/F5-TTS/src')
-
-    print("Testing F5-TTS Python API...")
-    try:
-        from f5_tts.model import DiT
-        from f5_tts.infer.utils_infer import load_model, load_vocoder
-        print("✅ F5-TTS imports successful!")
-
-        # Try loading a model
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        print(f"Using device: {device}")
-
-        print("F5-TTS Python API is working!")
-        return "F5-TTS Python API is working!"
-
-    except Exception as e:
-        print(f"❌ Error testing Python API: {e}")
-        import traceback
-        traceback.print_exc()
-        return f"Error: {e}"
-
-
-if __name__ == "__main__":
-    # For local testing
-    pass
+    return app
