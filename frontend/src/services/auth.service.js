@@ -108,6 +108,24 @@ class AuthService {
       };
     }
   }
+
+  async getUserProfile() {
+    try {
+      const response = await api.get('/auth/profile');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async updateUserProfile(userData) {
+    try {
+      const response = await api.put('/auth/profile', userData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export default new AuthService(); 

@@ -20,3 +20,25 @@ env/
 .env
 .env.*
 !.env.example
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Frontend build outputs
+frontend/build/
+frontend/dist/
+frontend/.next/
+
+# Logs
+logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
