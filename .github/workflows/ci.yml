@@ -56,8 +56,6 @@ jobs:
           docker compose -f docker-compose.yml up -d api
           echo "Waiting for API to start..."
           sleep 10
-          echo "Checking API logs:"
-          docker compose -f docker-compose.yml logs api
 
       - name: Run tests
         run: docker compose -f docker-compose.yml run --rm tests

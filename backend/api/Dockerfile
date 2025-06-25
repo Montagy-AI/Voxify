@@ -1,6 +1,6 @@
 FROM backend-base:latest
 
-WORKDIR /app/backend/api
+WORKDIR /app/backend
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
 
 COPY . .
 
-ENV FLASK_APP=app.py
+ENV FLASK_APP=api/app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_ENV=development
 

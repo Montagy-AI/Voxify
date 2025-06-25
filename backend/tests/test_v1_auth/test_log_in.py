@@ -2,7 +2,7 @@ import unittest
 import requests
 
 class TestLoginAPI(unittest.TestCase):
-    BASE_URL = "http://127.0.0.1:5000/api/v1/auth/login"
+    BASE_URL = "http://voxify_api:5000/api/v1/auth/login"
     HEADERS = {"Content-Type": "application/json"}
 
     # Helper method to send a POST request

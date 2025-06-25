@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from flask import Flask
-from backend.api.v1.auth.routes import auth_bp
+from api.v1.auth.routes import auth_bp
 from sqlalchemy.exc import IntegrityError
 
 
