@@ -37,6 +37,7 @@ services:
     container_name: voxify_tests
     depends_on:
       - db-init
+      - api
     volumes:
       - data_volume:/data
     environment:
