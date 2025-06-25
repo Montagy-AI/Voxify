@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import VoiceClone from './pages/VoiceClone';
 import TextToSpeech from './pages/TextToSpeech';
 import Tasks from './pages/Tasks';
+import Settings from './pages/Settings';
 import authService from './services/auth.service';
 
 // Protected Route Component
@@ -87,7 +88,7 @@ function App() {
           } />
           <Route path="/settings" element={
             <ProtectedRoute>
-              <Dashboard />
+              <Settings />
             </ProtectedRoute>
           } />
 
