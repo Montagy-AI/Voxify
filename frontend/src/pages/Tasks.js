@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import jobService from '../services/job.service';
 import authService from '../services/auth.service';
 import { createAudioUrl } from '../services/api';
+import apiConfig from '../config/api.config';
 
 const Tasks = () => {
   const navigate = useNavigate();
@@ -104,7 +105,7 @@ const Tasks = () => {
       const endpoint = isVoiceClone ? `/file/voice-clone/${jobId}` : `/file/synthesis/${jobId}`;
       const token = localStorage.getItem('access_token');
       
-      const response = await fetch(`http://localhost:5000/api/v1${endpoint}`, {
+      const response = await fetch(`${apiConfig.apiBaseUrl}${endpoint}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

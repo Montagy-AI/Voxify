@@ -1,8 +1,10 @@
 import axios from 'axios';
 import authService from './auth.service';
+import apiConfig from '../config/api.config';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api/v1',
+  baseURL: apiConfig.apiBaseUrl,
+  timeout: apiConfig.timeout,
   headers: {
     'Content-Type': 'application/json',
   },

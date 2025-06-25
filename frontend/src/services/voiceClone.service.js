@@ -1,7 +1,7 @@
 import api from './api';
 
 class VoiceCloneService {
-  async uploadVoiceSample(file, name) {
+  async uploadVoiceSample(file, name, onProgress) {
     try {
       const token = localStorage.getItem('access_token');
       if (!token) {
@@ -26,7 +26,9 @@ class VoiceCloneService {
       const response = await api.post('/voice/samples', formData, {
         headers: {
           'Authorization': `Bearer ${token}`
-        }
+        },
+        timeout: 300000, // 5-minute timeout for large audio files
+        onUploadProgress: onProgress // Upload progress callback
       });
 
       return response.data;

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import jobService from '../services/job.service';
 import voiceCloneService from '../services/voiceClone.service';
 import { createAudioUrl } from '../services/api';
+import apiConfig from '../config/api.config';
 
 const TextToSpeech = () => {
   const [text, setText] = useState('');
@@ -79,7 +80,7 @@ const TextToSpeech = () => {
       const endpoint = isVoiceClone ? `/file/voice-clone/${jobId}` : `/file/synthesis/${jobId}`;
       const token = localStorage.getItem('access_token');
       
-      const response = await fetch(`http://localhost:5000/api/v1${endpoint}`, {
+      const response = await fetch(`${apiConfig.apiBaseUrl}${endpoint}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
