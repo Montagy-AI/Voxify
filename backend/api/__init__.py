@@ -58,7 +58,10 @@ def create_app(test_config=None):
              "http://localhost:3001",  # Alternative ports
              "http://127.0.0.1:3001",
              "https://voxify.vercel.app",  # Vercel production
-             "https://*.vercel.app"     # All Vercel preview deployments
+             "https://*.vercel.app",     # All Vercel preview deployments
+             "https://test-ho72cndbz-jun-yangs-projects-f7853876.vercel.app",
+             "https://test-lemon-eight-27.vercel.app",
+             "https://voxify-front.vercel.app"  # Production frontend
          ],
          methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
          allow_headers=["Content-Type", "Authorization", "Accept"],
