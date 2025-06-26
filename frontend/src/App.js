@@ -8,12 +8,13 @@ import VoiceClone from './pages/VoiceClone';
 import TextToSpeech from './pages/TextToSpeech';
 import Tasks from './pages/Tasks';
 import Settings from './pages/Settings';
+import HelpPage from './pages/HelpPage';
 import authService from './services/auth.service';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = authService.isAuthenticated();
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
   }
@@ -24,7 +25,7 @@ const ProtectedRoute = ({ children }) => {
 // Public Route Component (redirects to dashboard if already logged in)
 const PublicRoute = ({ children }) => {
   const isAuthenticated = authService.isAuthenticated();
-  
+
   if (isAuthenticated) {
     return <Navigate to="/dashboard" />;
   }
@@ -102,14 +103,19 @@ function App() {
             </ProtectedRoute>
           } />
 
+          <Route path="/help" element={
+            <HelpPage />
+          } />
+
           {/* Redirect root to dashboard or login */}
           <Route path="/" element={
             <Navigate to={authService.isAuthenticated() ? "/dashboard" : "/login"} replace />
           } />
+
         </Routes>
       </div>
     </Router>
   );
 }
 
-export default App; 
+export default App;
