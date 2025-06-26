@@ -36,7 +36,7 @@ const Tasks = () => {
       // Check if user is logged in
       const currentUser = authService.getCurrentUser();
       const token = localStorage.getItem('access_token');
-      
+
       if (!currentUser || !token) {
         navigate('/login');
         return;
@@ -51,7 +51,7 @@ const Tasks = () => {
             return;
           }
         }
-        
+
         // Load jobs after ensuring authentication
         await loadJobs();
       } catch (err) {
@@ -83,7 +83,7 @@ const Tasks = () => {
 
         // Determine if this is a voice clone job or traditional job
         const isVoiceClone = job.voice_model?.type === 'f5_tts' || job.output_path?.includes('voice_clones');
-        
+
         // Fetch audio file
         const audioBlob = await fetchAudioBlob(job.id, isVoiceClone);
         if (audioBlob && audioRef.current) {
@@ -104,7 +104,7 @@ const Tasks = () => {
     try {
       const endpoint = isVoiceClone ? `/file/voice-clone/${jobId}` : `/file/synthesis/${jobId}`;
       const token = localStorage.getItem('access_token');
-      
+
       const response = await fetch(`${apiConfig.apiBaseUrl}${endpoint}`, {
         method: 'GET',
         headers: {
@@ -133,14 +133,14 @@ const Tasks = () => {
       const isVoiceClone = job.voice_model?.type === 'f5_tts' || job.output_path?.includes('voice_clones');
       const audioBlob = await fetchAudioBlob(job.id, isVoiceClone);
       const audioUrl = URL.createObjectURL(audioBlob);
-      
+
       const link = document.createElement('a');
       link.href = audioUrl;
       link.download = `speech_${job.id}.wav`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       // Clean up the URL after download
       setTimeout(() => URL.revokeObjectURL(audioUrl), 1000);
     } catch (err) {
@@ -208,11 +208,11 @@ const Tasks = () => {
   return (
     <div className="min-h-screen bg-black text-white p-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold mb-12">Generated Voices</h1>
-        
+        <h1 className="text-4xl font-bold mb-12">Generated Audio Files</h1>
+
         {/* Hidden audio element for playback */}
-        <audio 
-          ref={audioRef} 
+        <audio
+          ref={audioRef}
           onEnded={handleAudioEnded}
           className="hidden"
         />
@@ -325,7 +325,7 @@ const Tasks = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     {job.status === 'processing' && (
                       <button
@@ -352,4 +352,4 @@ const Tasks = () => {
   );
 };
 
-export default Tasks; 
+export default Tasks;
