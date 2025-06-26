@@ -42,7 +42,10 @@ scipy==1.13.0
 pandas==2.0.3
 resemblyzer==0.1.4
 
-# Text-to-Speech (if your project includes a TTS service)
+# Text-to-Speech (F5-TTS integration)
+f5-tts==1.0.0
+torch>=2.0.0
+torchaudio>=2.0.0
 # TTS==0.22.0
 # phonemizer==3.2.1
 
@@ -96,8 +99,9 @@ isort==5.12.0
 mypy==1.5.1
 
 # ============================================================================
-# Production Deployment (select based on actual needs)
+# Production Deployment
 # ============================================================================
+waitress==2.1.2
 # gunicorn==21.2.0
 # uvicorn==0.23.2
 

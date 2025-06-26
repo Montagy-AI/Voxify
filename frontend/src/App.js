@@ -61,9 +61,19 @@ function App() {
               <Dashboard />
             </ProtectedRoute>
           } />
-          <Route path="/tasks/*" element={
+          <Route path="/voice-clone" element={
             <ProtectedRoute>
-              <Dashboard />
+              <VoiceClone />
+            </ProtectedRoute>
+          } />
+          <Route path="/text-to-speech" element={
+            <ProtectedRoute>
+              <TextToSpeech />
+            </ProtectedRoute>
+          } />
+          <Route path="/tasks" element={
+            <ProtectedRoute>
+              <Tasks />
             </ProtectedRoute>
           } />
           <Route path="/tasks/voice-clone" element={

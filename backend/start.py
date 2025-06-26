@@ -190,9 +190,9 @@ def start_flask_app(skip_db_init=False, skip_file_init=False, seed_data=False):
     # Create Flask app
     app = create_app()
     
-    # Get configuration from environment
-    host = os.getenv('FLASK_HOST', '127.0.0.1')
-    port = int(os.getenv('FLASK_PORT', 5000))
+    # Get configuration from environment (cloud platform compatible)
+    host = os.getenv('FLASK_HOST', '0.0.0.0')  # Bind to all interfaces for cloud deployment
+    port = int(os.getenv('PORT', os.getenv('FLASK_PORT', 10000)))  # Use PORT for cloud platforms
     debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
     
     print(f"Starting Voxify API Server...")
@@ -206,12 +206,23 @@ def start_flask_app(skip_db_init=False, skip_file_init=False, seed_data=False):
     
     # Run the Flask app
     try:
-        app.run(
-            host=host,
-            port=port,
-            debug=debug,
-            threaded=True
-        )
+        # Check if we're in production environment
+        is_production = os.getenv('FLASK_ENV') == 'production'
+        
+        if is_production:
+            # Use production-ready server (if available)
+            try:
+                from waitress import serve
+                print("🚀 Starting with Waitress WSGI server (production)")
+                serve(app, host=host, port=port, threads=4)
+            except ImportError:
+                print("⚠️  Waitress not available, falling back to Flask dev server")
+                app.run(host=host, port=port, debug=False, threaded=True)
+        else:
+            # Development server
+            print("🔧 Starting with Flask development server")
+            app.run(host=host, port=port, debug=debug, threaded=True)
+            
     except KeyboardInterrupt:
         print("\n\nServer stopped")
     except Exception as e:

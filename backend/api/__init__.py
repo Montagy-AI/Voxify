@@ -56,7 +56,12 @@ def create_app(test_config=None):
              "http://localhost:3000",  # React development server
              "http://127.0.0.1:3000",
              "http://localhost:3001",  # Alternative ports
-             "http://127.0.0.1:3001"
+             "http://127.0.0.1:3001",
+             "https://voxify.vercel.app",  # Vercel production
+             "https://*.vercel.app",     # All Vercel preview deployments
+             "https://test-ho72cndbz-jun-yangs-projects-f7853876.vercel.app",
+             "https://test-lemon-eight-27.vercel.app",
+             "https://voxify-front.vercel.app"  # Production frontend
          ],
          methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
          allow_headers=["Content-Type", "Authorization", "Accept"],
@@ -66,7 +71,7 @@ def create_app(test_config=None):
     limiter = Limiter(
         get_remote_address,
         app=app,
-        default_limits=["200 per day", "50 per hour"]
+        default_limits=["5000 per day", "1000 per hour"]
     )
     
     # Import blueprints

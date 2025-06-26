@@ -324,7 +324,12 @@ def create_job():
                 speed=data.get('speed', 1.0),
                 pitch=data.get('pitch', 1.0),
                 volume=data.get('volume', 1.0),
-                status='pending'
+                status='pending',
+                progress=0.0,  # Initialize progress to 0.0
+                # Initialize timestamp fields
+                word_timestamps=None,
+                syllable_timestamps=None,
+                phoneme_timestamps=None
             )
             
             session.add(job)

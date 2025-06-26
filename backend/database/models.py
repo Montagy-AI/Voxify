@@ -11,7 +11,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.dialects.sqlite import TEXT
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 import json
 
@@ -21,10 +21,14 @@ def generate_uuid():
     """Generate UUID for primary keys"""
     return str(uuid.uuid4())
 
+def utc_now():
+    """Get current UTC time with timezone info"""
+    return datetime.now(timezone.utc)
+
 class TimestampMixin:
     """Mixin for created_at and updated_at timestamps"""
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=utc_now, nullable=False)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
 
 class User(Base, TimestampMixin):
     """User account model"""
@@ -443,7 +447,7 @@ class SynthesisCache(Base, TimestampMixin):
     
     # Cache metadata
     hit_count = Column(Integer, default=0)
-    last_accessed = Column(DateTime, default=datetime.utcnow)
+    last_accessed = Column(DateTime, default=utc_now)
     file_size = Column(Integer)
     
     # Cache management
@@ -485,7 +489,7 @@ class PhonemeAlignment(Base):
     energy_mean = Column(Float)
     energy_std = Column(Float)
     
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
     
     # Relationships
     synthesis_job = relationship("SynthesisJob", back_populates="phoneme_alignments")
@@ -527,7 +531,7 @@ class UsageStat(Base):
     avg_synthesis_time = Column(Float, default=0.0)
     cache_hit_rate = Column(Float, default=0.0)
     
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
     
     # Relationships
     user = relationship("User", back_populates="usage_stats")
@@ -550,7 +554,7 @@ class SystemSetting(Base):
     data_type = Column(String, default='string')
     description = Column(Text)
     is_public = Column(Boolean, default=False)
-    updated_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=utc_now)
     updated_by = Column(String)
     
     # Constraints
@@ -578,7 +582,7 @@ class SchemaVersion(Base):
     __tablename__ = 'schema_version'
     
     version = Column(String, primary_key=True)
-    applied_at = Column(DateTime, default=datetime.utcnow)
+    applied_at = Column(DateTime, default=utc_now)
     description = Column(Text)
 
 # Database connection and session management

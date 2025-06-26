@@ -12,7 +12,7 @@ from flask import request, jsonify, send_file, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from . import file_bp
-from database.models import SynthesisJob, SynthesisCache, get_database_manager
+from database.models import SynthesisJob, SynthesisCache, VoiceModel, VoiceSample, get_database_manager
 
 # Configure file storage paths
 SYNTHESIS_OUTPUT_DIR = os.path.join(os.getenv('VOXIFY_SYNTHESIS_STORAGE', 'data/files/synthesis'), 'output')
@@ -162,6 +162,120 @@ def delete_synthesis_file(job_id: str):
             session.rollback()
             return error_response(f"Error deleting file: {str(e)}", "DELETE_ERROR", 500)
 
+@file_bp.route('/voice-clone/<job_id>', methods=['GET'])
+@jwt_required()
+def download_voice_clone_synthesis(job_id: str):
+    """
+    Download voice clone synthesized audio file
+    
+    Args:
+        job_id: Synthesis job ID from voice clone
+        
+    Returns:
+        Audio file or error response
+    """
+    current_user_id = get_jwt_identity()
+    
+    try:
+        # Get synthesis job information
+        db = get_database_manager()
+        with db.get_session() as session:
+            job = session.query(SynthesisJob).filter_by(id=job_id).first()
+            if not job:
+                return error_response("Synthesis job not found", "JOB_NOT_FOUND", 404)
+            
+            # Check ownership
+            if job.user_id != current_user_id:
+                return error_response("Access denied", "ACCESS_DENIED", 403)
+            
+            # Get file path and ensure it exists
+            if not job.output_path:
+                return error_response("Audio file not found", "FILE_NOT_FOUND", 404)
+            
+            # Handle both relative and absolute paths
+            if os.path.isabs(job.output_path):
+                file_path = job.output_path
+            else:
+                # Database stores paths relative to backend directory
+                # If running from api/ directory, need to go up one level
+                # If running from backend/ directory, use as-is
+                
+                # Method 1: Try from current directory (if running from backend/)
+                candidate1 = job.output_path
+                # Method 2: Try from parent directory (if running from api/)
+                candidate2 = os.path.join('..', job.output_path)
+                
+                if os.path.exists(candidate1):
+                    file_path = os.path.abspath(candidate1)
+                elif os.path.exists(candidate2):
+                    file_path = os.path.abspath(candidate2)
+                else:
+                    return error_response("Audio file not found on server", "FILE_NOT_FOUND", 404)
+            
+            if not os.path.exists(file_path):
+                return error_response("Audio file not found on server", "FILE_NOT_FOUND", 404)
+            
+            # Get filename for download
+            filename = os.path.basename(file_path)
+            if not filename:
+                filename = f"synthesis_{job_id}.wav"
+            
+            # Send the file
+            return send_file(
+                file_path,
+                as_attachment=False,  # Stream instead of download for audio playback
+                download_name=filename,
+                mimetype='audio/wav'
+            )
+            
+    except Exception as e:
+        return error_response(f"Error downloading file: {str(e)}", "DOWNLOAD_ERROR", 500)
 
-
- 
+@file_bp.route('/voice-clone/<job_id>/info', methods=['GET'])
+@jwt_required()
+def get_voice_clone_synthesis_info(job_id: str):
+    """
+    Get voice clone synthesis file information
+    
+    Args:
+        job_id: Synthesis job ID
+        
+    Returns:
+        File information or error response
+    """
+    current_user_id = get_jwt_identity()
+    
+    try:
+        db = get_database_manager()
+        with db.get_session() as session:
+            job = session.query(SynthesisJob).filter_by(id=job_id).first()
+            if not job:
+                return error_response("Synthesis job not found", "JOB_NOT_FOUND", 404)
+            
+            # Check ownership
+            if job.user_id != current_user_id:
+                return error_response("Access denied", "ACCESS_DENIED", 403)
+            
+            # Get file info
+            file_info = {
+                'job_id': job.id,
+                'text_content': job.text_content,
+                'language': job.text_language,
+                'status': job.status,
+                'output_path': job.output_path,
+                'duration': job.duration,
+                'created_at': job.created_at.isoformat() if job.created_at else None,
+                'completed_at': job.completed_at.isoformat() if job.completed_at else None
+            }
+            
+            # Check if file exists
+            if job.output_path and os.path.exists(job.output_path):
+                file_info['file_size'] = os.path.getsize(job.output_path)
+                file_info['file_exists'] = True
+            else:
+                file_info['file_exists'] = False
+            
+            return success_response(file_info)
+            
+    except Exception as e:
+        return error_response(f"Error getting file info: {str(e)}", "INFO_ERROR", 500)

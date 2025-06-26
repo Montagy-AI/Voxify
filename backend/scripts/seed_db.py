@@ -5,7 +5,7 @@ Creates sample data for testing and development
 
 import os
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import json
 from pathlib import Path
 
@@ -19,6 +19,10 @@ from database.models import (
 )
 from api.utils.password import hash_password
 
+def utc_now():
+    """Get current UTC time with timezone info"""
+    return datetime.now(timezone.utc)
+
 def create_test_users(session):
     """Create test users"""
     users = [
@@ -29,7 +33,7 @@ def create_test_users(session):
             'last_name': 'User',
             'is_active': True,
             'email_verified': True,
-            'last_login_at': datetime.utcnow()
+            'last_login_at': utc_now()
         },
         {
             'email': 'admin@example.com',
@@ -38,7 +42,7 @@ def create_test_users(session):
             'last_name': 'User',
             'is_active': True,
             'email_verified': True,
-            'last_login_at': datetime.utcnow()
+            'last_login_at': utc_now()
         }
     ]
     
@@ -76,8 +80,8 @@ def create_voice_samples(session, users):
                 is_public=True,
                 gender='male' if i % 2 == 0 else 'female',
                 tags_list=['test', 'english', 'high-quality'],
-                processing_start_time=datetime.utcnow() - timedelta(days=1),
-                processing_end_time=datetime.utcnow() - timedelta(days=1, minutes=5)
+                processing_start_time=utc_now() - timedelta(days=1),
+                processing_end_time=utc_now() - timedelta(days=1, minutes=5)
             )
             session.add(sample)
             samples.append(sample)
@@ -107,8 +111,8 @@ def create_voice_models(session, samples):
             dataset_size=100,
             training_status='completed',
             training_progress=1.0,
-            training_start_time=datetime.utcnow() - timedelta(days=2),
-            training_end_time=datetime.utcnow() - timedelta(days=1),
+            training_start_time=utc_now() - timedelta(days=2),
+            training_end_time=utc_now() - timedelta(days=1),
             mel_loss=0.1,
             validation_score=0.95,
             mos_score=4.5,
@@ -157,8 +161,8 @@ def create_synthesis_jobs(session, users, models):
                     sample_rate=22050,
                     status=status,
                     progress=progress,
-                    started_at=datetime.utcnow() - timedelta(hours=1) if status != 'pending' else None,
-                    completed_at=datetime.utcnow() if status == 'completed' else None
+                                    started_at=utc_now() - timedelta(hours=1) if status != 'pending' else None,
+                completed_at=utc_now() if status == 'completed' else None
                 )
                 
                 if status == 'completed':
@@ -179,7 +183,7 @@ def create_usage_stats(session, users):
     """Create usage statistics"""
     for user in users:
         for i in range(7):  # Last 7 days of data
-            date = (datetime.utcnow() - timedelta(days=i)).strftime('%Y-%m-%d')
+            date = (utc_now() - timedelta(days=i)).strftime('%Y-%m-%d')
             stat = UsageStat(
                 user_id=user.id,
                 date=date,
