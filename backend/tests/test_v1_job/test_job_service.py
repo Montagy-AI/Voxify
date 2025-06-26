@@ -6,6 +6,7 @@ import time
 from unittest.mock import patch
 import sys
 import os
+import platform
 
 # Add the backend directory to Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
@@ -24,8 +25,21 @@ class TestJobServiceAPI:
 
     @pytest.fixture(scope="class")
     def server_url(self):
-        """Get the Flask server URL"""
-        return "http://127.0.0.1:5000"
+        """Get the Flask server URL based on start.py configuration"""
+        # Get configuration from environment variables (same as start.py)
+        host = os.getenv('FLASK_HOST', '127.0.0.1')  # Use 127.0.0.1 for local testing
+        port = int(os.getenv('PORT', os.getenv('FLASK_PORT', 10000)))  # Default port from start.py
+        return f"http://{host}:{port}"
+
+    @pytest.fixture(scope="class", autouse=True)
+    def check_curl_available(self):
+        """Check if curl is available on the system"""
+        try:
+            result = subprocess.run(["curl", "--version"], capture_output=True, text=True)
+            if result.returncode != 0:
+                pytest.skip("curl is not available on this system")
+        except FileNotFoundError:
+            pytest.skip("curl is not installed on this system")
 
     @pytest.fixture(scope="class")
     def test_user(self):
@@ -541,5 +555,28 @@ def run_tests():
     """Run tests using pytest"""
     pytest.main([__file__, "-v"])
 
+
+def test_configuration():
+    """Test that the configuration is correct"""
+    import os
+    import platform
+    
+    # Test server URL configuration
+    host = os.getenv('FLASK_HOST', '127.0.0.1')
+    port = int(os.getenv('PORT', os.getenv('FLASK_PORT', 10000)))
+    server_url = f"http://{host}:{port}"
+    
+    print(f"Server URL: {server_url}")
+    print(f"Platform: {platform.system()}")
+    
+    # Test curl availability
+    try:
+        result = subprocess.run(["curl", "--version"], capture_output=True, text=True)
+        print(f"Curl available: {result.returncode == 0}")
+    except FileNotFoundError:
+        print("Curl not available")
+
+
 if __name__ == "__main__":
+    test_configuration()
     run_tests() 

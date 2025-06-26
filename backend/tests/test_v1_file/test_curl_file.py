@@ -6,6 +6,7 @@ import time
 from unittest.mock import patch
 import sys
 import os
+import platform
 
 # Add the backend directory to Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
@@ -24,8 +25,26 @@ class TestFileServiceAPI:
 
     @pytest.fixture(scope="class")
     def server_url(self):
-        """Get the Flask server URL"""
-        return "http://127.0.0.1:5000"
+        """Get the Flask server URL based on start.py configuration"""
+        # Get configuration from environment variables (same as start.py)
+        host = os.getenv('FLASK_HOST', '127.0.0.1')  # Use 127.0.0.1 for local testing
+        port = int(os.getenv('PORT', os.getenv('FLASK_PORT', 10000)))  # Default port from start.py
+        return f"http://{host}:{port}"
+
+    @pytest.fixture(scope="class")
+    def null_device(self):
+        """Get the appropriate null device for the current platform"""
+        return "NUL" if platform.system() == "Windows" else "/dev/null"
+
+    @pytest.fixture(scope="class", autouse=True)
+    def check_curl_available(self):
+        """Check if curl is available on the system"""
+        try:
+            result = subprocess.run(["curl", "--version"], capture_output=True, text=True)
+            if result.returncode != 0:
+                pytest.skip("curl is not available on this system")
+        except FileNotFoundError:
+            pytest.skip("curl is not installed on this system")
 
     @pytest.fixture(scope="class")
     def test_user(self):
@@ -137,7 +156,7 @@ class TestFileServiceAPI:
         assert "error" in response
         assert response["error"]["code"] == "FILE_NOT_FOUND"
 
-    def test_download_synthesis_file_with_valid_job(self, server_url, auth_tokens, test_job_id):
+    def test_download_synthesis_file_with_valid_job(self, server_url, auth_tokens, test_job_id, null_device):
         """Test download synthesis file with valid job ID"""
         if not test_job_id:
             pytest.skip("No test job ID available")
@@ -147,7 +166,7 @@ class TestFileServiceAPI:
             f"{server_url}/api/v1/file/synthesis/{test_job_id}",
             "-H", "Content-Type: application/json",
             "-H", f"Authorization: Bearer {auth_tokens['access_token']}",
-            "-o", "/dev/null",  # Don't save the file, just check response
+            "-o", null_device,  # Don't save the file, just check response
             "-w", "%{http_code}"
         ]
 
@@ -306,7 +325,7 @@ class TestFileServiceAPI:
         # Should return 405 Method Not Allowed
         assert "405" in result.stdout or "Method Not Allowed" in result.stdout
 
-    def test_download_synthesis_file_with_headers(self, server_url, auth_tokens, test_job_id):
+    def test_download_synthesis_file_with_headers(self, server_url, auth_tokens, test_job_id, null_device):
         """Test download synthesis file with additional headers"""
         if not test_job_id:
             pytest.skip("No test job ID available")
@@ -317,7 +336,7 @@ class TestFileServiceAPI:
             "-H", "Content-Type: application/json",
             "-H", "Accept: audio/*",
             "-H", f"Authorization: Bearer {auth_tokens['access_token']}",
-            "-o", "/dev/null",
+            "-o", null_device,
             "-w", "%{http_code}"
         ]
 
@@ -404,5 +423,28 @@ def run_tests():
     pytest.main([__file__, "-v"])
 
 
+def test_configuration():
+    """Test that the configuration is correct"""
+    import os
+    import platform
+    
+    # Test server URL configuration
+    host = os.getenv('FLASK_HOST', '127.0.0.1')
+    port = int(os.getenv('PORT', os.getenv('FLASK_PORT', 10000)))
+    server_url = f"http://{host}:{port}"
+    
+    print(f"Server URL: {server_url}")
+    print(f"Platform: {platform.system()}")
+    print(f"Null device: {'NUL' if platform.system() == 'Windows' else '/dev/null'}")
+    
+    # Test curl availability
+    try:
+        result = subprocess.run(["curl", "--version"], capture_output=True, text=True)
+        print(f"Curl available: {result.returncode == 0}")
+    except FileNotFoundError:
+        print("Curl not available")
+
+
 if __name__ == "__main__":
+    test_configuration()
     run_tests() 
