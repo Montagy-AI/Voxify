@@ -3,17 +3,16 @@ Authentication API Routes
 Implements user registration, login, and token management endpoints
 """
 
-from flask import request, jsonify, current_app
+from flask import request, jsonify
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError
 from . import auth_bp
 from datetime import datetime
-
 # Import database models
 from database.models import User, get_database_manager
-
 # Import utility functions
 from api.utils.password import hash_password, verify_password, validate_password_strength, validate_email
+
 
 # Standard error response format
 def error_response(message: str, code: str = None, details: dict = None, status_code: int = 400):
@@ -30,6 +29,7 @@ def error_response(message: str, code: str = None, details: dict = None, status_
         response["error"]["details"] = details
     return jsonify(response), status_code
 
+
 # Standard success response format
 def success_response(data=None, message: str = None, status_code: int = 200):
     """Create standardized success response"""
@@ -42,6 +42,7 @@ def success_response(data=None, message: str = None, status_code: int = 200):
     if message:
         response["message"] = message
     return jsonify(response), status_code
+
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
@@ -108,7 +109,7 @@ def register():
             "last_name": new_user.last_name,
             "created_at": new_user.created_at.isoformat() if new_user.created_at else None
         }
-        
+
         return success_response(
             data={"user": user_data},
             message="User registered successfully",
@@ -123,6 +124,7 @@ def register():
         return error_response(f"Registration failed: {str(e)}", "REGISTRATION_ERROR", status_code=500)
     finally:
         session.close()
+
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -185,7 +187,7 @@ def login():
                 "last_login_at": user.last_login_at.isoformat()
             }
         }
-        
+
         return success_response(
             data=response_data,
             message="Login successful"
@@ -196,6 +198,7 @@ def login():
         return error_response(f"Login failed: {str(e)}", "LOGIN_ERROR", status_code=500)
     finally:
         session.close()
+
 
 @auth_bp.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
@@ -224,7 +227,7 @@ def refresh():
             "access_token": new_access_token,
             "refresh_token": new_refresh_token
         }
-        
+
         return success_response(
             data=response_data,
             message="Token refreshed successfully"
@@ -232,6 +235,7 @@ def refresh():
 
     except Exception as e:
         return error_response(f"Failed to refresh token: {str(e)}", "TOKEN_REFRESH_ERROR", status_code=500)
+
 
 @auth_bp.route('/profile', methods=['GET'])
 @jwt_required()
@@ -272,7 +276,7 @@ def get_profile():
                 "updated_at": user.updated_at.isoformat() if user.updated_at else None,
                 "last_login_at": user.last_login_at.isoformat() if user.last_login_at else None
             }
-            
+
             return success_response(
                 data={"user": user_data},
                 message="Profile retrieved successfully"
@@ -283,6 +287,7 @@ def get_profile():
 
     except Exception as e:
         return error_response(f"Failed to get profile: {str(e)}", "PROFILE_ERROR", status_code=500)
+
 
 @auth_bp.route('/profile', methods=['PUT', 'PATCH'])
 @jwt_required()
@@ -325,27 +330,30 @@ def update_profile():
 
             # Update fields if provided
             updated_fields = []
-            
+
             if 'first_name' in data:
                 user.first_name = data['first_name']
                 updated_fields.append('first_name')
-            
+
             if 'last_name' in data:
                 user.last_name = data['last_name']
                 updated_fields.append('last_name')
-            
+
             if 'email' in data:
                 new_email = data['email']
                 # Validate email format
                 is_valid, error_message = validate_email(new_email)
                 if not is_valid:
                     return error_response(error_message, "INVALID_EMAIL")
-                
+
                 # Check if email is already taken by another user
-                existing_user = session.query(User).filter_by(email=new_email).filter(User.id != current_user_id).first()
+                existing_user = (
+                    session.query(User).filter_by(email=new_email)
+                    .filter(User.id != current_user_id).first()
+                )
                 if existing_user:
                     return error_response("Email already exists", "EMAIL_EXISTS", status_code=409)
-                
+
                 user.email = new_email
                 user.email_verified = False  # Reset email verification when email changes
                 updated_fields.append('email')
@@ -369,7 +377,7 @@ def update_profile():
                 "updated_at": user.updated_at.isoformat() if user.updated_at else None,
                 "last_login_at": user.last_login_at.isoformat() if user.last_login_at else None
             }
-            
+
             return success_response(
                 data={"user": user_data, "updated_fields": updated_fields},
                 message="Profile updated successfully"

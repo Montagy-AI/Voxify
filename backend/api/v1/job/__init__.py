@@ -4,10 +4,9 @@ Handles synthesis job listing, monitoring, and cancellation
 """
 
 from flask import Blueprint
+# Import routes after blueprint creation to avoid circular imports
+# from . import routes
 
 job_bp = Blueprint('job', __name__)
 
-# Import routes after blueprint creation to avoid circular imports
-from . import routes
-
-__all__ = ["job_bp"] 
+__all__ = ["job_bp"]

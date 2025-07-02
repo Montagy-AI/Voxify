@@ -7,11 +7,10 @@ including user authentication, voice sample management, and TTS synthesis.
 """
 
 from flask import Flask
-from flask_restful import Api
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+# from flask_jwt_extended import JWTManager
+# from flask_limiter import Limiter
+# from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
 import os
 
@@ -19,15 +18,13 @@ import os
 def create_app(test_config=None):
     """
     Create and configure the Flask application
-    
-    Parameters
-    ----------
+
+    Parameters:
     test_config : dict, optional
         Test configuration to override default configuration
-        
-    Returns
-    -------
-    Flask
+
+    Returns:
+        Flask
         Configured Flask application
     """
 
@@ -35,7 +32,7 @@ def create_app(test_config=None):
 
     # Create Flask app
     app = Flask(__name__, instance_relative_config=True)
-    
+
     # Default configuration
     app.config.from_mapping(
         SECRET_KEY=os.getenv('SECRET_KEY', 'Majick'),
@@ -49,9 +46,9 @@ def create_app(test_config=None):
     # Override with test config if provided
     if test_config is not None:
         app.config.from_mapping(test_config)
-    
+
     # Configure CORS to allow frontend access
-    CORS(app, 
+    CORS(app,
          origins=[
              "http://localhost:3000",  # React development server
              "http://127.0.0.1:3000",
@@ -66,17 +63,16 @@ def create_app(test_config=None):
          methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
          allow_headers=["Content-Type", "Authorization", "Accept"],
          supports_credentials=True)
-    
-    jwt = JWTManager(app)
-    limiter = Limiter(
-        get_remote_address,
-        app=app,
-        default_limits=["5000 per day", "1000 per hour"]
-    )
-    
+
+    # jwt = JWTManager(app)
+    # limiter = Limiter(
+    #     get_remote_address,
+    #     app=app,
+    #     default_limits=["5000 per day", "1000 per hour"]
+    # )
+
     # Import blueprints
     from .v1.auth import auth_bp
-    # from .v1.admin import admin_bp
     from .v1.voice import voice_bp
     from .v1.job import job_bp
     from .v1.file import file_bp

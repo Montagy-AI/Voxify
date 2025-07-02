@@ -62,7 +62,6 @@ def fastapi_app():
     from pydantic import BaseModel
     import sys
     import subprocess
-    import os
 
     # Add F5-TTS to path
     sys.path.insert(0, '/app/F5-TTS')

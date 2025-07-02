@@ -6,22 +6,20 @@ Creates sample data for testing and development
 import os
 import sys
 from datetime import datetime, timedelta, timezone
-import json
-from pathlib import Path
+from database import get_database_manager
+from database.models import (
+    User, VoiceSample, VoiceModel, SynthesisJob, UsageStat
+)
+from api.utils.password import hash_password
 
 # Add the backend directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from database import get_database_manager
-from database.models import (
-    User, VoiceSample, VoiceModel, SynthesisJob,
-    PhonemeAlignment, UsageStat, SystemSetting
-)
-from api.utils.password import hash_password
 
 def utc_now():
     """Get current UTC time with timezone info"""
     return datetime.now(timezone.utc)
+
 
 def create_test_users(session):
     """Create test users"""
@@ -45,7 +43,7 @@ def create_test_users(session):
             'last_login_at': utc_now()
         }
     ]
-    
+
     created_users = []
     for user_data in users:
         password = user_data.pop('password')
@@ -55,8 +53,9 @@ def create_test_users(session):
         )
         session.add(user)
         created_users.append(user)
-    
+
     return created_users
+
 
 def create_voice_samples(session, users):
     """Create voice samples for users"""
@@ -85,8 +84,9 @@ def create_voice_samples(session, users):
             )
             session.add(sample)
             samples.append(sample)
-    
+
     return samples
+
 
 def create_voice_models(session, samples):
     """Create voice models for samples"""
@@ -122,8 +122,9 @@ def create_voice_models(session, samples):
         )
         session.add(model)
         models.append(model)
-    
+
     return models
+
 
 def create_synthesis_jobs(session, users, models):
     """Create synthesis jobs"""
@@ -134,7 +135,7 @@ def create_synthesis_jobs(session, users, models):
         "Voice synthesis technology is becoming more natural.",
         "Have a great day!"
     ]
-    
+
     for user in users:
         for model in models:
             for i, text in enumerate(texts):
@@ -143,7 +144,7 @@ def create_synthesis_jobs(session, users, models):
                 progress = 1.0 if status == 'completed' else (
                     0.0 if status == 'pending' else 0.5
                 )
-                
+
                 job = SynthesisJob(
                     user_id=user.id,
                     voice_model_id=model.id,
@@ -161,10 +162,10 @@ def create_synthesis_jobs(session, users, models):
                     sample_rate=22050,
                     status=status,
                     progress=progress,
-                                    started_at=utc_now() - timedelta(hours=1) if status != 'pending' else None,
-                completed_at=utc_now() if status == 'completed' else None
+                    started_at=utc_now() - timedelta(hours=1) if status != 'pending' else None,
+                    completed_at=utc_now() if status == 'completed' else None
                 )
-                
+
                 if status == 'completed':
                     job.output_path = f'data/files/synthesis/output/{job.id}.wav'
                     job.output_size = 1024 * 1024  # 1MB
@@ -173,11 +174,12 @@ def create_synthesis_jobs(session, users, models):
                     job.queue_time_ms = 500
                 elif status == 'failed':
                     job.error_message = "Model inference failed: Out of memory"
-                
+
                 session.add(job)
                 jobs.append(job)
-    
+
     return jobs
+
 
 def create_usage_stats(session, users):
     """Create usage statistics"""
@@ -202,46 +204,47 @@ def create_usage_stats(session, users):
             session.add(stat)
             session.flush()  # Flush immediately to ensure relationships are established
 
+
 def main():
     """Main function to seed the database"""
     print("🌱 Starting to seed test data...")
-    
+
     # Get database connection
     db = get_database_manager()
     session = db.get_session()
-    
+
     try:
         # Create test data
         print("👤 Creating test users...")
         users = create_test_users(session)
         session.commit()
-        
+
         print("🎤 Creating voice samples...")
         samples = create_voice_samples(session, users)
         session.commit()
-        
+
         print("🤖 Creating voice models...")
         models = create_voice_models(session, samples)
         session.commit()
-        
+
         print("🎯 Creating synthesis jobs...")
         jobs = create_synthesis_jobs(session, users, models)
         session.commit()
-        
+
         print("📊 Creating usage statistics...")
         create_usage_stats(session, users)
         session.commit()
-        
+
         print("✅ Test data creation successful!")
-        
+
         # Print summary
         print("\n📝 Data Summary:")
         print(f"- Users: {len(users)}")
         print(f"- Voice Samples: {len(samples)}")
         print(f"- Voice Models: {len(models)}")
         print(f"- Synthesis Jobs: {len(jobs)}")
-        print(f"- Usage Stats per User: 7 days")
-        
+        print("- Usage Stats per User: 7 days")
+
     except Exception as e:
         session.rollback()
         print(f"❌ Error: {str(e)}")
@@ -249,5 +252,6 @@ def main():
     finally:
         session.close()
 
+
 if __name__ == '__main__':
-    main() 
+    main()
