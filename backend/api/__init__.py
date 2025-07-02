@@ -8,6 +8,7 @@ including user authentication, voice sample management, and TTS synthesis.
 
 from flask import Flask
 from flask_cors import CORS
+
 # from flask_jwt_extended import JWTManager
 # from flask_limiter import Limiter
 # from flask_limiter.util import get_remote_address
@@ -35,12 +36,12 @@ def create_app(test_config=None):
 
     # Default configuration
     app.config.from_mapping(
-        SECRET_KEY=os.getenv('SECRET_KEY', 'Majick'),
-        JWT_SECRET_KEY=os.getenv('JWT_SECRET_KEY', 'Majick'),
-        JWT_ACCESS_TOKEN_EXPIRES=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES', 3600)),
-        JWT_REFRESH_TOKEN_EXPIRES=int(os.getenv('JWT_REFRESH_TOKEN_EXPIRES', 2592000)),
-        DATABASE_URL=os.getenv('DATABASE_URL', 'sqlite:///data/voxify.db'),
-        MAX_CONTENT_LENGTH=16 * 1024 * 1024  # 限制上传文件大小为16MB
+        SECRET_KEY=os.getenv("SECRET_KEY", "Majick"),
+        JWT_SECRET_KEY=os.getenv("JWT_SECRET_KEY", "Majick"),
+        JWT_ACCESS_TOKEN_EXPIRES=int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES", 3600)),
+        JWT_REFRESH_TOKEN_EXPIRES=int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES", 2592000)),
+        DATABASE_URL=os.getenv("DATABASE_URL", "sqlite:///data/voxify.db"),
+        MAX_CONTENT_LENGTH=16 * 1024 * 1024,  # 限制上传文件大小为16MB
     )
 
     # Override with test config if provided
@@ -48,21 +49,23 @@ def create_app(test_config=None):
         app.config.from_mapping(test_config)
 
     # Configure CORS to allow frontend access
-    CORS(app,
-         origins=[
-             "http://localhost:3000",  # React development server
-             "http://127.0.0.1:3000",
-             "http://localhost:3001",  # Alternative ports
-             "http://127.0.0.1:3001",
-             "https://voxify.vercel.app",  # Vercel production
-             "https://*.vercel.app",     # All Vercel preview deployments
-             "https://test-ho72cndbz-jun-yangs-projects-f7853876.vercel.app",
-             "https://test-lemon-eight-27.vercel.app",
-             "https://voxify-front.vercel.app"  # Production frontend
-         ],
-         methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-         allow_headers=["Content-Type", "Authorization", "Accept"],
-         supports_credentials=True)
+    CORS(
+        app,
+        origins=[
+            "http://localhost:3000",  # React development server
+            "http://127.0.0.1:3000",
+            "http://localhost:3001",  # Alternative ports
+            "http://127.0.0.1:3001",
+            "https://voxify.vercel.app",  # Vercel production
+            "https://*.vercel.app",  # All Vercel preview deployments
+            "https://test-ho72cndbz-jun-yangs-projects-f7853876.vercel.app",
+            "https://test-lemon-eight-27.vercel.app",
+            "https://voxify-front.vercel.app",  # Production frontend
+        ],
+        methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization", "Accept"],
+        supports_credentials=True,
+    )
 
     # jwt = JWTManager(app)
     # limiter = Limiter(
@@ -78,14 +81,14 @@ def create_app(test_config=None):
     from .v1.file import file_bp
 
     # Register blueprints
-    app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
+    app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
     # app.register_blueprint(admin_bp, url_prefix='/api/v1/admin')
-    app.register_blueprint(voice_bp, url_prefix='/api/v1/voice')
-    app.register_blueprint(job_bp, url_prefix='/api/v1/job')
-    app.register_blueprint(file_bp, url_prefix='/api/v1/file')
+    app.register_blueprint(voice_bp, url_prefix="/api/v1/voice")
+    app.register_blueprint(job_bp, url_prefix="/api/v1/job")
+    app.register_blueprint(file_bp, url_prefix="/api/v1/file")
 
     # Simple index route
-    @app.route('/')
+    @app.route("/")
     def index():
         return {"message": "Welcome to Voxify API"}
 

@@ -29,9 +29,9 @@ if __name__ == "__main__":
             json={
                 "text": "Hello, this is a test of voice cloning. I love cats and cheese.",
                 "reference_audio_b64": audio_b64,
-                "reference_text": ""  # Leave empty for auto-transcription
+                "reference_text": "",  # Leave empty for auto-transcription
             },
-            timeout=120  # 2 minute timeout
+            timeout=120,  # 2 minute timeout
         )
 
         print(f"📥 Response status: {response.status_code}")

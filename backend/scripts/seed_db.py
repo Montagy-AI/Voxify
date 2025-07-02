@@ -7,9 +7,7 @@ import os
 import sys
 from datetime import datetime, timedelta, timezone
 from database import get_database_manager
-from database.models import (
-    User, VoiceSample, VoiceModel, SynthesisJob, UsageStat
-)
+from database.models import User, VoiceSample, VoiceModel, SynthesisJob, UsageStat
 from api.utils.password import hash_password
 
 # Add the backend directory to the Python path
@@ -25,32 +23,29 @@ def create_test_users(session):
     """Create test users"""
     users = [
         {
-            'email': 'test@example.com',
-            'password': 'Test123!',
-            'first_name': 'Test',
-            'last_name': 'User',
-            'is_active': True,
-            'email_verified': True,
-            'last_login_at': utc_now()
+            "email": "test@example.com",
+            "password": "Test123!",
+            "first_name": "Test",
+            "last_name": "User",
+            "is_active": True,
+            "email_verified": True,
+            "last_login_at": utc_now(),
         },
         {
-            'email': 'admin@example.com',
-            'password': 'Admin123!',
-            'first_name': 'Admin',
-            'last_name': 'User',
-            'is_active': True,
-            'email_verified': True,
-            'last_login_at': utc_now()
-        }
+            "email": "admin@example.com",
+            "password": "Admin123!",
+            "first_name": "Admin",
+            "last_name": "User",
+            "is_active": True,
+            "email_verified": True,
+            "last_login_at": utc_now(),
+        },
     ]
 
     created_users = []
     for user_data in users:
-        password = user_data.pop('password')
-        user = User(
-            password_hash=hash_password(password),
-            **user_data
-        )
+        password = user_data.pop("password")
+        user = User(password_hash=hash_password(password), **user_data)
         session.add(user)
         created_users.append(user)
 
@@ -64,23 +59,23 @@ def create_voice_samples(session, users):
         for i in range(2):  # 2 samples per user
             sample = VoiceSample(
                 user_id=user.id,
-                name=f'{user.first_name}\'s Voice Sample {i+1}',
-                description='This is a test voice sample',
-                file_path=f'data/files/samples/{user.id}/sample_{i+1}.wav',
+                name=f"{user.first_name}'s Voice Sample {i+1}",
+                description="This is a test voice sample",
+                file_path=f"data/files/samples/{user.id}/sample_{i+1}.wav",
                 file_size=1024 * 1024,  # 1MB
-                original_filename=f'original_sample_{i+1}.wav',
-                format='wav',
+                original_filename=f"original_sample_{i+1}.wav",
+                format="wav",
                 duration=5.0,
                 sample_rate=22050,
                 channels=1,
-                status='ready',
+                status="ready",
                 quality_score=9.5,
-                language='en-US',
+                language="en-US",
                 is_public=True,
-                gender='male' if i % 2 == 0 else 'female',
-                tags_list=['test', 'english', 'high-quality'],
+                gender="male" if i % 2 == 0 else "female",
+                tags_list=["test", "english", "high-quality"],
                 processing_start_time=utc_now() - timedelta(days=1),
-                processing_end_time=utc_now() - timedelta(days=1, minutes=5)
+                processing_end_time=utc_now() - timedelta(days=1, minutes=5),
             )
             session.add(sample)
             samples.append(sample)
@@ -94,22 +89,18 @@ def create_voice_models(session, samples):
     for sample in samples:
         model = VoiceModel(
             voice_sample_id=sample.id,
-            name=f'Model for {sample.name}',
-            description='Model trained from voice sample',
-            model_path=f'data/models/{sample.id}/model.pth',
-            model_type='tacotron2',
+            name=f"Model for {sample.name}",
+            description="Model trained from voice sample",
+            model_path=f"data/models/{sample.id}/model.pth",
+            model_type="tacotron2",
             model_size=256 * 1024 * 1024,  # 256MB
-            model_version='1.0',
-            training_config_dict={
-                'epochs': 1000,
-                'batch_size': 32,
-                'learning_rate': 0.001
-            },
+            model_version="1.0",
+            training_config_dict={"epochs": 1000, "batch_size": 32, "learning_rate": 0.001},
             training_epochs=1000,
             learning_rate=0.001,
             batch_size=32,
             dataset_size=100,
-            training_status='completed',
+            training_status="completed",
             training_progress=1.0,
             training_start_time=utc_now() - timedelta(days=2),
             training_end_time=utc_now() - timedelta(days=1),
@@ -118,7 +109,7 @@ def create_voice_models(session, samples):
             mos_score=4.5,
             similarity_score=0.98,
             is_active=True,
-            deployment_status='online'
+            deployment_status="online",
         )
         session.add(model)
         models.append(model)
@@ -133,46 +124,40 @@ def create_synthesis_jobs(session, users, models):
         "Hello, this is a test voice synthesis.",
         "Artificial Intelligence is changing our lives.",
         "Voice synthesis technology is becoming more natural.",
-        "Have a great day!"
+        "Have a great day!",
     ]
 
     for user in users:
         for model in models:
             for i, text in enumerate(texts):
                 # Create jobs with different statuses
-                status = ['completed', 'processing', 'pending', 'failed'][i % 4]
-                progress = 1.0 if status == 'completed' else (
-                    0.0 if status == 'pending' else 0.5
-                )
+                status = ["completed", "processing", "pending", "failed"][i % 4]
+                progress = 1.0 if status == "completed" else (0.0 if status == "pending" else 0.5)
 
                 job = SynthesisJob(
                     user_id=user.id,
                     voice_model_id=model.id,
                     text_content=text,
                     text_hash=str(hash(text)),
-                    text_language='en-US',
+                    text_language="en-US",
                     text_length=len(text),
                     word_count=len(text.split()),
-                    config_dict={
-                        'speed': 1.0,
-                        'pitch': 1.0,
-                        'volume': 1.0
-                    },
-                    output_format='wav',
+                    config_dict={"speed": 1.0, "pitch": 1.0, "volume": 1.0},
+                    output_format="wav",
                     sample_rate=22050,
                     status=status,
                     progress=progress,
-                    started_at=utc_now() - timedelta(hours=1) if status != 'pending' else None,
-                    completed_at=utc_now() if status == 'completed' else None
+                    started_at=utc_now() - timedelta(hours=1) if status != "pending" else None,
+                    completed_at=utc_now() if status == "completed" else None,
                 )
 
-                if status == 'completed':
-                    job.output_path = f'data/files/synthesis/output/{job.id}.wav'
+                if status == "completed":
+                    job.output_path = f"data/files/synthesis/output/{job.id}.wav"
                     job.output_size = 1024 * 1024  # 1MB
                     job.duration = 5.0
                     job.processing_time_ms = 1500
                     job.queue_time_ms = 500
-                elif status == 'failed':
+                elif status == "failed":
                     job.error_message = "Model inference failed: Out of memory"
 
                 session.add(job)
@@ -185,7 +170,7 @@ def create_usage_stats(session, users):
     """Create usage statistics"""
     for user in users:
         for i in range(7):  # Last 7 days of data
-            date = (utc_now() - timedelta(days=i)).strftime('%Y-%m-%d')
+            date = (utc_now() - timedelta(days=i)).strftime("%Y-%m-%d")
             stat = UsageStat(
                 user_id=user.id,
                 date=date,
@@ -199,7 +184,7 @@ def create_usage_stats(session, users):
                 api_calls_tts=10,
                 api_calls_admin=2,
                 avg_synthesis_time=1.5,
-                cache_hit_rate=0.8
+                cache_hit_rate=0.8,
             )
             session.add(stat)
             session.flush()  # Flush immediately to ensure relationships are established
@@ -253,5 +238,5 @@ def main():
         session.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

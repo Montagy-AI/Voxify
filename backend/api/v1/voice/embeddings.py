@@ -11,16 +11,10 @@ import uuid
 from resemblyzer import VoiceEncoder, preprocess_wav
 
 # Initialize ChromaDB client
-chroma_client = chromadb.Client(Settings(
-    persist_directory="data/embeddings",
-    anonymized_telemetry=False
-))
+chroma_client = chromadb.Client(Settings(persist_directory="data/embeddings", anonymized_telemetry=False))
 
 # Initialize the voice embeddings collection
-voice_collection = chroma_client.get_or_create_collection(
-    name="voice_embeddings",
-    metadata={"hnsw:space": "cosine"}
-)
+voice_collection = chroma_client.get_or_create_collection(name="voice_embeddings", metadata={"hnsw:space": "cosine"})
 
 # Initialize Resemblyzer voice encoder
 voice_encoder = VoiceEncoder()
@@ -48,11 +42,7 @@ def generate_voice_embedding(audio_path: str) -> Tuple[str, np.ndarray]:
         voice_collection.add(
             embeddings=[embedding.tolist()],
             ids=[embedding_id],
-            metadatas=[{
-                "audio_path": audio_path,
-                "model": "resemblyzer",
-                "embedding_dim": len(embedding)
-            }]
+            metadatas=[{"audio_path": audio_path, "model": "resemblyzer", "embedding_dim": len(embedding)}],
         )
 
         return embedding_id, embedding
@@ -73,8 +63,8 @@ def get_voice_embedding(embedding_id: str) -> Optional[np.ndarray]:
     """
     try:
         result = voice_collection.get(ids=[embedding_id])
-        if result and result['embeddings']:
-            return np.array(result['embeddings'][0])
+        if result and result["embeddings"]:
+            return np.array(result["embeddings"][0])
     except Exception as e:
         print(f"Error retrieving embedding: {e}")
     return None

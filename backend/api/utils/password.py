@@ -19,7 +19,7 @@ def hash_password(password: str) -> str:
     str
         Hashed password
     """
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(password: str, password_hash: str) -> bool:
@@ -36,7 +36,7 @@ def verify_password(password: str, password_hash: str) -> bool:
     bool
         True if password matches hash, False otherwise
     """
-    return bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8'))
+    return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
 
 
 def validate_password_strength(password: str) -> tuple:
@@ -55,15 +55,15 @@ def validate_password_strength(password: str) -> tuple:
         return False, "Password must be at least 8 characters long"
 
     # Check for at least one uppercase letter
-    if not re.search(r'[A-Z]', password):
+    if not re.search(r"[A-Z]", password):
         return False, "Password must contain at least one uppercase letter"
 
     # Check for at least one lowercase letter
-    if not re.search(r'[a-z]', password):
+    if not re.search(r"[a-z]", password):
         return False, "Password must contain at least one lowercase letter"
 
     # Check for at least one digit
-    if not re.search(r'\d', password):
+    if not re.search(r"\d", password):
         return False, "Password must contain at least one digit"
 
     # Check for at least one special character
@@ -86,7 +86,7 @@ def validate_email(email: str) -> tuple:
         (is_valid, error_message)
     """
     # Email validation regex
-    email_regex = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    email_regex = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
     if not email_regex.match(email):
         return False, "Invalid email format"

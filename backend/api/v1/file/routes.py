@@ -12,8 +12,8 @@ from . import file_bp
 from database.models import SynthesisJob, SynthesisCache, get_database_manager
 
 # Configure file storage paths
-SYNTHESIS_OUTPUT_DIR = os.path.join(os.getenv('VOXIFY_SYNTHESIS_STORAGE', 'data/files/synthesis'), 'output')
-SYNTHESIS_CACHE_DIR = os.path.join(os.getenv('VOXIFY_SYNTHESIS_STORAGE', 'data/files/synthesis'), 'cache')
+SYNTHESIS_OUTPUT_DIR = os.path.join(os.getenv("VOXIFY_SYNTHESIS_STORAGE", "data/files/synthesis"), "output")
+SYNTHESIS_CACHE_DIR = os.path.join(os.getenv("VOXIFY_SYNTHESIS_STORAGE", "data/files/synthesis"), "cache")
 
 # Ensure directories exist
 os.makedirs(SYNTHESIS_OUTPUT_DIR, exist_ok=True)
@@ -22,26 +22,28 @@ os.makedirs(SYNTHESIS_CACHE_DIR, exist_ok=True)
 
 def error_response(message: str, code: str = None, status_code: int = 400):
     """Standard error response format"""
-    return jsonify({
-        'success': False,
-        'error': {
-            'message': message,
-            'code': code or f"ERROR_{status_code}",
-            'timestamp': datetime.utcnow().isoformat()
-        }
-    }), status_code
+    return (
+        jsonify(
+            {
+                "success": False,
+                "error": {
+                    "message": message,
+                    "code": code or f"ERROR_{status_code}",
+                    "timestamp": datetime.utcnow().isoformat(),
+                },
+            }
+        ),
+        status_code,
+    )
 
 
 def success_response(data=None, message: str = None, status_code: int = 200):
     """Standard success response format"""
-    response = {
-        'success': True,
-        'timestamp': datetime.utcnow().isoformat()
-    }
+    response = {"success": True, "timestamp": datetime.utcnow().isoformat()}
     if data is not None:
-        response['data'] = data
+        response["data"] = data
     if message:
-        response['message'] = message
+        response["message"] = message
     return jsonify(response), status_code
 
 
@@ -66,7 +68,7 @@ def get_synthesis_file(job_id: str) -> Tuple[Optional[str], Optional[str], Optio
         return None, None, None
 
 
-@file_bp.route('/synthesis/<job_id>', methods=['GET'])
+@file_bp.route("/synthesis/<job_id>", methods=["GET"])
 @jwt_required()
 def download_synthesis_file(job_id: str):
     """
@@ -106,16 +108,13 @@ def download_synthesis_file(job_id: str):
 
     try:
         return send_file(
-            file_path,
-            as_attachment=True,
-            download_name=filename,
-            mimetype=f'audio/{os.path.splitext(filename)[1][1:]}'
+            file_path, as_attachment=True, download_name=filename, mimetype=f"audio/{os.path.splitext(filename)[1][1:]}"
         )
     except Exception as e:
         return error_response(f"Error downloading file: {str(e)}", "DOWNLOAD_ERROR", 500)
 
 
-@file_bp.route('/synthesis/<job_id>', methods=['DELETE'])
+@file_bp.route("/synthesis/<job_id>", methods=["DELETE"])
 @jwt_required()
 def delete_synthesis_file(job_id: str):
     """
@@ -165,7 +164,7 @@ def delete_synthesis_file(job_id: str):
             return error_response(f"Error deleting file: {str(e)}", "DELETE_ERROR", 500)
 
 
-@file_bp.route('/voice-clone/<job_id>', methods=['GET'])
+@file_bp.route("/voice-clone/<job_id>", methods=["GET"])
 @jwt_required()
 def download_voice_clone_synthesis(job_id: str):
     """
@@ -206,7 +205,7 @@ def download_voice_clone_synthesis(job_id: str):
                 # Method 1: Try from current directory (if running from backend/)
                 candidate1 = job.output_path
                 # Method 2: Try from parent directory (if running from api/)
-                candidate2 = os.path.join('..', job.output_path)
+                candidate2 = os.path.join("..", job.output_path)
 
                 if os.path.exists(candidate1):
                     file_path = os.path.abspath(candidate1)
@@ -228,14 +227,14 @@ def download_voice_clone_synthesis(job_id: str):
                 file_path,
                 as_attachment=False,  # Stream instead of download for audio playback
                 download_name=filename,
-                mimetype='audio/wav'
+                mimetype="audio/wav",
             )
 
     except Exception as e:
         return error_response(f"Error downloading file: {str(e)}", "DOWNLOAD_ERROR", 500)
 
 
-@file_bp.route('/voice-clone/<job_id>/info', methods=['GET'])
+@file_bp.route("/voice-clone/<job_id>/info", methods=["GET"])
 @jwt_required()
 def get_voice_clone_synthesis_info(job_id: str):
     """
@@ -262,22 +261,22 @@ def get_voice_clone_synthesis_info(job_id: str):
 
             # Get file info
             file_info = {
-                'job_id': job.id,
-                'text_content': job.text_content,
-                'language': job.text_language,
-                'status': job.status,
-                'output_path': job.output_path,
-                'duration': job.duration,
-                'created_at': job.created_at.isoformat() if job.created_at else None,
-                'completed_at': job.completed_at.isoformat() if job.completed_at else None
+                "job_id": job.id,
+                "text_content": job.text_content,
+                "language": job.text_language,
+                "status": job.status,
+                "output_path": job.output_path,
+                "duration": job.duration,
+                "created_at": job.created_at.isoformat() if job.created_at else None,
+                "completed_at": job.completed_at.isoformat() if job.completed_at else None,
             }
 
             # Check if file exists
             if job.output_path and os.path.exists(job.output_path):
-                file_info['file_size'] = os.path.getsize(job.output_path)
-                file_info['file_exists'] = True
+                file_info["file_size"] = os.path.getsize(job.output_path)
+                file_info["file_exists"] = True
             else:
-                file_info['file_exists'] = False
+                file_info["file_exists"] = False
 
             return success_response(file_info)
 

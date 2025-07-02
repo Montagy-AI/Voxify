@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class VoiceCloneConfig:
     """Configuration for voice cloning"""
+
     name: str
     ref_audio_path: str
     ref_text: str
@@ -36,6 +37,7 @@ class VoiceCloneConfig:
 @dataclass
 class TTSConfig:
     """Configuration for TTS synthesis"""
+
     text: str
     ref_audio_path: str
     ref_text: str
@@ -52,10 +54,9 @@ class F5TTSService:
         self.model_name = model_name
         self.use_remote = use_remote
         self.remote_api_url = os.getenv(
-            'F5_TTS_REMOTE_URL',
-            'https://avltg--f5-tts-voxify-fastapi-app.modal.run/synthesize'
+            "F5_TTS_REMOTE_URL", "https://avltg--f5-tts-voxify-fastapi-app.modal.run/synthesize"
         )
-        self.request_timeout = int(os.getenv('F5_TTS_TIMEOUT', '120'))  # 2 minutes default
+        self.request_timeout = int(os.getenv("F5_TTS_TIMEOUT", "120"))  # 2 minutes default
 
         # Local model setup (only if not using remote)
         if not self.use_remote:
@@ -87,10 +88,7 @@ class F5TTSService:
                 from f5_tts.api import F5TTS
 
                 # Initialize F5TTS with GPU support
-                self.model = F5TTS(
-                    model=self.model_name,
-                    device=str(self.device)
-                )
+                self.model = F5TTS(model=self.model_name, device=str(self.device))
 
                 # The vocoder is built into the F5TTS class
                 self.vocoder = None  # Not needed with new API
@@ -126,7 +124,7 @@ class F5TTSService:
             payload = {
                 "text": config.text,
                 "reference_audio_b64": audio_b64,
-                "reference_text": config.ref_text or ""  # Use ref_text or empty for auto-transcription
+                "reference_text": config.ref_text or "",  # Use ref_text or empty for auto-transcription
             }
 
             logger.info("Sending request to remote F5-TTS API...")
@@ -134,11 +132,7 @@ class F5TTSService:
             logger.info(f"Reference text: {config.ref_text[:50]}..." if config.ref_text else "Auto-transcription")
 
             # Make API request
-            response = requests.post(
-                self.remote_api_url,
-                json=payload,
-                timeout=self.request_timeout
-            )
+            response = requests.post(self.remote_api_url, json=payload, timeout=self.request_timeout)
 
             logger.info(f"API response status: {response.status_code}")
 
@@ -207,26 +201,26 @@ class F5TTSService:
             # For F5-TTS, we don't need to train a model
             # Instead, we store the reference audio and text for later use
             clone_info = {
-                'id': clone_id,
-                'name': config.name,
-                'description': config.description,
-                'ref_audio_path': config.ref_audio_path,
-                'ref_text': config.ref_text,
-                'language': config.language,
-                'speed': config.speed,
-                'sample_ids': sample_ids,
-                'status': 'ready',  # F5-TTS doesn't require training
-                'created_at': datetime.now(timezone.utc).isoformat(),
-                'model_type': 'f5_tts'
+                "id": clone_id,
+                "name": config.name,
+                "description": config.description,
+                "ref_audio_path": config.ref_audio_path,
+                "ref_text": config.ref_text,
+                "language": config.language,
+                "speed": config.speed,
+                "sample_ids": sample_ids,
+                "status": "ready",  # F5-TTS doesn't require training
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "model_type": "f5_tts",
             }
 
             # Copy reference audio to clone directory
             ref_audio_dest = clone_path / "reference.wav"
             shutil.copy2(config.ref_audio_path, ref_audio_dest)
-            clone_info['ref_audio_path'] = str(ref_audio_dest)
+            clone_info["ref_audio_path"] = str(ref_audio_dest)
 
             # Save clone info as JSON
-            with open(clone_path / "clone_info.json", 'w', encoding='utf-8') as f:
+            with open(clone_path / "clone_info.json", "w", encoding="utf-8") as f:
                 json.dump(clone_info, f, ensure_ascii=False, indent=2)
 
             logger.info(f"Voice clone created successfully: {clone_id}")
@@ -257,14 +251,14 @@ class F5TTSService:
                     raise ValueError(f"Voice clone not found: {clone_id}")
 
                 # Load clone info
-                with open(clone_path / "clone_info.json", 'r', encoding='utf-8') as f:
+                with open(clone_path / "clone_info.json", "r", encoding="utf-8") as f:
                     clone_info = json.load(f)
 
                 # Use clone's reference audio and text
-                config.ref_audio_path = clone_info['ref_audio_path']
-                config.ref_text = clone_info['ref_text']
-                config.language = clone_info.get('language', config.language)
-                config.speed = clone_info.get('speed', config.speed)
+                config.ref_audio_path = clone_info["ref_audio_path"]
+                config.ref_text = clone_info["ref_text"]
+                config.language = clone_info.get("language", config.language)
+                config.speed = clone_info.get("speed", config.speed)
 
             # Generate unique output filename
             output_id = str(uuid.uuid4())
@@ -285,11 +279,12 @@ class F5TTSService:
 
                 # Create a simple mock audio file (just copy the reference audio)
                 import shutil
+
                 shutil.copy2(config.ref_audio_path, output_path)
 
                 # Add a text file with the synthesized text for debugging
-                text_path = output_path.with_suffix('.txt')
-                with open(text_path, 'w', encoding='utf-8') as f:
+                text_path = output_path.with_suffix(".txt")
+                with open(text_path, "w", encoding="utf-8") as f:
                     f.write(f"Synthesized text: {config.text}\n")
                     f.write(f"Reference text: {config.ref_text}\n")
                     f.write(f"Language: {config.language}\n")
@@ -312,7 +307,7 @@ class F5TTSService:
                         nfe_step=32,
                         cfg_strength=2.0,
                         sway_sampling_coef=-1.0,
-                        remove_silence=True
+                        remove_silence=True,
                     )
 
                     # Save generated audio
@@ -341,11 +336,7 @@ class F5TTSService:
                         # If multiple dimensions, flatten to (channels, samples)
                         audio_data = audio_data.view(1, -1)
 
-                    torchaudio.save(
-                        str(output_path),
-                        audio_data.cpu().float(),
-                        sample_rate
-                    )
+                    torchaudio.save(str(output_path), audio_data.cpu().float(), sample_rate)
 
                     logger.info(f"Real F5-TTS synthesis completed: {output_path}")
 
@@ -353,6 +344,7 @@ class F5TTSService:
                     logger.error(f"F5-TTS synthesis failed, falling back to mock: {e}")
                     # Fallback to mock
                     import shutil
+
                     shutil.copy2(config.ref_audio_path, output_path)
 
             logger.info(f"Speech synthesis completed: {output_path}")
@@ -369,7 +361,7 @@ class F5TTSService:
             if not clone_path.exists():
                 raise ValueError(f"Voice clone not found: {clone_id}")
 
-            with open(clone_path / "clone_info.json", 'r', encoding='utf-8') as f:
+            with open(clone_path / "clone_info.json", "r", encoding="utf-8") as f:
                 return json.load(f)
 
         except Exception as e:
@@ -388,7 +380,7 @@ class F5TTSService:
                     except Exception as e:
                         logger.warning(f"Failed to load clone {clone_dir.name}: {e}")
 
-            return sorted(clones, key=lambda x: x.get('created_at', ''), reverse=True)
+            return sorted(clones, key=lambda x: x.get("created_at", ""), reverse=True)
 
         except Exception as e:
             logger.error(f"Failed to list clones: {e}")
@@ -444,6 +436,6 @@ def get_f5_tts_service() -> F5TTSService:
     global _f5_tts_service
     if _f5_tts_service is None:
         # Check environment variable for remote/local mode
-        use_remote = os.getenv('F5_TTS_USE_REMOTE', 'true').lower() == 'true'
+        use_remote = os.getenv("F5_TTS_USE_REMOTE", "true").lower() == "true"
         _f5_tts_service = F5TTSService(use_remote=use_remote)
     return _f5_tts_service

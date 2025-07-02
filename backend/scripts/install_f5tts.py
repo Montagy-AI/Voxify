@@ -10,7 +10,7 @@ import logging
 from pathlib import Path
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -42,6 +42,7 @@ def check_gpu_support():
     """Check if GPU is available"""
     try:
         import torch
+
         if torch.cuda.is_available():
             logger.info(f"CUDA available: {torch.cuda.get_device_name()}")
             return "cuda"
@@ -90,16 +91,7 @@ def install_additional_dependencies():
     """Install additional required packages"""
     logger.info("Installing additional dependencies...")
 
-    packages = [
-        "soundfile",
-        "librosa",
-        "numpy",
-        "scipy",
-        "transformers",
-        "accelerate",
-        "datasets",
-        "tokenizers"
-    ]
+    packages = ["soundfile", "librosa", "numpy", "scipy", "transformers", "accelerate", "datasets", "tokenizers"]
 
     for package in packages:
         if not run_command(f"pip install {package}", f"Installing {package}"):
@@ -114,13 +106,16 @@ def verify_installation():
 
     try:
         import f5_tts
+
         logger.info("F5-TTS imported successfully")
 
         # Try importing key modules
         from f5_tts.infer.utils_infer import load_model
+
         logger.info("F5-TTS inference modules imported successfully")
 
         import torch
+
         logger.info(f"PyTorch version: {torch.__version__}")
         logger.info(f"CUDA available: {torch.cuda.is_available()}")
 
