@@ -1,8 +1,6 @@
 import unittest
-from unittest.mock import patch, MagicMock
 from flask import Flask
 from api.v1.auth.routes import auth_bp
-from sqlalchemy.exc import IntegrityError
 
 
 class TestRegister(unittest.TestCase):
@@ -23,11 +21,11 @@ class TestRegister(unittest.TestCase):
             "first_name": "John",
             "last_name": "Doe"
         })
-        
+
         # The API should handle this successfully
         self.assertIn(response.status_code, [201, 409])  # 201 for success, 409 if user already exists
         data = response.get_json()
-        
+
         if response.status_code == 201:
             # Just check that it's a success response
             self.assertIn('message', data)
@@ -85,7 +83,7 @@ class TestRegister(unittest.TestCase):
             "email": "duplicate@example.com",
             "password": "SecurePassword123!"
         })
-        
+
         # Then try to register the same user again
         response = self.client.post('/api/v1/auth/register', json={
             "email": "duplicate@example.com",

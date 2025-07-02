@@ -1,6 +1,7 @@
 import unittest
 import requests
 
+
 class TestLoginAPI(unittest.TestCase):
     BASE_URL = "http://voxify_api:5000/api/v1/auth/login"
     HEADERS = {"Content-Type": "application/json"}
@@ -9,7 +10,7 @@ class TestLoginAPI(unittest.TestCase):
     def post_login(self, payload):
         response = requests.post(self.BASE_URL, json=payload, headers=self.HEADERS)
         return response
-    
+
     # TODO: Uncomment and implement this test after registering a user
     # def test_login_successful(self):
     #     # You need to first register a user before logging in!
@@ -86,6 +87,7 @@ class TestLoginAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
         data = response.json()
         self.assertEqual(data['error']['code'], "INVALID_CREDENTIALS")
+
 
 if __name__ == "__main__":
     unittest.main()

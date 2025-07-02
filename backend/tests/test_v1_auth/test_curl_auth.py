@@ -9,6 +9,7 @@ import platform
 # Add the backend directory to Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 
+
 class TestCurlAuth:
     """Test authentication endpoints using curl commands"""
 
@@ -17,7 +18,7 @@ class TestCurlAuth:
         """Check if server is running before tests"""
         try:
             # Use auth endpoint to check if server is running
-            # GET request to auth endpoint will return 405 (Method Not Allowed) 
+            # GET request to auth endpoint will return 405 (Method Not Allowed)
             # which means server is running but endpoint expects POST
             response = requests.get(f"{server_url}/api/v1/auth/login")
             # 405 means server is running but method not allowed (expected for GET on POST endpoint)
@@ -199,6 +200,7 @@ class TestCurlAuth:
         # Check for msg in response (error case)
         assert "msg" in response
 
+
 def run_tests():
     """Run tests using pytest"""
     pytest.main([__file__, "-v"])
@@ -206,17 +208,14 @@ def run_tests():
 
 def test_configuration():
     """Test that the configuration is correct"""
-    import os
-    import platform
-    
     # Test server URL configuration
     host = os.getenv('FLASK_HOST', '127.0.0.1')
     port = int(os.getenv('PORT', os.getenv('FLASK_PORT', 10000)))
     server_url = f"http://{host}:{port}"
-    
+
     print(f"Server URL: {server_url}")
     print(f"Platform: {platform.system()}")
-    
+
     # Test curl availability
     try:
         result = subprocess.run(["curl", "--version"], capture_output=True, text=True)
@@ -227,4 +226,4 @@ def test_configuration():
 
 if __name__ == "__main__":
     test_configuration()
-    run_tests() 
+    run_tests()

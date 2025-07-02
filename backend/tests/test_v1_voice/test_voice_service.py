@@ -2,15 +2,13 @@ import subprocess
 import json
 import pytest
 import requests
-import time
-from unittest.mock import patch
 import sys
 import os
-import platform
 import tempfile
 
 # Add the backend directory to Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+
 
 class TestVoiceServiceAPI:
     """Service tests for voice API endpoints using curl commands"""
@@ -118,12 +116,12 @@ class TestVoiceServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl command failed: {result.stderr}"
-        
+
         response = json.loads(result.stdout)
-        
+
         # Print response for debugging
         print(f"Upload response: {response}")
-        
+
         # Check if upload was successful or if there's a specific error
         if response.get("success") is False:
             # If upload failed, check if it's due to missing dependencies or other issues
@@ -153,7 +151,7 @@ class TestVoiceServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is False
         assert "error" in response
@@ -170,7 +168,7 @@ class TestVoiceServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is False
         assert "error" in response
@@ -195,7 +193,7 @@ class TestVoiceServiceAPI:
 
             result = subprocess.run(curl_cmd, capture_output=True, text=True)
             assert result.returncode == 0
-            
+
             response = json.loads(result.stdout)
             assert response["success"] is False
             assert "error" in response
@@ -213,7 +211,7 @@ class TestVoiceServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is True
         assert "data" in response
@@ -230,7 +228,7 @@ class TestVoiceServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is True
         assert "data" in response
@@ -248,7 +246,7 @@ class TestVoiceServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is True
 
@@ -260,23 +258,23 @@ class TestVoiceServiceAPI:
             f"{server_url}/api/v1/voice/samples",
             "-H", f"Authorization: Bearer {auth_tokens['access_token']}"
         ]
-        
+
         result = subprocess.run(list_cmd, capture_output=True, text=True)
         response = json.loads(result.stdout)
-        
+
         if response["success"] and response["data"]["samples"]:
             sample_id = response["data"]["samples"][0]["id"]
-            
+
             # Get specific sample details
             get_cmd = [
                 "curl", "-X", "GET",
                 f"{server_url}/api/v1/voice/samples/{sample_id}",
                 "-H", f"Authorization: Bearer {auth_tokens['access_token']}"
             ]
-            
+
             result = subprocess.run(get_cmd, capture_output=True, text=True)
             assert result.returncode == 0
-            
+
             response = json.loads(result.stdout)
             assert response["success"] is True
             assert "data" in response
@@ -287,7 +285,7 @@ class TestVoiceServiceAPI:
     def test_get_voice_sample_not_found(self, server_url, auth_tokens):
         """Test getting a non-existent voice sample"""
         non_existent_id = "non-existent-sample-id"
-        
+
         curl_cmd = [
             "curl", "-X", "GET",
             f"{server_url}/api/v1/voice/samples/{non_existent_id}",
@@ -296,7 +294,7 @@ class TestVoiceServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is False
         assert "error" in response
@@ -309,23 +307,23 @@ class TestVoiceServiceAPI:
             f"{server_url}/api/v1/voice/samples",
             "-H", f"Authorization: Bearer {auth_tokens['access_token']}"
         ]
-        
+
         result = subprocess.run(list_cmd, capture_output=True, text=True)
         response = json.loads(result.stdout)
-        
+
         if response["success"] and response["data"]["samples"]:
             sample_id = response["data"]["samples"][0]["id"]
-            
+
             # Delete the sample
             delete_cmd = [
                 "curl", "-X", "DELETE",
                 f"{server_url}/api/v1/voice/samples/{sample_id}",
                 "-H", f"Authorization: Bearer {auth_tokens['access_token']}"
             ]
-            
+
             result = subprocess.run(delete_cmd, capture_output=True, text=True)
             assert result.returncode == 0
-            
+
             response = json.loads(result.stdout)
             assert response["success"] is True
         else:
@@ -348,7 +346,7 @@ class TestVoiceServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is False
         assert "error" in response
@@ -372,7 +370,7 @@ class TestVoiceServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is False
         assert "error" in response
@@ -388,7 +386,7 @@ class TestVoiceServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is True
         assert "data" in response
@@ -405,7 +403,7 @@ class TestVoiceServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is True
         assert "data" in response
@@ -414,7 +412,7 @@ class TestVoiceServiceAPI:
     def test_get_voice_clone_not_found(self, server_url, auth_tokens):
         """Test getting a non-existent voice clone"""
         non_existent_id = "non-existent-clone-id"
-        
+
         curl_cmd = [
             "curl", "-X", "GET",
             f"{server_url}/api/v1/voice/clones/{non_existent_id}",
@@ -423,7 +421,7 @@ class TestVoiceServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is False
         assert "error" in response
@@ -431,7 +429,7 @@ class TestVoiceServiceAPI:
     def test_delete_voice_clone_not_found(self, server_url, auth_tokens):
         """Test deleting a non-existent voice clone"""
         non_existent_id = "non-existent-clone-id"
-        
+
         curl_cmd = [
             "curl", "-X", "DELETE",
             f"{server_url}/api/v1/voice/clones/{non_existent_id}",
@@ -440,7 +438,7 @@ class TestVoiceServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is False
         assert "error" in response
@@ -448,7 +446,7 @@ class TestVoiceServiceAPI:
     def test_select_voice_clone_not_found(self, server_url, auth_tokens):
         """Test selecting a non-existent voice clone"""
         non_existent_id = "non-existent-clone-id"
-        
+
         curl_cmd = [
             "curl", "-X", "POST",
             f"{server_url}/api/v1/voice/clones/{non_existent_id}/select",
@@ -459,7 +457,7 @@ class TestVoiceServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is False
         assert "error" in response
@@ -473,7 +471,7 @@ class TestVoiceServiceAPI:
             "pitch": 1.0,
             "volume": 1.0
         }
-        
+
         curl_cmd = [
             "curl", "-X", "POST",
             f"{server_url}/api/v1/voice/clones/{non_existent_id}/synthesize",
@@ -484,7 +482,7 @@ class TestVoiceServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is False
         assert "error" in response
@@ -497,16 +495,16 @@ class TestVoiceServiceAPI:
             "/api/v1/voice/samples/test-id",
             "/api/v1/voice/clones/test-id"
         ]
-        
+
         for endpoint in endpoints:
             curl_cmd = [
                 "curl", "-X", "GET",
                 f"{server_url}{endpoint}"
             ]
-            
+
             result = subprocess.run(curl_cmd, capture_output=True, text=True)
             assert result.returncode == 0
-            
+
             response = json.loads(result.stdout)
             # Flask-JWT-Extended returns {"msg": "Missing Authorization Header"} for unauthorized access
             assert "msg" in response
@@ -515,28 +513,31 @@ class TestVoiceServiceAPI:
     def test_invalid_token_access(self, server_url):
         """Test accessing voice endpoints with invalid token"""
         invalid_token = "invalid.token.here"
-        
+
         curl_cmd = [
             "curl", "-X", "GET",
             f"{server_url}/api/v1/voice/samples",
             "-H", f"Authorization: Bearer {invalid_token}"
         ]
-        
+
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         # Flask-JWT-Extended returns {"msg": "Invalid token"} or {"msg": "Invalid header string ..."}
         assert "msg" in response
         assert ("Invalid token" in response["msg"] or "Invalid header string" in response["msg"])
 
+
 def run_tests():
     """Run the voice service tests"""
     pytest.main([__file__, "-v"])
+
 
 def test_configuration():
     """Test that the test configuration is correct"""
     assert True  # Placeholder for configuration tests
 
+
 if __name__ == "__main__":
-    run_tests() 
+    run_tests()

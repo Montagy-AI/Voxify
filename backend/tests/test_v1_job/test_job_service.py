@@ -2,14 +2,13 @@ import subprocess
 import json
 import pytest
 import requests
-import time
-from unittest.mock import patch
 import sys
 import os
 import platform
 
 # Add the backend directory to Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+
 
 class TestJobServiceAPI:
     """Service tests for job API endpoints and data boundaries"""
@@ -122,7 +121,7 @@ class TestJobServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl command failed: {result.stderr}"
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is False
         assert "error" in response
@@ -145,7 +144,7 @@ class TestJobServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is False
         assert "error" in response
@@ -187,7 +186,7 @@ class TestJobServiceAPI:
 
             result = subprocess.run(curl_cmd, capture_output=True, text=True)
             assert result.returncode == 0
-            
+
             response = json.loads(result.stdout)
             assert response["success"] is False
             assert "error" in response
@@ -203,7 +202,7 @@ class TestJobServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl command failed: {result.stderr}"
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is True
         assert "data" in response
@@ -227,7 +226,7 @@ class TestJobServiceAPI:
 
             result = subprocess.run(curl_cmd, capture_output=True, text=True)
             assert result.returncode == 0, f"Failed with filter: {filter_param}"
-            
+
             response = json.loads(result.stdout)
             assert response["success"] is True
             assert "data" in response
@@ -250,7 +249,7 @@ class TestJobServiceAPI:
 
             result = subprocess.run(curl_cmd, capture_output=True, text=True)
             assert result.returncode == 0
-            
+
             response = json.loads(result.stdout)
             assert response["success"] is False
             assert "error" in response
@@ -274,7 +273,7 @@ class TestJobServiceAPI:
 
         result = subprocess.run(create_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         create_response = json.loads(result.stdout)
         job_id = create_response["data"]["id"]
 
@@ -287,7 +286,7 @@ class TestJobServiceAPI:
 
         result = subprocess.run(get_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl command failed: {result.stderr}"
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is True
         assert response["data"]["id"] == job_id
@@ -303,7 +302,7 @@ class TestJobServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is False
         assert "error" in response
@@ -328,7 +327,7 @@ class TestJobServiceAPI:
 
         result = subprocess.run(create_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         create_response = json.loads(result.stdout)
         job_id = create_response["data"]["id"]
 
@@ -350,7 +349,7 @@ class TestJobServiceAPI:
 
         result = subprocess.run(update_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl command failed: {result.stderr}"
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is True
         assert response["data"]["text_content"] == update_data["text_content"]
@@ -374,7 +373,7 @@ class TestJobServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is False
         assert "error" in response
@@ -398,7 +397,7 @@ class TestJobServiceAPI:
 
         result = subprocess.run(create_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         create_response = json.loads(result.stdout)
         job_id = create_response["data"]["id"]
 
@@ -419,7 +418,7 @@ class TestJobServiceAPI:
 
         result = subprocess.run(patch_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl command failed: {result.stderr}"
-        
+
         response = json.loads(result.stdout)
         assert response["success"] is True
         assert response["data"]["status"] == patch_data["status"]
@@ -444,7 +443,7 @@ class TestJobServiceAPI:
 
         result = subprocess.run(create_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         create_response = json.loads(result.stdout)
         job_id = create_response["data"]["id"]
 
@@ -478,7 +477,7 @@ class TestJobServiceAPI:
 
         result = subprocess.run(create_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         create_response = json.loads(result.stdout)
         job_id = create_response["data"]["id"]
 
@@ -514,7 +513,7 @@ class TestJobServiceAPI:
 
             result = subprocess.run(curl_cmd, capture_output=True, text=True)
             assert result.returncode == 0
-            
+
             response = json.loads(result.stdout)
             assert "msg" in response
             assert "Authorization" in response["msg"]
@@ -539,17 +538,18 @@ class TestJobServiceAPI:
 
         result = subprocess.run(create_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         first_response = json.loads(result.stdout)
         assert first_response["success"] is True
 
         # Create duplicate job
         result = subprocess.run(create_cmd, capture_output=True, text=True)
         assert result.returncode == 0
-        
+
         second_response = json.loads(result.stdout)
         # Should return existing job or success message about duplicate
         assert second_response["success"] is True
+
 
 def run_tests():
     """Run tests using pytest"""
@@ -558,17 +558,14 @@ def run_tests():
 
 def test_configuration():
     """Test that the configuration is correct"""
-    import os
-    import platform
-    
     # Test server URL configuration
     host = os.getenv('FLASK_HOST', '127.0.0.1')
     port = int(os.getenv('PORT', os.getenv('FLASK_PORT', 10000)))
     server_url = f"http://{host}:{port}"
-    
+
     print(f"Server URL: {server_url}")
     print(f"Platform: {platform.system()}")
-    
+
     # Test curl availability
     try:
         result = subprocess.run(["curl", "--version"], capture_output=True, text=True)
@@ -579,4 +576,4 @@ def test_configuration():
 
 if __name__ == "__main__":
     test_configuration()
-    run_tests() 
+    run_tests()

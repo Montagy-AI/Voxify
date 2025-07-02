@@ -1,5 +1,4 @@
 # This file was written entirely by Claude AI
-
 import requests
 import base64
 import json

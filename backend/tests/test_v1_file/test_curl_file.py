@@ -2,14 +2,13 @@ import subprocess
 import json
 import pytest
 import requests
-import time
-from unittest.mock import patch
 import sys
 import os
 import platform
 
 # Add the backend directory to Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+
 
 class TestFileServiceAPI:
     """Service tests for file API endpoints and data boundaries"""
@@ -98,7 +97,7 @@ class TestFileServiceAPI:
             "output_format": "wav",
             "sample_rate": 44100
         }
-        
+
         job_cmd = [
             "curl", "-X", "POST",
             f"{server_url}/api/v1/job",
@@ -106,7 +105,7 @@ class TestFileServiceAPI:
             "-H", f"Authorization: Bearer {auth_tokens['access_token']}",
             "-d", json.dumps(job_data)
         ]
-        
+
         result = subprocess.run(job_cmd, capture_output=True, text=True)
         response = json.loads(result.stdout)
         return response.get("data", {}).get("id")
@@ -160,7 +159,7 @@ class TestFileServiceAPI:
         """Test download synthesis file with valid job ID"""
         if not test_job_id:
             pytest.skip("No test job ID available")
-            
+
         curl_cmd = [
             "curl", "-X", "GET",
             f"{server_url}/api/v1/file/synthesis/{test_job_id}",
@@ -225,7 +224,7 @@ class TestFileServiceAPI:
         """Test delete synthesis file with valid job ID"""
         if not test_job_id:
             pytest.skip("No test job ID available")
-            
+
         curl_cmd = [
             "curl", "-X", "DELETE",
             f"{server_url}/api/v1/file/synthesis/{test_job_id}",
@@ -250,7 +249,6 @@ class TestFileServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl command failed: {result.stderr}"
-        # Should return 401 Unauthorized
         assert "Not enough segments" in result.stdout
 
     def test_delete_synthesis_file_with_invalid_token(self, server_url):
@@ -308,7 +306,6 @@ class TestFileServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl command failed: {result.stderr}"
-        # Should return 405 Method Not Allowed
         assert "405" in result.stdout or "Method Not Allowed" in result.stdout
 
     def test_delete_synthesis_file_wrong_method(self, server_url, auth_tokens):
@@ -322,14 +319,13 @@ class TestFileServiceAPI:
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl command failed: {result.stderr}"
-        # Should return 405 Method Not Allowed
         assert "405" in result.stdout or "Method Not Allowed" in result.stdout
 
     def test_download_synthesis_file_with_headers(self, server_url, auth_tokens, test_job_id, null_device):
         """Test download synthesis file with additional headers"""
         if not test_job_id:
             pytest.skip("No test job ID available")
-            
+
         curl_cmd = [
             "curl", "-X", "GET",
             f"{server_url}/api/v1/file/synthesis/{test_job_id}",
@@ -351,7 +347,7 @@ class TestFileServiceAPI:
             "/api/v1/file/synthesis/test-job-id",
             "/api/v1/file/synthesis/00000000-0000-0000-0000-000000000000"
         ]
-        
+
         for endpoint in test_endpoints:
             # Test GET without auth
             curl_cmd = [
@@ -359,18 +355,18 @@ class TestFileServiceAPI:
                 f"{server_url}{endpoint}",
                 "-H", "Content-Type: application/json"
             ]
-            
+
             result = subprocess.run(curl_cmd, capture_output=True, text=True)
             assert result.returncode == 0, f"Curl command failed: {result.stderr}"
             assert "Missing Authorization Header" in result.stdout
-            
+
             # Test DELETE without auth
             curl_cmd = [
                 "curl", "-X", "DELETE",
                 f"{server_url}{endpoint}",
                 "-H", "Content-Type: application/json"
             ]
-            
+
             result = subprocess.run(curl_cmd, capture_output=True, text=True)
             assert result.returncode == 0, f"Curl command failed: {result.stderr}"
             assert "Missing Authorization Header" in result.stdout
@@ -387,7 +383,7 @@ class TestFileServiceAPI:
                 "expected_error": "FILE_NOT_FOUND"
             }
         ]
-        
+
         for case in test_cases:
             # Test GET
             curl_cmd = [
@@ -396,13 +392,13 @@ class TestFileServiceAPI:
                 "-H", "Content-Type: application/json",
                 "-H", f"Authorization: Bearer {auth_tokens['access_token']}"
             ]
-            
+
             result = subprocess.run(curl_cmd, capture_output=True, text=True)
             assert result.returncode == 0, f"Curl command failed: {result.stderr}"
             response = json.loads(result.stdout)
             assert response["success"] is False
             assert response["error"]["code"] == case["expected_error"]
-            
+
             # Test DELETE
             curl_cmd = [
                 "curl", "-X", "DELETE",
@@ -410,7 +406,7 @@ class TestFileServiceAPI:
                 "-H", "Content-Type: application/json",
                 "-H", f"Authorization: Bearer {auth_tokens['access_token']}"
             ]
-            
+
             result = subprocess.run(curl_cmd, capture_output=True, text=True)
             assert result.returncode == 0, f"Curl command failed: {result.stderr}"
             response = json.loads(result.stdout)
@@ -425,18 +421,15 @@ def run_tests():
 
 def test_configuration():
     """Test that the configuration is correct"""
-    import os
-    import platform
-    
     # Test server URL configuration
     host = os.getenv('FLASK_HOST', '127.0.0.1')
     port = int(os.getenv('PORT', os.getenv('FLASK_PORT', 10000)))
     server_url = f"http://{host}:{port}"
-    
+
     print(f"Server URL: {server_url}")
     print(f"Platform: {platform.system()}")
     print(f"Null device: {'NUL' if platform.system() == 'Windows' else '/dev/null'}")
-    
+
     # Test curl availability
     try:
         result = subprocess.run(["curl", "--version"], capture_output=True, text=True)
@@ -447,4 +440,4 @@ def test_configuration():
 
 if __name__ == "__main__":
     test_configuration()
-    run_tests() 
+    run_tests()
