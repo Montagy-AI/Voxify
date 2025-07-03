@@ -35,6 +35,7 @@ class TestLoginAPI(unittest.TestCase):
 
         try:
             from flask_jwt_extended import JWTManager
+
             jwt = JWTManager(self.app)
         except Exception as e:
             print(f"JWT initialization failed: {e}, {jwt}")
