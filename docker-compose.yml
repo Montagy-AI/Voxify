@@ -43,7 +43,7 @@ services:
     environment:
       - DATABASE_URL=sqlite:////data/voxify.db
       - VECTOR_DB_PATH=data/chroma_db
-    command: ["python", "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py", "-v"]
+    command: ["sh", "-c", "python -m pytest tests/ -v && python -m unittest discover -s tests -p 'test_*.py' -v"]
     restart: "no"
 
 volumes:
