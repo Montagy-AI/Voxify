@@ -1,0 +1,15 @@
+{
+  "id": "fb8b554d-9831-4e72-9abf-0a99524575ce",
+  "name": "v1",
+  "description": "",
+  "ref_audio_path": "data\\voice_clones\\fb8b554d-9831-4e72-9abf-0a99524575ce\\reference.wav",
+  "ref_text": "Today I had a great lunch with my cats. It's really a great experience. I love our lunch very much.",
+  "language": "en-US",
+  "speed": 1.0,
+  "sample_ids": [
+    "049008c5-f638-48d0-9be1-408a24d9c150"
+  ],
+  "status": "ready",
+  "created_at": "2025-07-14T19:15:00.723715+00:00",
+  "model_type": "f5_tts"
+}

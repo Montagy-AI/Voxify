@@ -192,7 +192,7 @@ def start_flask_app(skip_db_init=False, skip_file_init=False, seed_data=False):
     
     # Get configuration from environment (cloud platform compatible)
     host = os.getenv('FLASK_HOST', '0.0.0.0')  # Bind to all interfaces for cloud deployment
-    port = int(os.getenv('PORT', os.getenv('FLASK_PORT', 10000)))  # Use PORT for cloud platforms
+    port = int(os.getenv('PORT', os.getenv('FLASK_PORT', 8000)))  # Use PORT for cloud platforms
     debug = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
     
     print(f"Starting Voxify API Server...")

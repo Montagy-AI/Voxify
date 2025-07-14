@@ -3,7 +3,7 @@ const config = {
   // API base URL from environment variables
   apiBaseUrl: process.env.REACT_APP_API_BASE_URL || (
     process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:10000/api/v1'  // 开发环境默认
+      ? 'http://localhost:8000/api/v1'  // 开发环境默认，使用8000端口
       : process.env.REACT_APP_PROD_API_URL // 生产环境必须提供URL
   ),
   

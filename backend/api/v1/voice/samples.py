@@ -14,6 +14,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from database import get_database_manager
 from database.models import VoiceSample
 from .embeddings import generate_voice_embedding, delete_voice_embedding
+from .transcription import transcription_service
 
 # Import the blueprint from __init__.py
 from . import voice_bp
@@ -100,6 +101,27 @@ def upload_voice_sample():
         # Extract audio metadata
         metadata = extract_audio_metadata(str(permanent_path))
         
+        # Generate automatic transcription using OpenAI Whisper
+        transcription_result = None
+        transcription_text = None
+        transcription_confidence = None
+        transcription_language = None
+        
+        if transcription_service.is_configured():
+            print(f"[DEBUG] Starting automatic transcription for: {sample_id}")
+            transcription_result = transcription_service.transcribe_audio(str(permanent_path))
+            
+            if transcription_result['success']:
+                transcription_text = transcription_result['text']
+                transcription_language = transcription_result.get('language')
+                # Note: OpenAI Whisper doesn't provide confidence scores in the current API
+                print(f"[DEBUG] Transcription successful: {transcription_text[:50]}...")
+                print(f"[DEBUG] Detected language: {transcription_language}")
+            else:
+                print(f"[DEBUG] Transcription failed: {transcription_result['error']}")
+        else:
+            print(f"[DEBUG] Transcription service not configured (missing OPENAI_API_KEY)")
+        
         # Generate voice embedding
         embedding_id, embedding = generate_voice_embedding(str(permanent_path))
         
@@ -122,7 +144,9 @@ def upload_voice_sample():
                 status='ready',  # Changed from 'uploaded' to 'ready' since we generate embedding immediately
                 processing_start_time=datetime.now(timezone.utc),
                 processing_end_time=datetime.now(timezone.utc),
-                voice_embedding_id=embedding_id  # Store the embedding ID
+                voice_embedding_id=embedding_id,  # Store the embedding ID
+                transcription=transcription_text,  # Auto-generated transcription
+                transcription_language=transcription_language  # Detected language
             )
             session.add(voice_sample)
             session.commit()
@@ -135,6 +159,8 @@ def upload_voice_sample():
                 'duration': metadata['duration'],
                 'format': metadata['format'],
                 'status': 'ready',
+                'transcription': transcription_text,
+                'transcription_language': transcription_language,
                 'message': 'Voice sample uploaded and processed successfully.'
             }
         }), 201
@@ -236,6 +262,105 @@ def get_voice_sample(sample_id: str):
             'success': True,
             'data': sample.to_dict()
         })
+
+@voice_bp.route('/samples/<sample_id>/transcription', methods=['GET'])
+@jwt_required()
+def get_sample_transcription(sample_id: str):
+    """
+    Get transcription for a voice sample.
+    
+    Returns:
+        JSON response with transcription text and metadata
+    """
+    user_id = get_jwt_identity()
+    db = get_database_manager()
+    
+    with db.get_session() as session:
+        # Find the voice sample
+        voice_sample = session.query(VoiceSample).filter_by(
+            id=sample_id, 
+            user_id=user_id
+        ).first()
+        
+        if not voice_sample:
+            return jsonify({
+                'success': False,
+                'error': 'Voice sample not found'
+            }), 404
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'sample_id': sample_id,
+                'transcription': voice_sample.transcription,
+                'transcription_language': voice_sample.transcription_language,
+                'transcription_confidence': voice_sample.transcription_confidence,
+                'has_transcription': bool(voice_sample.transcription)
+            }
+        })
+
+@voice_bp.route('/samples/<sample_id>/transcription', methods=['POST'])
+@jwt_required()
+def regenerate_sample_transcription(sample_id: str):
+    """
+    Regenerate transcription for a voice sample.
+    
+    Returns:
+        JSON response with new transcription text
+    """
+    user_id = get_jwt_identity()
+    db = get_database_manager()
+    
+    with db.get_session() as session:
+        # Find the voice sample
+        voice_sample = session.query(VoiceSample).filter_by(
+            id=sample_id, 
+            user_id=user_id
+        ).first()
+        
+        if not voice_sample:
+            return jsonify({
+                'success': False,
+                'error': 'Voice sample not found'
+            }), 404
+        
+        # Check if transcription service is configured
+        if not transcription_service.is_configured():
+            return jsonify({
+                'success': False,
+                'error': 'Transcription service not configured. Please set OPENAI_API_KEY.'
+            }), 500
+        
+        # Regenerate transcription
+        try:
+            transcription_result = transcription_service.transcribe_audio(voice_sample.file_path)
+            
+            if transcription_result['success']:
+                # Update the voice sample with new transcription
+                voice_sample.transcription = transcription_result['text']
+                voice_sample.transcription_language = transcription_result.get('language')
+                session.commit()
+                
+                return jsonify({
+                    'success': True,
+                    'data': {
+                        'sample_id': sample_id,
+                        'transcription': transcription_result['text'],
+                        'transcription_language': transcription_result.get('language'),
+                        'message': 'Transcription regenerated successfully'
+                    }
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': f'Transcription failed: {transcription_result["error"]}'
+                }), 500
+                
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': f'Error regenerating transcription: {str(e)}'
+            }), 500
 
 @voice_bp.route('/samples/<sample_id>', methods=['DELETE'])
 @jwt_required()

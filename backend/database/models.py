@@ -124,6 +124,11 @@ class VoiceSample(Base, TimestampMixin):
     age_group = Column(String)  # Detected age group
     accent = Column(String)  # Detected accent
     
+    # Transcription (OpenAI Whisper)
+    transcription = Column(Text)  # Auto-generated text from audio
+    transcription_confidence = Column(Float)  # Confidence score from Whisper
+    transcription_language = Column(String)  # Detected language from Whisper
+    
     # Relationships
     user = relationship("User", back_populates="voice_samples")
     voice_models = relationship("VoiceModel", back_populates="voice_sample", cascade="all, delete-orphan")
@@ -181,6 +186,9 @@ class VoiceSample(Base, TimestampMixin):
             'gender': self.gender,
             'age_group': self.age_group,
             'accent': self.accent,
+            'transcription': self.transcription,
+            'transcription_confidence': self.transcription_confidence,
+            'transcription_language': self.transcription_language,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }

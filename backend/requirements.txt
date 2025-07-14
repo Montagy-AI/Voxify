@@ -59,6 +59,9 @@ torchaudio>=2.0.0
 requests==2.31.0
 urllib3>=1.26.0,<2.0.0 # An important dependency for requests, sometimes requires specifying a version range
 
+# OpenAI API for speech-to-text (Whisper)
+openai>=1.30.0
+
 # WebSocket support (if real-time communication is needed)
 # flask-socketio==5.3.6
 # python-socketio==5.8.0

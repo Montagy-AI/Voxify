@@ -7,7 +7,7 @@ const VoiceClone = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [refText, setRefText] = useState('');
-  const [language, setLanguage] = useState('zh-CN');
+  const [language, setLanguage] = useState('en-US');
   const [files, setFiles] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
@@ -44,6 +44,15 @@ const VoiceClone = () => {
           if (result.success) {
             uploadedIds.push(result.data.sample_id);
             setUploadedSamples(prev => [...prev, result.data]);
+            
+            // Auto-fill reference text if transcription is available
+            if (result.data.transcription && result.data.transcription.trim()) {
+              setRefText(result.data.transcription);
+              console.log('Auto-transcribed text:', result.data.transcription);
+              
+              // Show notification to user
+              alert(`Voice sample uploaded successfully! Text content has been automatically transcribed and filled into the reference text field.\n\nTranscription result: ${result.data.transcription.substring(0, 100)}${result.data.transcription.length > 100 ? '...' : ''}`);
+            }
           } else {
             console.error(`Failed to upload ${file.name}:`, result.error);
             alert(`Failed to upload ${file.name}: ${result.error}`);
@@ -158,6 +167,9 @@ const VoiceClone = () => {
               <p className="text-sm text-gray-400">
                 Enter the exact text spoken in your audio file, including punctuation
               </p>
+              <p className="text-xs text-blue-400 mt-1">
+                💡 Tip: After uploading the voice file, the system will automatically recognize the text content and fill in this field
+              </p>
             </div>
             <textarea
               id="refText"
@@ -180,8 +192,8 @@ const VoiceClone = () => {
               onChange={(e) => setLanguage(e.target.value)}
               className="w-full rounded border border-zinc-800 bg-zinc-900 px-4 py-2 text-white focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
             >
-              <option value="zh-CN">Chinese</option>
               <option value="en-US">English</option>
+              <option value="zh-CN">Chinese</option>
             </select>
           </div>
 
