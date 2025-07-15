@@ -1,3 +1,4 @@
+This branch will update the following feature:
 ## 🗣️ Voice Transcription Service (STT Integration)
 
 This module integrates OpenAI's Whisper API to automatically transcribe user-uploaded audio files into text during the voice cloning process in **Voxify**.
