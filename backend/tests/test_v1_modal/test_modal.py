@@ -30,9 +30,9 @@ if __name__ == "__main__":
             json={
                 "text": "Hello, this is a test of voice cloning. I love cats and cheese.",
                 "reference_audio_b64": audio_b64,
-                "reference_text": ""  # Leave empty for auto-transcription
+                "reference_text": "",  # Leave empty for auto-transcription
             },
-            timeout=120  # 2 minute timeout
+            timeout=120,  # 2 minute timeout
         )
 
         print(f"📥 Response status: {response.status_code}")
@@ -48,7 +48,11 @@ if __name__ == "__main__":
     try:
         result = response.json()
         print("📋 Response received:")
-        print(json.dumps(result, indent=2)[:500] + "..." if len(str(result)) > 500 else json.dumps(result, indent=2))
+        print(
+            json.dumps(result, indent=2)[:500] + "..."
+            if len(str(result)) > 500
+            else json.dumps(result, indent=2)
+        )
 
     except json.JSONDecodeError:
         print(f"❌ Invalid JSON response: {response.text}")

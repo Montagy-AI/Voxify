@@ -36,9 +36,9 @@ const Settings = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProfile(prev => ({
+    setProfile((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -75,13 +75,13 @@ const Settings = () => {
     <div className="min-h-screen bg-black text-white p-8">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">Settings</h1>
-        
+
         {error && (
           <div className="bg-red-900 text-white p-4 rounded-lg mb-6">
             {error}
           </div>
         )}
-        
+
         {successMessage && (
           <div className="bg-zinc-800 text-white p-4 rounded-lg mb-6">
             {successMessage}
@@ -136,17 +136,25 @@ const Settings = () => {
               </div>
 
               <div>
-                <label className="block text-gray-400 mb-2">Email Verification Status</label>
+                <label className="block text-gray-400 mb-2">
+                  Email Verification Status
+                </label>
                 <div className="flex items-center space-x-2">
-                  <span className={`inline-block w-2 h-2 rounded-full ${profile.email_verified ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                  <span>{profile.email_verified ? 'Verified' : 'Not Verified'}</span>
+                  <span
+                    className={`inline-block w-2 h-2 rounded-full ${profile.email_verified ? 'bg-green-500' : 'bg-red-500'}`}
+                  ></span>
+                  <span>
+                    {profile.email_verified ? 'Verified' : 'Not Verified'}
+                  </span>
                 </div>
               </div>
 
               <div>
                 <label className="block text-gray-400 mb-2">Last Login</label>
                 <div className="text-white">
-                  {profile.last_login_at ? new Date(profile.last_login_at).toLocaleString() : 'Never'}
+                  {profile.last_login_at
+                    ? new Date(profile.last_login_at).toLocaleString()
+                    : 'Never'}
                 </div>
               </div>
 
@@ -169,4 +177,4 @@ const Settings = () => {
   );
 };
 
-export default Settings; 
+export default Settings;
