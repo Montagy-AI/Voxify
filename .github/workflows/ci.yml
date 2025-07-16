@@ -28,14 +28,9 @@ jobs:
       - name: Build base image
         run: |
           docker build -f backend/Dockerfile.base -t backend-base:latest backend
-          docker tag backend-base:latest backend-base:latest
-      
+          
       - name: Build services
         run: |
-          docker compose build lint-backend
-          docker system prune -f
-          docker compose build db-init  
-          docker system prune -f
           docker compose build api
           docker system prune -f
           docker compose build frontend
