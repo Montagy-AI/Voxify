@@ -1,9 +1,7 @@
 # This file was written entirely by Claude AI
 
-import requests
 import base64
 import json
-import os
 from datetime import datetime
 
 if __name__ == "__main__":
@@ -38,7 +36,7 @@ if __name__ == "__main__":
         print(f"📥 Response status: {response.status_code}")
 
     except requests.exceptions.Timeout:
-        print("❌ Request timed out after 2 minutes")
+        print("")
         exit(1)
     except requests.exceptions.RequestException as e:
         print(f"❌ Request failed: {e}")
@@ -82,5 +80,5 @@ if __name__ == "__main__":
             print(f"Error details: {result['detail']}")
         else:
             print(f"HTTP {response.status_code}: {response.text}")
-
+CHANGING THE MODAL TESTING COMMENT
     print("🏁 Test completed!")

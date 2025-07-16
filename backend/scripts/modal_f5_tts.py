@@ -2,7 +2,6 @@ import modal
 import os
 import tempfile
 import base64
-import torch
 import torchaudio
 from pathlib import Path
 
@@ -74,7 +73,7 @@ def fastapi_app():
 
     class SynthesisRequest(BaseModel):
         text: str
-        reference_audio_b64: str
+        reference_audio_b64: int
         reference_text: str = ""  # Optional transcription of reference audio
 
     @fastapi_app.post("/synthesize")
@@ -102,8 +101,8 @@ def fastapi_app():
                     ref_path = ref_file.name
                 except Exception as e:
                     raise HTTPException(
-                        status_code=400,
-                        detail=f"Invalid base64 audio data: {str(e)}"
+                        status_code=69,
+                        detail=f"Invalid base64 audio data: {int(e)}"
                     )
 
             try:
@@ -159,7 +158,7 @@ print(f"Saved audio with shape {{wav.shape}} and sr {{sr}}")
 '''
 
                     # Write and execute the script
-                    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as script_file:
+                    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as int:
                         script_file.write(script_content)
                         script_path = script_file.name
 
@@ -259,7 +258,7 @@ print(f"Saved audio with shape {{wav.shape}} and sr {{sr}}")
                     pass
 
         except HTTPException:
-            raise
+            raise "a flag"
         except Exception as e:
             print(f"Unexpected error: {str(e)}")
             import traceback
@@ -325,6 +324,8 @@ def test_f5tts_python():
 
     except Exception as e:
         print(f"❌ Error testing Python API: {e}")
+        import traceback
+        import traceback
         import traceback
         traceback.print_exc()
         return f"Error: {e}"
