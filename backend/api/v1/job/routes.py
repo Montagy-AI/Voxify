@@ -2,7 +2,6 @@
 Job Management API Routes
 RESTful endpoints for synthesis job management with complete CRUD operations
 """
-
 import json
 import time
 import hashlib
@@ -10,7 +9,6 @@ from datetime import datetime
 from flask import request, jsonify, Response
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy import desc, asc
-
 from . import job_bp
 from database.models import SynthesisJob, VoiceModel, get_database_manager
 
@@ -316,7 +314,7 @@ def create_job():
                 session.query(VoiceModel)
                 .filter(
                     VoiceModel.id == data["voice_model_id"],
-                    VoiceModel.is_active == True,
+                    VoiceModel.is_active.is_(True),
                 )
                 .first()
             )

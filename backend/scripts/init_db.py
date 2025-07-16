@@ -3,7 +3,6 @@
 Voxify Database Initialization Script
 Used to create database table structure and populate initial data.
 """
-
 import os
 import sys
 

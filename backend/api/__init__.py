@@ -7,9 +7,6 @@ including user authentication, voice sample management, and TTS synthesis.
 """
 from flask import Flask
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
 import os
 
@@ -65,11 +62,6 @@ def create_app(test_config=None):
         methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["Content-Type", "Authorization", "Accept"],
         supports_credentials=True,
-    )
-
-    jwt = JWTManager(app)
-    limiter = Limiter(
-        get_remote_address, app=app, default_limits=["5000 per day", "1000 per hour"]
     )
 
     # Import blueprints

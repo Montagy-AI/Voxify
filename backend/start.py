@@ -50,7 +50,7 @@ def init_database():
     print("Initializing database...")
 
     try:
-        from database import initialize_database, get_database_manager, ChromaVectorDB
+        from database import initialize_database
     except ImportError as e:
         print(f"Error: Could not import database module: {e}")
         print("Please ensure this script is run from the project's 'backend' directory")
@@ -152,7 +152,7 @@ def seed_database():
             print(f"- Voice Samples: {len(samples)}")
             print(f"- Voice Models: {len(models)}")
             print(f"- Synthesis Jobs: {len(jobs)}")
-            print(f"- Usage Stats per User: 7 days")
+            print("- Usage Stats per User: 7 days")
 
             return True
 
@@ -206,7 +206,7 @@ def start_flask_app(skip_db_init=False, skip_file_init=False, seed_data=False):
     )  # Use PORT for cloud platforms
     debug = os.getenv("FLASK_DEBUG", "False").lower() == "true"
 
-    print(f"Starting Voxify API Server...")
+    print("Starting Voxify API Server...")
     print(f"Server: http://{host}:{port}")
     print(f"Auth endpoints: http://{host}:{port}/api/v1/auth")
     print(f"Voice endpoints: http://{host}:{port}/api/v1/voice")

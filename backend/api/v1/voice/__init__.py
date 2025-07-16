@@ -2,10 +2,7 @@
 Voice API Blueprint
 Handles voice sample management and cloning
 """
-
 # Import routes to register them with the blueprint
-from . import samples
-from . import clones
 from flask import Blueprint
 
 # Create the blueprint
