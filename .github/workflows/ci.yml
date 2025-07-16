@@ -31,8 +31,9 @@ jobs:
           
       - name: Build services
         run: |
+          docker compose build lint-backend
+          docker compose build db-init  
           docker compose build api
-          docker system prune -f
           docker compose build frontend
           docker compose build tests
       
