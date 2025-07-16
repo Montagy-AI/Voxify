@@ -6,11 +6,8 @@ import chromadb
 from chromadb.config import Settings
 from typing import Dict, List, Optional, Any
 import os
-from pathlib import Path
 import logging
 import json
-import numpy as np
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 

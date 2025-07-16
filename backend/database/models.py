@@ -2,7 +2,6 @@
 Voxify Database ORM Models
 SQLAlchemy models for the Voxify platform hybrid storage system
 """
-
 from sqlalchemy import (
     create_engine,
     Column,
@@ -15,7 +14,6 @@ from sqlalchemy import (
     ForeignKey,
     CheckConstraint,
     Index,
-    func,
     UniqueConstraint,
 )
 from sqlalchemy.orm import declarative_base
@@ -23,7 +21,7 @@ from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.dialects.sqlite import TEXT
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 import json
 
 Base = declarative_base()

@@ -245,7 +245,7 @@ def list_voice_clones():
                         "model_type": model.model_type,
                     }
                     clones.append(clone_data)
-                except Exception as e:
+                except Exception:
                     # If F5-TTS service fails, use database info only
                     clone_data = {
                         "clone_id": model.id,
@@ -457,7 +457,7 @@ def delete_voice_clone(clone_id: str):
             f5_service = get_f5_tts_service()
             try:
                 f5_service.delete_clone(clone_id)
-            except Exception as e:
+            except Exception:
                 # Log error but continue with database deletion
                 pass
 

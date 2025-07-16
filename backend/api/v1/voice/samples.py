@@ -2,7 +2,6 @@
 Voice Sample Management Routes
 Handles voice sample upload, processing, and management
 """
-
 import os
 import uuid
 import soundfile as sf
@@ -151,18 +150,16 @@ def upload_voice_sample():
         )
 
     except Exception as e:
-        # Clean up permanent file if it exists and was created
         if "permanent_path" in locals() and permanent_path.exists():
             try:
                 permanent_path.unlink()
-            except:
+            except Exception:
                 pass
 
-        # Clean up embedding if it was created
         if "embedding_id" in locals():
             try:
                 delete_voice_embedding(embedding_id)
-            except:
+            except Exception:
                 pass
 
         return (
