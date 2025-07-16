@@ -20,23 +20,23 @@ jobs:
         run: docker build -f backend/Dockerfile.base -t backend-base:latest backend
       
       - name: Build all services
-        run: docker-compose build
+        run: docker compose build
       
       - name: Run backend linting
-        run: docker-compose run --rm lint-backend
+        run: docker compose run --rm lint-backend
       
       - name: Run frontend linting
-        run: docker-compose run --rm lint-frontend
+        run: docker compose run --rm lint-frontend
       
       - name: Initialize database
-        run: docker-compose run --rm db-init
+        run: docker compose run --rm db-init
       
       - name: Start API and run tests
         run: |
-          docker-compose up -d api
+          docker compose up -d api
           echo "Waiting for API to start..."
           sleep 10
-          docker-compose run --rm tests
+          docker compose run --rm tests
       
       - name: Shut down services
-        run: docker-compose down --volumes
+        run: docker compose down --volumes
