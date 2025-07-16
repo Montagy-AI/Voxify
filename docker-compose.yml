@@ -42,15 +42,15 @@ services:
 
   db-init:
     build:
-      context: .
-      dockerfile: backend/scripts/Dockerfile
+      context: ./backend/
+      dockerfile: Dockerfile.base
     container_name: voxify_db_init
     volumes:
       - data_volume:/data
     environment:
       - DATABASE_URL=sqlite:////data/voxify.db
       - VECTOR_DB_PATH=data/chroma_db
-    entrypoint: ["python", "init_db.py"]
+    entrypoint: ["python", "scripts/init_db.py"]
     restart: "no"
 
   tests:
