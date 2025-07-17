@@ -126,7 +126,7 @@ npm install --save-dev eslint prettier
 | **Code Review Time** | 2-4 hours manual review | 15-30 minutes automated + targeted manual review | ~75% reduction |
 | **Bug Detection Rate** | Manual detection only | Automated + manual detection | ~40% increase in early detection |
 | **Security Issue Identification** | Ad-hoc manual checks | Continuous automated scanning | 100% coverage on file uploads |
-| **Code Consistency** | Variable formatting | Automated linting enforcement | 95% consistency score |
+| **Code Consistency** | Variable formatting | Automated linting enforcement | >70% consistency score |
 | **TTS-Specific Issues** | Often missed in reviews | Specialized AI analysis | ~60% better domain-specific issue detection |
 
 ### Trade-offs
