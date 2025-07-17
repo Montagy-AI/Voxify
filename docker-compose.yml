@@ -96,5 +96,16 @@ services:
     command: ["sh", "/lint.sh"]
     restart: "no"
 
+  snyk-security:
+    image: snyk/snyk:node
+    container_name: voxify_snyk_security
+    volumes:
+      - ./backend:/app/backend
+    working_dir: /app/backend
+    environment:
+      - SNYK_TOKEN=${SNYK_TOKEN}
+    command: ["snyk", "code", "test", "--severity-threshold=high"]
+    restart: "no"
+
 volumes:
   data_volume:
