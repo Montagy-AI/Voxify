@@ -1,4 +1,4 @@
-FROM python:3.11-slim AS backend-baseg
+FROM python:3.11-slim AS backend-base
 WORKDIR /backend
 RUN apt-get update && apt-get install -y \
     build-essential gcc g++ libsndfile1 libsndfile1-dev curl git \
