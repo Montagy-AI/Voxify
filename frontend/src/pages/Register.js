@@ -14,6 +14,7 @@ const Register = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
 
   useEffect(() => {
     if (authService.isAuthenticated()) {
@@ -75,6 +76,15 @@ const Register = () => {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
+  // Password validation checks
+  const passwordValidations = [
+    { id: 1, text: 'At least 8 characters', isValid: formData.password.length >= 8 },
+    { id: 2, text: 'Contains at least one number', isValid: /\d/.test(formData.password) },
+    { id: 3, text: 'Contains at least one special character', isValid: /[!@#$%^&*(),.?":{}|<>]/.test(formData.password) },
+    { id: 4, text: 'Contains at least one uppercase letter', isValid: /[A-Z]/.test(formData.password) },
+    { id: 5, text: 'Contains at least one lowercase letter', isValid: /[a-z]/.test(formData.password) },
+  ];
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -160,6 +170,12 @@ const Register = () => {
                     required
                     value={formData.password}
                     onChange={handleChange}
+                    onFocus={() => setShowPasswordRequirements(true)}
+                    onBlur={() => {
+                      if (!formData.password) {
+                        setShowPasswordRequirements(false);
+                      }
+                    }}
                     className="mt-1 block w-full rounded border border-zinc-800 bg-zinc-900 px-3 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors pr-10"
                     placeholder="Create a password"
                     disabled={isLoading}
@@ -181,6 +197,31 @@ const Register = () => {
                     )}
                   </button>
                 </div>
+                
+                {/* Password Requirements */}
+                {(showPasswordRequirements || formData.password) && (
+                  <div className="mt-2 p-3 bg-zinc-900 border border-zinc-800 rounded text-sm">
+                    <p className="text-gray-300 mb-2">Password must contain:</p>
+                    <ul className="space-y-1">
+                      {passwordValidations.map((validation) => (
+                        <li key={validation.id} className="flex items-center">
+                          <span className={`inline-block w-4 h-4 mr-2 ${validation.isValid ? 'text-green-500' : 'text-gray-500'}`}>
+                            {validation.isValid ? (
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
+                              </svg>
+                            ) : (
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                              </svg>
+                            )}
+                          </span>
+                          <span className={validation.isValid ? 'text-gray-300' : 'text-gray-500'}>{validation.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
 
               {/* Confirm Password */}
@@ -234,8 +275,12 @@ const Register = () => {
             </div>
 
             <div className="text-center text-sm">
-              <Link to="/login" className="text-gray-400 hover:text-white transition-colors">
-                Already have an account? Log in
+              <div className="text-gray-400 mb-2">Already have an account?</div>
+              <Link 
+                to="/login" 
+                className="inline-block w-full rounded bg-white px-3 py-2 text-sm font-semibold text-black hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black"
+              >
+                Log in
               </Link>
             </div>
           </form>
@@ -245,4 +290,4 @@ const Register = () => {
   );
 };
 
-export default Register; 
+export default Register;
