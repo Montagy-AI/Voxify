@@ -19,6 +19,8 @@ jobs:
           sudo rm -rf /opt/ghc
           sudo rm -rf "/usr/local/share/boost"
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo apt-get clean
+          sudo apt-get autoremove -y
           docker system prune -af
           df -h
       
@@ -32,9 +34,12 @@ jobs:
       - name: Build services
         run: |
           docker compose build lint-backend
-          docker compose build db-init  
+          docker compose build db-init
+          docker system prune -f
           docker compose build api
+          docker system prune -f
           docker compose build frontend
+          docker system prune -f
           docker compose build tests
       
       - name: Run backend linting
@@ -43,6 +48,9 @@ jobs:
       - name: Run frontend linting
         run: docker compose run --rm lint-frontend
       
+      - name: Run Snyk security scan
+        run: docker compose run --rm snyk-security
+
       - name: Initialize database
         run: docker compose run --rm db-init
       
