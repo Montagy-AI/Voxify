@@ -211,7 +211,7 @@ def test_configuration():
     
     # Test server URL configuration
     host = os.getenv('FLASK_HOST', '127.0.0.1')
-    port = int(os.getenv('PORT', os.getenv('FLASK_PORT', 10000)))
+    port = int(os.getenv('PORT', os.getenv('FLASK_PORT', 8000)))
     server_url = f"http://{host}:{port}"
     
     print(f"Server URL: {server_url}")

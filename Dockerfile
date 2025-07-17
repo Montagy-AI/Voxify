@@ -1,15 +1,15 @@
 FROM python:3.11-slim
 
-# 设置工作目录
+# Set working directory
 WORKDIR /app
 
-# 设置环境变量
+# Set environment variables
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 ENV FLASK_APP=backend/start.py
 ENV FLASK_ENV=production
 
-# 安装系统依赖
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     gcc \
@@ -20,23 +20,23 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# 复制requirements文件
+# Copy requirements file
 COPY backend/requirements.txt .
 
-# 安装Python依赖
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 创建必要的目录
+# Create necessary directories
 RUN mkdir -p data/voice_clones data/files/synthesis data/files/samples data/files/temp
 
-# 复制应用代码
+# Copy application code
 COPY backend/ backend/
 
-# 设置权限
+# Set permissions
 RUN chmod +x backend/start.py
 
-# 暴露端口
-EXPOSE 10000
+# Expose port
+EXPOSE 8000
 
-# 启动应用
+# Start application
 CMD ["python", "backend/start.py"] 
