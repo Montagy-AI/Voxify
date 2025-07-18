@@ -91,7 +91,7 @@ jobs:
         with:
           driver-opts: |
             image=moby/buildkit:v0.12.0
-      
+
       - name: Build backend image
         uses: docker/build-push-action@v5
         with:
@@ -134,8 +134,7 @@ jobs:
           voxify-backend:latest
 
       - name: Wait for API
-        run: |
-          timeout 60 bach -c '
+          timeout 60 bash -c '
             until curl -f http://localhost:10000/health; do
               echo "Waiting for API..."
               sleep 2

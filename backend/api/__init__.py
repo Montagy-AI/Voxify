@@ -43,7 +43,7 @@ def create_app(test_config=None):
         JWT_HEADER_NAME="Authorization",
         JWT_HEADER_TYPE="Bearer",
         DATABASE_URL=os.getenv("DATABASE_URL", "sqlite:///data/voxify.db"),
-        MAX_CONTENT_LENGTH=16 * 1024 * 1024,  # 限制上传文件大小为16MB
+        MAX_CONTENT_LENGTH=16 * 1024 * 1024,  # limit file upload size to 16MB
     )
 
     jwt = JWTManager(app)  # noqa: F841
