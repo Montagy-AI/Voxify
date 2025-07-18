@@ -103,8 +103,8 @@ services:
       - ./backend:/app/backend
     working_dir: /app/backend
     environment:
-      - SNYK_TOKEN=${SNYK_TOKEN}
-    command: ["snyk", "code", "test", "--severity-threshold=high"]
+      - SNYK_TOKEN=${SNYK_TOKEN:-}
+    command: ["sh", "-c", "if [ -z \"$SNYK_TOKEN\" ]; then echo 'Error: SNYK_TOKEN is not set. Exiting.'; exit 1; fi; snyk code test --severity-threshold=high"]
     restart: "no"
 
 volumes:
