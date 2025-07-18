@@ -34,8 +34,12 @@ jobs:
       - name: Run backend linting
         working-directory: backend
         run: |
+          echo "Running Black formatting check..."
           black --check .
+          echo "✅ Black formatting check completed"
+          echo "Running Flake8 linting..."
           flake8 .
+          echo "✅ Flake8 linting completed"
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -46,9 +50,14 @@ jobs:
 
       - name: Run frontend linting       
         run: |
-         cd frontend
-         npm ci
-         npm run lint
+          cd frontend
+          npm ci
+          echo "Running ESLint..."
+          npm run lint
+          echo "✅ ESLint completed"
+          echo "Running Prettier formatting check..."
+          npm run format:check
+          echo "✅ Prettier formatting check completed"
       
       - name: Run Snyk security scan
         if: ${{ env.secrets.SNYK_TOKEN != '' }}
