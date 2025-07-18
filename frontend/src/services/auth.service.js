@@ -5,7 +5,7 @@ class AuthService {
     try {
       const response = await api.post('/auth/login', {
         email,
-        password
+        password,
       });
 
       if (response.data.success) {
@@ -16,14 +16,14 @@ class AuthService {
         return { success: true, user };
       }
 
-      return { 
-        success: false, 
-        error: response.data.error?.message || 'Login failed' 
+      return {
+        success: false,
+        error: response.data.error?.message || 'Login failed',
       };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error?.message || 'Login failed'
+        error: error.response?.data?.error?.message || 'Login failed',
       };
     }
   }
@@ -34,24 +34,24 @@ class AuthService {
         email: userData.email,
         password: userData.password,
         first_name: userData.firstName,
-        last_name: userData.lastName
+        last_name: userData.lastName,
       });
 
       if (response.data.success) {
-        return { 
-          success: true, 
-          user: response.data.data.user 
+        return {
+          success: true,
+          user: response.data.data.user,
         };
       }
 
       return {
         success: false,
-        error: response.data.error?.message || 'Registration failed'
+        error: response.data.error?.message || 'Registration failed',
       };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error?.message || 'Registration failed'
+        error: error.response?.data?.error?.message || 'Registration failed',
       };
     }
   }
@@ -84,11 +84,15 @@ class AuthService {
         throw new Error('No refresh token available');
       }
 
-      const response = await api.post('/auth/refresh', {}, {
-        headers: {
-          'Authorization': `Bearer ${refreshToken}`
+      const response = await api.post(
+        '/auth/refresh',
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${refreshToken}`,
+          },
         }
-      });
+      );
 
       if (response.data.success) {
         const { access_token, refresh_token } = response.data.data;
@@ -99,45 +103,41 @@ class AuthService {
 
       return {
         success: false,
-        error: response.data.error?.message || 'Token refresh failed'
+        error: response.data.error?.message || 'Token refresh failed',
       };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error?.message || 'Token refresh failed'
+        error: error.response?.data?.error?.message || 'Token refresh failed',
       };
     }
   }
 
   async getUserProfile() {
-    try {
-      const response = await api.get('/auth/profile');
-      if (response.data.success && response.data.data && response.data.data.user) {
-        return {
-          data: response.data.data.user
-        };
-      }
-      throw new Error('Invalid response format');
-    } catch (error) {
-      throw error;
+    const response = await api.get('/auth/profile');
+    if (
+      response.data.success &&
+      response.data.data &&
+      response.data.data.user
+    ) {
+      return {
+        data: response.data.data.user,
+      };
     }
+    throw new Error('Invalid response format');
   }
 
   async updateUserProfile(userData) {
-    try {
-      const response = await api.put('/auth/profile', userData);
-      if (response.data.success && response.data.data) {
-        return {
-          data: response.data.data.user || response.data.data,
-          message: response.data.message
-        };
-      }
-      throw new Error('Invalid response format');
-    } catch (error) {
-      throw error;
+    const response = await api.put('/auth/profile', userData);
+    if (response.data.success && response.data.data) {
+      return {
+        data: response.data.data.user || response.data.data,
+        message: response.data.message,
+      };
     }
+    throw new Error('Invalid response format');
   }
 }
 
 const authService = new AuthService();
-export default authService; 
+export default authService;

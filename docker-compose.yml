@@ -1,13 +1,32 @@
 services:
+  frontend:
+    build:
+      context: ./frontend/
+      dockerfile: Dockerfile
+    container_name: voxify_frontend
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:10000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    restart: unless-stopped
+    command: npm start
+
   api:
     build:
       context: ./backend/
       dockerfile: api/Dockerfile
     container_name: voxify_api
     depends_on:
-      - db-init
+      db-init:
+        condition: service_completed_successfully
     ports:
-      - "5000:5000"
+      - "10000:10000"
     environment:
       - FLASK_ENV=development
       - DATABASE_URL=sqlite:////data/voxify.db
@@ -15,19 +34,23 @@ services:
     volumes:
       - data_volume:/data
     restart: unless-stopped
-    command: flask run --host=0.0.0.0
+    healthcheck:  # Add health check for the API
+      test: ["CMD", "curl", "-f", "http://localhost:10000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   db-init:
     build:
-      context: .
-      dockerfile: backend/scripts/Dockerfile
+      context: ./backend/
+      dockerfile: Dockerfile.base
     container_name: voxify_db_init
     volumes:
       - data_volume:/data
     environment:
       - DATABASE_URL=sqlite:////data/voxify.db
       - VECTOR_DB_PATH=data/chroma_db
-    entrypoint: ["python", "init_db.py"]
+    entrypoint: ["python", "scripts/init_db.py"]
     restart: "no"
 
   tests:
@@ -36,29 +59,53 @@ services:
       dockerfile: backend/tests/Dockerfile
     container_name: voxify_tests
     depends_on:
-      - db-init
-      - api
+      api:
+        condition: service_healthy
     volumes:
       - data_volume:/data
     environment:
       - DATABASE_URL=sqlite:////data/voxify.db
       - VECTOR_DB_PATH=data/chroma_db
+      - DOCKER_ENV=true
+      - FLASK_HOST=voxify_api
     command: ["sh", "-c", "python -m pytest tests/ -v && python -m unittest discover -s tests -p 'test_*.py' -v"]
     restart: "no"
 
-    # ai:
-    #   build:
-    #     context: ./ai
-    #     dockerfile: Dockerfile
-    #   container_name: voxify_ai
-    #   ports:
-    #     - "6000:6000"
-    #   environment:
-    #     - MODEL_CACHE=/models
-    #   volumes:
-    #     - model_cache:/models
-    #   restart: unless-stopped
+  lint-backend:
+    build:
+      context: ./backend/
+      dockerfile: Dockerfile.base
+    container_name: voxify_lint_backend
+    volumes:
+      - ./backend:/app
+      - ./backend/scripts/lint.sh:/lint.sh
+    working_dir: /app
+    command: ["bash", "/lint.sh"]
+    restart: "no"
+
+  lint-frontend:
+    build:
+      context: ./frontend/
+      dockerfile: Dockerfile
+    container_name: voxify_lint_frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - ./frontend/scripts/lint.sh:/lint.sh
+    working_dir: /app
+    command: ["sh", "/lint.sh"]
+    restart: "no"
+
+  snyk-security:
+    image: snyk/snyk:node
+    container_name: voxify_snyk_security
+    volumes:
+      - ./backend:/app/backend
+    working_dir: /app/backend
+    environment:
+      - SNYK_TOKEN=${SNYK_TOKEN:-}
+    command: ["sh", "-c", "if [ -z \"$SNYK_TOKEN\" ]; then echo 'Error: SNYK_TOKEN is not set. Exiting.'; exit 1; fi; snyk code test --severity-threshold=high"]
+    restart: "no"
 
 volumes:
   data_volume:
-  model_cache:

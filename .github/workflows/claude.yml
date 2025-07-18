@@ -1,4 +1,4 @@
-name: Claude PR Assistant
+name: Claude TTS Code Assistant
 
 on:
   issue_comment:
@@ -9,6 +9,18 @@ on:
     types: [opened, assigned]
   pull_request_review:
     types: [submitted]
+  # Auto-trigger on PRs that touch TTS-critical files
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - '**/*f5*.py'
+      - '**/*tts*.py' 
+      - '**/*voice*.py'
+      - '**/audio/**'
+      - '**/components/**/*audio*'
+      - '**/api/**'
+      - 'app.py'
+      - 'requirements.txt'
 
 jobs:
   claude-code-action:
@@ -16,32 +28,64 @@ jobs:
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && contains(github.event.issue.body, '@claude'))
+      (github.event_name == 'issues' && contains(github.event.issue.body, '@claude')) ||
+      (github.event_name == 'pull_request' && 
+       (contains(github.event.pull_request.title, 'tts') || 
+        contains(github.event.pull_request.title, 'audio') ||
+        contains(github.event.pull_request.title, 'voice') ||
+        contains(github.event.pull_request.title, 'f5')))
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write  # Changed to write for auto-comments
       issues: read
       id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0  # Get full history for better context
 
-      - name: Run Claude PR Action
+      - name: Run Claude TTS Analysis
         uses: anthropics/claude-code-action@beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          # Or use OAuth token instead:
-          # claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          timeout_minutes: "60"
-          # Optional: Restrict network access to specific domains only
-          # experimental_allowed_domains: |
-          #   .anthropic.com
-          #   .github.com
-          #   api.github.com
-          #   .githubusercontent.com
-          #   bun.sh
-          #   registry.npmjs.org
-          #   .blob.core.windows.net
+          timeout_minutes: "30"
+          # Optional: Add environment context for TTS project
+          extra_context: |
+            This is a zero-shot TTS voice cloning project using:
+            - Flask backend with F5-TTS integration
+            - React frontend for voice recording/playback
+            - Focus on performance, security, and audio quality
+            
+            Priority areas: F5-TTS optimization, audio security, React audio components
+
+  # Optional: Auto-comment on TTS-critical PRs
+  auto-tts-review:
+    if: |
+      github.event_name == 'pull_request' && 
+      (contains(github.event.pull_request.title, 'tts') || 
+       contains(github.event.pull_request.title, 'audio') ||
+       contains(github.event.pull_request.title, 'voice') ||
+       contains(github.event.pull_request.title, 'f5'))
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Auto-request TTS review
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: ` **TTS-related changes detected!**
+              
+              @claude review-performance - Focus on F5-TTS and audio performance
+              @claude review-security - Check audio upload security
+              @claude review-audio - Review React audio components
+              @claude review-f5 - Analyze F5-TTS integration
+              
+              Or use \`@claude\` for general TTS-aware code review.`
+            });

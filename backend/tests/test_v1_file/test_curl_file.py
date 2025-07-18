@@ -2,14 +2,13 @@ import subprocess
 import json
 import pytest
 import requests
-import time
-from unittest.mock import patch
 import sys
 import os
 import platform
 
 # Add the backend directory to Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+
 
 class TestFileServiceAPI:
     """Service tests for file API endpoints and data boundaries"""
@@ -19,7 +18,9 @@ class TestFileServiceAPI:
         """Check if server is running before tests"""
         try:
             response = requests.get(f"{server_url}/api/v1/auth/login", timeout=5)
-            assert response.status_code == 405, f"Unexpected status code: {response.status_code}"
+            assert (
+                response.status_code == 405
+            ), f"Unexpected status code: {response.status_code}"
         except Exception as e:
             pytest.skip(f"Server not available: {e}")
 
@@ -27,8 +28,10 @@ class TestFileServiceAPI:
     def server_url(self):
         """Get the Flask server URL based on start.py configuration"""
         # Get configuration from environment variables (same as start.py)
-        host = os.getenv('FLASK_HOST', '127.0.0.1')  # Use 127.0.0.1 for local testing
-        port = int(os.getenv('PORT', os.getenv('FLASK_PORT', 10000)))  # Default port from start.py
+        host = os.getenv("FLASK_HOST", "127.0.0.1")  # Use 127.0.0.1 for local testing
+        port = int(
+            os.getenv("PORT", os.getenv("FLASK_PORT", 10000))
+        )  # Default port from start.py
         return f"http://{host}:{port}"
 
     @pytest.fixture(scope="class")
@@ -40,7 +43,9 @@ class TestFileServiceAPI:
     def check_curl_available(self):
         """Check if curl is available on the system"""
         try:
-            result = subprocess.run(["curl", "--version"], capture_output=True, text=True)
+            result = subprocess.run(
+                ["curl", "--version"], capture_output=True, text=True
+            )
             if result.returncode != 0:
                 pytest.skip("curl is not available on this system")
         except FileNotFoundError:
@@ -53,7 +58,7 @@ class TestFileServiceAPI:
             "email": "filetest@example.com",
             "password": "Test123!@#",
             "first_name": "File",
-            "last_name": "Tester"
+            "last_name": "Tester",
         }
 
     @pytest.fixture(scope="class")
@@ -61,28 +66,35 @@ class TestFileServiceAPI:
         """Get authentication tokens for testing"""
         # Register user
         register_cmd = [
-            "curl", "-X", "POST",
+            "curl",
+            "-X",
+            "POST",
             f"{server_url}/api/v1/auth/register",
-            "-H", "Content-Type: application/json",
-            "-d", json.dumps(test_user)
+            "-H",
+            "Content-Type: application/json",
+            "-d",
+            json.dumps(test_user),
         ]
         subprocess.run(register_cmd, capture_output=True)
 
         # Login to get tokens
         login_cmd = [
-            "curl", "-X", "POST",
+            "curl",
+            "-X",
+            "POST",
             f"{server_url}/api/v1/auth/login",
-            "-H", "Content-Type: application/json",
-            "-d", json.dumps({
-                "email": test_user["email"],
-                "password": test_user["password"]
-            })
+            "-H",
+            "Content-Type: application/json",
+            "-d",
+            json.dumps(
+                {"email": test_user["email"], "password": test_user["password"]}
+            ),
         ]
         result = subprocess.run(login_cmd, capture_output=True, text=True)
         response = json.loads(result.stdout)
         return {
             "access_token": response.get("data", {}).get("access_token"),
-            "refresh_token": response.get("data", {}).get("refresh_token")
+            "refresh_token": response.get("data", {}).get("refresh_token"),
         }
 
     @pytest.fixture(scope="class")
@@ -96,17 +108,22 @@ class TestFileServiceAPI:
             "pitch": 1.0,
             "volume": 1.0,
             "output_format": "wav",
-            "sample_rate": 44100
+            "sample_rate": 44100,
         }
-        
+
         job_cmd = [
-            "curl", "-X", "POST",
+            "curl",
+            "-X",
+            "POST",
             f"{server_url}/api/v1/job",
-            "-H", "Content-Type: application/json",
-            "-H", f"Authorization: Bearer {auth_tokens['access_token']}",
-            "-d", json.dumps(job_data)
+            "-H",
+            "Content-Type: application/json",
+            "-H",
+            f"Authorization: Bearer {auth_tokens['access_token']}",
+            "-d",
+            json.dumps(job_data),
         ]
-        
+
         result = subprocess.run(job_cmd, capture_output=True, text=True)
         response = json.loads(result.stdout)
         return response.get("data", {}).get("id")
@@ -114,9 +131,12 @@ class TestFileServiceAPI:
     def test_download_synthesis_file_without_auth(self, server_url):
         """Test download synthesis file without authentication"""
         curl_cmd = [
-            "curl", "-X", "GET",
+            "curl",
+            "-X",
+            "GET",
             f"{server_url}/api/v1/file/synthesis/test-job-id",
-            "-H", "Content-Type: application/json"
+            "-H",
+            "Content-Type: application/json",
         ]
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
@@ -127,10 +147,14 @@ class TestFileServiceAPI:
     def test_download_synthesis_file_invalid_job_id(self, server_url, auth_tokens):
         """Test download synthesis file with invalid job ID"""
         curl_cmd = [
-            "curl", "-X", "GET",
+            "curl",
+            "-X",
+            "GET",
             f"{server_url}/api/v1/file/synthesis/invalid-job-id",
-            "-H", "Content-Type: application/json",
-            "-H", f"Authorization: Bearer {auth_tokens['access_token']}"
+            "-H",
+            "Content-Type: application/json",
+            "-H",
+            f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
@@ -143,10 +167,14 @@ class TestFileServiceAPI:
     def test_download_synthesis_file_nonexistent_job(self, server_url, auth_tokens):
         """Test download synthesis file with non-existent job ID"""
         curl_cmd = [
-            "curl", "-X", "GET",
+            "curl",
+            "-X",
+            "GET",
             f"{server_url}/api/v1/file/synthesis/00000000-0000-0000-0000-000000000000",
-            "-H", "Content-Type: application/json",
-            "-H", f"Authorization: Bearer {auth_tokens['access_token']}"
+            "-H",
+            "Content-Type: application/json",
+            "-H",
+            f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
@@ -156,18 +184,26 @@ class TestFileServiceAPI:
         assert "error" in response
         assert response["error"]["code"] == "FILE_NOT_FOUND"
 
-    def test_download_synthesis_file_with_valid_job(self, server_url, auth_tokens, test_job_id, null_device):
+    def test_download_synthesis_file_with_valid_job(
+        self, server_url, auth_tokens, test_job_id, null_device
+    ):
         """Test download synthesis file with valid job ID"""
         if not test_job_id:
             pytest.skip("No test job ID available")
-            
+
         curl_cmd = [
-            "curl", "-X", "GET",
+            "curl",
+            "-X",
+            "GET",
             f"{server_url}/api/v1/file/synthesis/{test_job_id}",
-            "-H", "Content-Type: application/json",
-            "-H", f"Authorization: Bearer {auth_tokens['access_token']}",
-            "-o", null_device,  # Don't save the file, just check response
-            "-w", "%{http_code}"
+            "-H",
+            "Content-Type: application/json",
+            "-H",
+            f"Authorization: Bearer {auth_tokens['access_token']}",
+            "-o",
+            null_device,  # Don't save the file, just check response
+            "-w",
+            "%{http_code}",
         ]
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
@@ -179,9 +215,12 @@ class TestFileServiceAPI:
     def test_delete_synthesis_file_without_auth(self, server_url):
         """Test delete synthesis file without authentication"""
         curl_cmd = [
-            "curl", "-X", "DELETE",
+            "curl",
+            "-X",
+            "DELETE",
             f"{server_url}/api/v1/file/synthesis/test-job-id",
-            "-H", "Content-Type: application/json"
+            "-H",
+            "Content-Type: application/json",
         ]
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
@@ -192,10 +231,14 @@ class TestFileServiceAPI:
     def test_delete_synthesis_file_invalid_job_id(self, server_url, auth_tokens):
         """Test delete synthesis file with invalid job ID"""
         curl_cmd = [
-            "curl", "-X", "DELETE",
+            "curl",
+            "-X",
+            "DELETE",
             f"{server_url}/api/v1/file/synthesis/invalid-job-id",
-            "-H", "Content-Type: application/json",
-            "-H", f"Authorization: Bearer {auth_tokens['access_token']}"
+            "-H",
+            "Content-Type: application/json",
+            "-H",
+            f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
@@ -208,10 +251,14 @@ class TestFileServiceAPI:
     def test_delete_synthesis_file_nonexistent_job(self, server_url, auth_tokens):
         """Test delete synthesis file with non-existent job ID"""
         curl_cmd = [
-            "curl", "-X", "DELETE",
+            "curl",
+            "-X",
+            "DELETE",
             f"{server_url}/api/v1/file/synthesis/00000000-0000-0000-0000-000000000000",
-            "-H", "Content-Type: application/json",
-            "-H", f"Authorization: Bearer {auth_tokens['access_token']}"
+            "-H",
+            "Content-Type: application/json",
+            "-H",
+            f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
@@ -221,16 +268,22 @@ class TestFileServiceAPI:
         assert "error" in response
         assert response["error"]["code"] == "FILE_NOT_FOUND"
 
-    def test_delete_synthesis_file_with_valid_job(self, server_url, auth_tokens, test_job_id):
+    def test_delete_synthesis_file_with_valid_job(
+        self, server_url, auth_tokens, test_job_id
+    ):
         """Test delete synthesis file with valid job ID"""
         if not test_job_id:
             pytest.skip("No test job ID available")
-            
+
         curl_cmd = [
-            "curl", "-X", "DELETE",
+            "curl",
+            "-X",
+            "DELETE",
             f"{server_url}/api/v1/file/synthesis/{test_job_id}",
-            "-H", "Content-Type: application/json",
-            "-H", f"Authorization: Bearer {auth_tokens['access_token']}"
+            "-H",
+            "Content-Type: application/json",
+            "-H",
+            f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
@@ -242,10 +295,14 @@ class TestFileServiceAPI:
     def test_download_synthesis_file_with_invalid_token(self, server_url):
         """Test download synthesis file with invalid token"""
         curl_cmd = [
-            "curl", "-X", "GET",
+            "curl",
+            "-X",
+            "GET",
             f"{server_url}/api/v1/file/synthesis/test-job-id",
-            "-H", "Content-Type: application/json",
-            "-H", "Authorization: Bearer invalid_token_here"
+            "-H",
+            "Content-Type: application/json",
+            "-H",
+            "Authorization: Bearer invalid_token_here",
         ]
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
@@ -256,10 +313,14 @@ class TestFileServiceAPI:
     def test_delete_synthesis_file_with_invalid_token(self, server_url):
         """Test delete synthesis file with invalid token"""
         curl_cmd = [
-            "curl", "-X", "DELETE",
+            "curl",
+            "-X",
+            "DELETE",
             f"{server_url}/api/v1/file/synthesis/test-job-id",
-            "-H", "Content-Type: application/json",
-            "-H", "Authorization: Bearer invalid_token_here"
+            "-H",
+            "Content-Type: application/json",
+            "-H",
+            "Authorization: Bearer invalid_token_here",
         ]
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
@@ -270,10 +331,14 @@ class TestFileServiceAPI:
     def test_download_synthesis_file_malformed_job_id(self, server_url, auth_tokens):
         """Test download synthesis file with malformed job ID"""
         curl_cmd = [
-            "curl", "-X", "GET",
+            "curl",
+            "-X",
+            "GET",
             f"{server_url}/api/v1/file/synthesis/not-a-uuid",
-            "-H", "Content-Type: application/json",
-            "-H", f"Authorization: Bearer {auth_tokens['access_token']}"
+            "-H",
+            "Content-Type: application/json",
+            "-H",
+            f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
@@ -285,10 +350,14 @@ class TestFileServiceAPI:
     def test_delete_synthesis_file_malformed_job_id(self, server_url, auth_tokens):
         """Test delete synthesis file with malformed job ID"""
         curl_cmd = [
-            "curl", "-X", "DELETE",
+            "curl",
+            "-X",
+            "DELETE",
             f"{server_url}/api/v1/file/synthesis/not-a-uuid",
-            "-H", "Content-Type: application/json",
-            "-H", f"Authorization: Bearer {auth_tokens['access_token']}"
+            "-H",
+            "Content-Type: application/json",
+            "-H",
+            f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
@@ -300,10 +369,14 @@ class TestFileServiceAPI:
     def test_download_synthesis_file_wrong_method(self, server_url, auth_tokens):
         """Test download synthesis file with wrong HTTP method"""
         curl_cmd = [
-            "curl", "-X", "POST",
+            "curl",
+            "-X",
+            "POST",
             f"{server_url}/api/v1/file/synthesis/test-job-id",
-            "-H", "Content-Type: application/json",
-            "-H", f"Authorization: Bearer {auth_tokens['access_token']}"
+            "-H",
+            "Content-Type: application/json",
+            "-H",
+            f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
@@ -314,10 +387,14 @@ class TestFileServiceAPI:
     def test_delete_synthesis_file_wrong_method(self, server_url, auth_tokens):
         """Test delete synthesis file with wrong HTTP method"""
         curl_cmd = [
-            "curl", "-X", "POST",
+            "curl",
+            "-X",
+            "POST",
             f"{server_url}/api/v1/file/synthesis/test-job-id",
-            "-H", "Content-Type: application/json",
-            "-H", f"Authorization: Bearer {auth_tokens['access_token']}"
+            "-H",
+            "Content-Type: application/json",
+            "-H",
+            f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
@@ -325,19 +402,28 @@ class TestFileServiceAPI:
         # Should return 405 Method Not Allowed
         assert "405" in result.stdout or "Method Not Allowed" in result.stdout
 
-    def test_download_synthesis_file_with_headers(self, server_url, auth_tokens, test_job_id, null_device):
+    def test_download_synthesis_file_with_headers(
+        self, server_url, auth_tokens, test_job_id, null_device
+    ):
         """Test download synthesis file with additional headers"""
         if not test_job_id:
             pytest.skip("No test job ID available")
-            
+
         curl_cmd = [
-            "curl", "-X", "GET",
+            "curl",
+            "-X",
+            "GET",
             f"{server_url}/api/v1/file/synthesis/{test_job_id}",
-            "-H", "Content-Type: application/json",
-            "-H", "Accept: audio/*",
-            "-H", f"Authorization: Bearer {auth_tokens['access_token']}",
-            "-o", null_device,
-            "-w", "%{http_code}"
+            "-H",
+            "Content-Type: application/json",
+            "-H",
+            "Accept: audio/*",
+            "-H",
+            f"Authorization: Bearer {auth_tokens['access_token']}",
+            "-o",
+            null_device,
+            "-w",
+            "%{http_code}",
         ]
 
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
@@ -349,28 +435,34 @@ class TestFileServiceAPI:
         """Test unauthorized access to file endpoints"""
         test_endpoints = [
             "/api/v1/file/synthesis/test-job-id",
-            "/api/v1/file/synthesis/00000000-0000-0000-0000-000000000000"
+            "/api/v1/file/synthesis/00000000-0000-0000-0000-000000000000",
         ]
-        
+
         for endpoint in test_endpoints:
             # Test GET without auth
             curl_cmd = [
-                "curl", "-X", "GET",
+                "curl",
+                "-X",
+                "GET",
                 f"{server_url}{endpoint}",
-                "-H", "Content-Type: application/json"
+                "-H",
+                "Content-Type: application/json",
             ]
-            
+
             result = subprocess.run(curl_cmd, capture_output=True, text=True)
             assert result.returncode == 0, f"Curl command failed: {result.stderr}"
             assert "Missing Authorization Header" in result.stdout
-            
+
             # Test DELETE without auth
             curl_cmd = [
-                "curl", "-X", "DELETE",
+                "curl",
+                "-X",
+                "DELETE",
                 f"{server_url}{endpoint}",
-                "-H", "Content-Type: application/json"
+                "-H",
+                "Content-Type: application/json",
             ]
-            
+
             result = subprocess.run(curl_cmd, capture_output=True, text=True)
             assert result.returncode == 0, f"Curl command failed: {result.stderr}"
             assert "Missing Authorization Header" in result.stdout
@@ -378,39 +470,44 @@ class TestFileServiceAPI:
     def test_file_endpoint_error_responses(self, server_url, auth_tokens):
         """Test various error response scenarios"""
         test_cases = [
-            {
-                "job_id": "invalid-format",
-                "expected_error": "FILE_NOT_FOUND"
-            },
+            {"job_id": "invalid-format", "expected_error": "FILE_NOT_FOUND"},
             {
                 "job_id": "00000000-0000-0000-0000-000000000000",
-                "expected_error": "FILE_NOT_FOUND"
-            }
+                "expected_error": "FILE_NOT_FOUND",
+            },
         ]
-        
+
         for case in test_cases:
             # Test GET
             curl_cmd = [
-                "curl", "-X", "GET",
+                "curl",
+                "-X",
+                "GET",
                 f"{server_url}/api/v1/file/synthesis/{case['job_id']}",
-                "-H", "Content-Type: application/json",
-                "-H", f"Authorization: Bearer {auth_tokens['access_token']}"
+                "-H",
+                "Content-Type: application/json",
+                "-H",
+                f"Authorization: Bearer {auth_tokens['access_token']}",
             ]
-            
+
             result = subprocess.run(curl_cmd, capture_output=True, text=True)
             assert result.returncode == 0, f"Curl command failed: {result.stderr}"
             response = json.loads(result.stdout)
             assert response["success"] is False
             assert response["error"]["code"] == case["expected_error"]
-            
+
             # Test DELETE
             curl_cmd = [
-                "curl", "-X", "DELETE",
+                "curl",
+                "-X",
+                "DELETE",
                 f"{server_url}/api/v1/file/synthesis/{case['job_id']}",
-                "-H", "Content-Type: application/json",
-                "-H", f"Authorization: Bearer {auth_tokens['access_token']}"
+                "-H",
+                "Content-Type: application/json",
+                "-H",
+                f"Authorization: Bearer {auth_tokens['access_token']}",
             ]
-            
+
             result = subprocess.run(curl_cmd, capture_output=True, text=True)
             assert result.returncode == 0, f"Curl command failed: {result.stderr}"
             response = json.loads(result.stdout)
@@ -427,16 +524,16 @@ def test_configuration():
     """Test that the configuration is correct"""
     import os
     import platform
-    
+
     # Test server URL configuration
-    host = os.getenv('FLASK_HOST', '127.0.0.1')
-    port = int(os.getenv('PORT', os.getenv('FLASK_PORT', 10000)))
+    host = os.getenv("FLASK_HOST", "127.0.0.1")
+    port = int(os.getenv("PORT", os.getenv("FLASK_PORT", 10000)))
     server_url = f"http://{host}:{port}"
-    
+
     print(f"Server URL: {server_url}")
     print(f"Platform: {platform.system()}")
     print(f"Null device: {'NUL' if platform.system() == 'Windows' else '/dev/null'}")
-    
+
     # Test curl availability
     try:
         result = subprocess.run(["curl", "--version"], capture_output=True, text=True)
@@ -447,4 +544,4 @@ def test_configuration():
 
 if __name__ == "__main__":
     test_configuration()
-    run_tests() 
+    run_tests()
