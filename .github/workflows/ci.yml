@@ -96,8 +96,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./backend
-          file: Dockerfile
-          target: production
+          file: ./backend/Dockerfile
           push: false
           load: true
           tags: voxify-backend:latest
@@ -108,7 +107,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
-          file: Dockerfile
+          file: ./frontend/Dockerfile
           push: false
           load: true
           tags: voxify-frontend:latest
