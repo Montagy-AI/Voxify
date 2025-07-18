@@ -66,7 +66,6 @@ def fastapi_app():
     from pydantic import BaseModel
     import sys
     import subprocess
-    import os
 
     # Add F5-TTS to path
     sys.path.insert(0, "/app/F5-TTS")
@@ -254,7 +253,7 @@ print(f"Saved audio with shape {{wav.shape}} and sr {{sr}}")
                     os.unlink(ref_path)
                     if "generated_file" in locals() and os.path.exists(generated_file):
                         os.unlink(generated_file)
-                except:
+                except OSError:
                     pass
 
         except HTTPException:

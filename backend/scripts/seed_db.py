@@ -6,23 +6,20 @@ Creates sample data for testing and development
 import os
 import sys
 from datetime import datetime, timedelta, timezone
-import json
-from pathlib import Path
-
-# Add the backend directory to the Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from database import get_database_manager
 from database.models import (
     User,
     VoiceSample,
     VoiceModel,
     SynthesisJob,
-    PhonemeAlignment,
+    # PhonemeAlignment,
     UsageStat,
-    SystemSetting,
+    # SystemSetting,
 )
 from api.utils.password import hash_password
+
+# Add the backend directory to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def utc_now():
@@ -243,7 +240,7 @@ def main():
         print(f"- Voice Samples: {len(samples)}")
         print(f"- Voice Models: {len(models)}")
         print(f"- Synthesis Jobs: {len(jobs)}")
-        print(f"- Usage Stats per User: 7 days")
+        print("- Usage Stats per User: 7 days")
 
     except Exception as e:
         session.rollback()

@@ -60,7 +60,7 @@ def install_pytorch():
     """Install PyTorch based on system configuration"""
     logger.info("Installing PyTorch...")
 
-    system = platform.system().lower()
+    system = platform.system().lower()  # noqa: F841
     gpu_support = check_gpu_support()
 
     if gpu_support == "cuda" or gpu_support == "unknown":

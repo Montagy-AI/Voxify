@@ -9,7 +9,6 @@ including user authentication, voice sample management, and TTS synthesis.
 from flask import Flask
 from flask_cors import CORS
 from dotenv import load_dotenv
-# from .v1.voice import voice_bp
 from flask_jwt_extended import JWTManager
 import os
 
@@ -40,16 +39,14 @@ def create_app(test_config=None):
         JWT_SECRET_KEY=os.getenv("JWT_SECRET_KEY", "Majick"),
         JWT_ACCESS_TOKEN_EXPIRES=int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES", 3600)),
         JWT_REFRESH_TOKEN_EXPIRES=int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES", 2592000)),
-
         JWT_TOKEN_LOCATION=["headers"],
         JWT_HEADER_NAME="Authorization",
         JWT_HEADER_TYPE="Bearer",
-
         DATABASE_URL=os.getenv("DATABASE_URL", "sqlite:///data/voxify.db"),
         MAX_CONTENT_LENGTH=16 * 1024 * 1024,  # 限制上传文件大小为16MB
     )
 
-    jwt = JWTManager(app)  ## noqa: F401, E402
+    jwt = JWTManager(app)  # noqa: F841
 
     # Override with test config if provided
     if test_config is not None:

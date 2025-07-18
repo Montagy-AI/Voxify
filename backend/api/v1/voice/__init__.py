@@ -2,18 +2,20 @@
 Voice Service Package
 Handles voice sample management, voice cloning, and TTS synthesis
 """
+
 from flask import Blueprint
 
 # Create the voice blueprint
-voice_bp = Blueprint('voice', __name__)
+voice_bp = Blueprint("voice", __name__)
 
 # Import route modules to register endpoints
 # This ensures all routes from samples.py and clones.py are registered
 from . import samples  # This will register sample routes
-from . import clones   # This will register clone routes
+from . import clones  # This will register clone routes
+
 
 # Add voice models endpoint (required by tests)
-@voice_bp.route('/models', methods=['GET'])
+@voice_bp.route("/models", methods=["GET"])
 def get_voice_models():
     """Get available voice models"""
     return {
@@ -27,14 +29,14 @@ def get_voice_models():
                     "type": "zero_shot",
                     "languages": ["en-US", "zh-CN"],
                     "max_duration": 30,
-                    "min_duration": 3
+                    "min_duration": 3,
                 }
             ]
-        }
+        },
     }
 
-# Optional: Add a basic info endpoint
-@voice_bp.route('/info', methods=['GET'])
+
+@voice_bp.route("/info", methods=["GET"])
 def voice_service_info():
     """Get voice service information"""
     return {
@@ -44,9 +46,9 @@ def voice_service_info():
             "Voice sample upload and management",
             "Voice cloning with F5-TTS",
             "Speech synthesis",
-            "Voice embedding generation"
+            "Voice embedding generation",
         ],
         "supported_formats": ["wav", "mp3"],
         "max_sample_duration": 30,
-        "min_sample_duration": 3
+        "min_sample_duration": 3,
     }
