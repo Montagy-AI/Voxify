@@ -192,8 +192,8 @@ const Login = () => {
 
             <div className="text-center text-sm">
               <div className="text-gray-400 mb-2">Don't have an account?</div>
-              <Link 
-                to="/register" 
+              <Link
+                to="/register"
                 className="inline-block w-full rounded bg-white px-3 py-2 text-sm font-semibold text-black hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black"
               >
                 Sign up

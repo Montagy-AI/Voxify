@@ -2,6 +2,7 @@
 Voice Sample Management Routes
 Handles voice sample upload, processing, and management
 """
+
 import os
 import uuid
 import soundfile as sf
@@ -98,9 +99,7 @@ def upload_voice_sample():
 
         # Save file to permanent location
         file.save(str(permanent_path))
-        print(
-            f"[DEBUG] File saved successfully, size: {os.path.getsize(str(permanent_path))} bytes"
-        )
+        print(f"[DEBUG] File saved successfully, size: {os.path.getsize(str(permanent_path))} bytes")
 
         # Extract audio metadata
         metadata = extract_audio_metadata(str(permanent_path))
@@ -163,9 +162,7 @@ def upload_voice_sample():
                 pass
 
         return (
-            jsonify(
-                {"success": False, "error": f"Error processing voice sample: {str(e)}"}
-            ),
+            jsonify({"success": False, "error": f"Error processing voice sample: {str(e)}"}),
             500,
         )
 
@@ -199,12 +196,7 @@ def list_voice_samples():
         if status:
             query = query.filter_by(status=status)
 
-        samples = (
-            query.order_by(VoiceSample.created_at.desc())
-            .offset((page - 1) * page_size)
-            .limit(page_size)
-            .all()
-        )
+        samples = query.order_by(VoiceSample.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
 
         total = query.count()
 
@@ -241,9 +233,7 @@ def get_voice_sample(sample_id: str):
 
     db = get_database_manager()
     with db.get_session() as session:
-        sample = (
-            session.query(VoiceSample).filter_by(id=sample_id, user_id=user_id).first()
-        )
+        sample = session.query(VoiceSample).filter_by(id=sample_id, user_id=user_id).first()
         if not sample:
             return jsonify({"success": False, "error": "Voice sample not found"}), 404
 
@@ -267,9 +257,7 @@ def delete_voice_sample(sample_id: str):
 
     db = get_database_manager()
     with db.get_session() as session:
-        sample = (
-            session.query(VoiceSample).filter_by(id=sample_id, user_id=user_id).first()
-        )
+        sample = session.query(VoiceSample).filter_by(id=sample_id, user_id=user_id).first()
         if not sample:
             return jsonify({"success": False, "error": "Voice sample not found"}), 404
 
@@ -281,6 +269,4 @@ def delete_voice_sample(sample_id: str):
         session.delete(sample)
         session.commit()
 
-        return jsonify(
-            {"success": True, "data": {"message": "Voice sample deleted successfully"}}
-        )
+        return jsonify({"success": True, "data": {"message": "Voice sample deleted successfully"}})

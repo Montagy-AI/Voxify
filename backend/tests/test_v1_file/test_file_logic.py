@@ -9,9 +9,7 @@ from api.v1.file.routes import get_synthesis_file, error_response, success_respo
 
 # Add the backend and backend/api directories to Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../backend"))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../backend")))
 
 
 class TestFileLogic:
@@ -110,9 +108,7 @@ class TestFileRetrieval:
         """Test get_synthesis_file when job doesn't exist"""
         mock_session = Mock()
         mock_session.query.return_value.filter_by.return_value.first.return_value = None
-        mock_db_manager.return_value.get_session.return_value.__enter__.return_value = (
-            mock_session
-        )
+        mock_db_manager.return_value.get_session.return_value.__enter__.return_value = mock_session
 
         file_path, filename, cache_id = get_synthesis_file("non-existent-job")
 
@@ -138,9 +134,7 @@ class TestFileRetrieval:
             mock_job,
             mock_cache,
         ]
-        mock_db_manager.return_value.get_session.return_value.__enter__.return_value = (
-            mock_session
-        )
+        mock_db_manager.return_value.get_session.return_value.__enter__.return_value = mock_session
 
         file_path, filename, cache_id = get_synthesis_file("job-123")
 
@@ -158,12 +152,8 @@ class TestFileRetrieval:
         mock_job.output_path = "/path/to/direct/output.wav"
 
         mock_session = Mock()
-        mock_session.query.return_value.filter_by.return_value.first.return_value = (
-            mock_job
-        )
-        mock_db_manager.return_value.get_session.return_value.__enter__.return_value = (
-            mock_session
-        )
+        mock_session.query.return_value.filter_by.return_value.first.return_value = mock_job
+        mock_db_manager.return_value.get_session.return_value.__enter__.return_value = mock_session
 
         file_path, filename, cache_id = get_synthesis_file("job-123")
 
@@ -181,12 +171,8 @@ class TestFileRetrieval:
         mock_job.output_path = None
 
         mock_session = Mock()
-        mock_session.query.return_value.filter_by.return_value.first.return_value = (
-            mock_job
-        )
-        mock_db_manager.return_value.get_session.return_value.__enter__.return_value = (
-            mock_session
-        )
+        mock_session.query.return_value.filter_by.return_value.first.return_value = mock_job
+        mock_db_manager.return_value.get_session.return_value.__enter__.return_value = mock_session
 
         file_path, filename, cache_id = get_synthesis_file("job-123")
 
@@ -208,9 +194,7 @@ class TestFileRetrieval:
             mock_job,
             None,
         ]
-        mock_db_manager.return_value.get_session.return_value.__enter__.return_value = (
-            mock_session
-        )
+        mock_db_manager.return_value.get_session.return_value.__enter__.return_value = mock_session
 
         file_path, filename, cache_id = get_synthesis_file("job-123")
 
@@ -222,9 +206,7 @@ class TestFileRetrieval:
     @patch("api.v1.file.routes.get_database_manager")
     def test_get_synthesis_file_database_error(self, mock_db_manager):
         """Test get_synthesis_file when database raises an exception"""
-        mock_db_manager.return_value.get_session.side_effect = Exception(
-            "Database connection failed"
-        )
+        mock_db_manager.return_value.get_session.side_effect = Exception("Database connection failed")
 
         # Should handle the exception gracefully
         with pytest.raises(Exception):
@@ -256,9 +238,7 @@ class TestFilePathLogic:
     def test_file_storage_paths(self):
         """Test file storage paths based on start.py configuration"""
         # Test environment variable defaults
-        synthesis_storage = os.getenv(
-            "VOXIFY_SYNTHESIS_STORAGE", "data/files/synthesis"
-        )
+        synthesis_storage = os.getenv("VOXIFY_SYNTHESIS_STORAGE", "data/files/synthesis")
         samples_storage = os.getenv("VOXIFY_SAMPLES_STORAGE", "data/files/samples")
         temp_storage = os.getenv("VOXIFY_TEMP_STORAGE", "data/files/temp")
 

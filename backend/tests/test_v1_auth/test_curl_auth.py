@@ -34,18 +34,14 @@ class TestCurlAuth:
         """Get the Flask server URL based on start.py configuration"""
         # Get configuration from environment variables (same as start.py)
         host = os.getenv("FLASK_HOST", "127.0.0.1")  # Use 127.0.0.1 for local testing
-        port = int(
-            os.getenv("PORT", os.getenv("FLASK_PORT", 10000))
-        )  # Default port from start.py
+        port = int(os.getenv("PORT", os.getenv("FLASK_PORT", 10000)))  # Default port from start.py
         return f"http://{host}:{port}"
 
     @pytest.fixture(scope="class", autouse=True)
     def check_curl_available(self):
         """Check if curl is available on the system"""
         try:
-            result = subprocess.run(
-                ["curl", "--version"], capture_output=True, text=True
-            )
+            result = subprocess.run(["curl", "--version"], capture_output=True, text=True)
             if result.returncode != 0:
                 pytest.skip("curl is not available on this system")
         except FileNotFoundError:
@@ -86,9 +82,7 @@ class TestCurlAuth:
             "-H",
             "Content-Type: application/json",
             "-d",
-            json.dumps(
-                {"email": test_user["email"], "password": test_user["password"]}
-            ),
+            json.dumps({"email": test_user["email"], "password": test_user["password"]}),
         ]
         result = subprocess.run(login_cmd, capture_output=True, text=True)
         response = json.loads(result.stdout)
@@ -171,9 +165,7 @@ class TestCurlAuth:
             "-H",
             "Content-Type: application/json",
             "-d",
-            json.dumps(
-                {"email": test_user["email"], "password": test_user["password"]}
-            ),
+            json.dumps({"email": test_user["email"], "password": test_user["password"]}),
         ]
         result = subprocess.run(curl_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl command failed: {result.stderr}"

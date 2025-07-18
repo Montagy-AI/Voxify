@@ -5,6 +5,7 @@ Hybrid Storage System: SQLite + Chroma Vector Database
 This package provides the complete database layer for the Voxify platform,
 including relational data management and vector similarity search capabilities.
 """
+
 from .models import (
     # Database Manager
     DatabaseManager,

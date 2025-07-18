@@ -6,12 +6,74 @@ on:
     branches: [ main ]
 
 jobs:
-  test-and-lint:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
       
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/requirements-dev.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt 
+      
+      - name: Run backend linting
+        working-directory: backend
+        run: |
+          echo "Running Black formatting check..."
+          black --check .
+          echo "✅ Black formatting check completed"
+          echo "Running Flake8 linting..."
+          flake8 .
+          echo "✅ Flake8 linting completed"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Run frontend linting       
+        run: |
+          cd frontend
+          npm ci
+          echo "Running ESLint..."
+          npm run lint
+          echo "✅ ESLint completed"
+          echo "Running Prettier formatting check..."
+          npm run format:check
+          echo "✅ Prettier formatting check completed"
+      
+      - name: Run Snyk security scan
+        if: ${{ env.secrets.SNYK_TOKEN != '' }}
+        run: |
+          npm install -g snyk
+          cd backend
+          snyk auth ${{ secrets.SNYK_TOKEN }}
+          snyk code test --severity-threshold=high || true  # Allow to fail
+  
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
       - name: Free up disk space
         run: |
           sudo rm -rf /usr/share/dotnet
@@ -26,40 +88,74 @@ jobs:
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
-      - name: Build base image
-        run: |
-          docker build -f backend/Dockerfile.base -t backend-base:latest backend
-          
-      - name: Build services
-        run: |
-          docker compose build lint-backend
-          docker compose build db-init
-          docker system prune -f
-          docker compose build api
-          docker system prune -f
-          docker compose build frontend
-          docker system prune -f
-          docker compose build tests
-      
-      - name: Run backend linting
-        run: docker compose run --rm lint-backend
-      
-      - name: Run frontend linting
-        run: docker compose run --rm lint-frontend
-      
-      - name: Run Snyk security scan
-        run: docker compose run --rm snyk-security
+        with:
+          driver-opts: |
+            image=moby/buildkit:v0.12.0
+
+      - name: Build backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: false
+          load: true
+          tags: voxify-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: false
+          load: true
+          tags: voxify-frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Initialize database
-        run: docker compose run --rm db-init
-      
-      - name: Start API and run tests
         run: |
-          docker compose up -d api
-          echo "Waiting for API to start..."
-          sleep 10
-          docker compose run --rm tests
+          docker run --rm \
+            -v voxify-data:/data \
+            -e DATABASE_URL=sqlite:////data/voxify.db \
+            -e VECTOR_DB_PATH=data/chroma_db \
+            voxify-backend:latest python scripts/init_db.py 
+
+      - name: Start service
+        run: |
+          docker run -d \
+          --name voxify_api \
+          -p 10000:10000 \
+          -v voxify_data:/data \
+          -e FLASK_ENV=development \
+          -e DATABASE_URL=sqlite:////data/voxify.db \
+          -e VECTOR_DB_PATH=data/chroma_db \
+          voxify-backend:latest
+
+      - name: Wait for API
+        run: |
+          timeout 60 bash -c '
+            until curl -f http://localhost:10000/health; do
+              echo "Waiting for API..."
+              sleep 2
+            done
+          '
       
-      - name: Shut down services
-        run: docker compose down --volumes
+      - name: Run tests
+        run: |
+          docker run --rm \
+            --network container:voxify_api \
+            -v voxify_data:/data \
+            -e DATABASE_URL=sqlite:////data/voxify.db \
+            -e VECTOR_DB_PATH=data/chroma_db \
+            -e DOCKER_ENV=true \
+            -e FLASK_HOST=localhost \
+            voxify-backend:latest python -m pytest tests/ -v
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker stop voxify_api || true
+          docker rm voxify_api || true
+          docker volume rm voxify_data || true

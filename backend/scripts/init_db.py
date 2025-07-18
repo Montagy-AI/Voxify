@@ -10,7 +10,8 @@ import sys
 # This assumes init_db.py is in the backend directory, and the database module is in its subdirectory
 # SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SCRIPT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# If init_db.py is in the backend/scripts/ directory, adjust to SCRIPT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# If init_db.py is in the backend/scripts/ directory,
+# adjust to SCRIPT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Or, a more robust way is to ensure PYTHONPATH is set correctly when running this script, or run from the project root
 # For the current structure (init_db.py in backend/ directory):
 # sys.path.append(SCRIPT_DIR)
@@ -24,9 +25,7 @@ try:
 except ImportError as e:
     print(f"❌ Error: Could not import the database module: {e}")
     print("   Please ensure this script is run from the project's 'backend' directory,")
-    print(
-        "   or that the Python path (PYTHONPATH) is set correctly to find the 'database' package."
-    )
+    print("   or that the Python path (PYTHONPATH) is set correctly to find the 'database' package.")
     print(f"   Current working directory: {os.getcwd()}")
     print(f"   Python search path: {sys.path}")
     sys.exit(1)
@@ -50,14 +49,16 @@ def main():
         print("✅ '/data' directory confirmed/created.")
     except OSError as e:
         print(
-            f"⚠️  Could not create 'data' directory: {e}. This might not be an issue if database files are not in this directory."
+            f"⚠️  Could not create 'data' directory: {e}. "
+            f"This might not be an issue if database files are not in this directory."
         )
 
     try:
         print("🔧 Initializing SQLite database and ChromaDB...")
         db_manager, vector_db = initialize_database(
             database_url=sqlite_db_url,
-            # vector_db_path parameter is not used in initialize_database, ChromaVectorDB uses its default or environment variable directly
+            # vector_db_path parameter is not used in initialize_database,
+            # ChromaVectorDB uses its default or environment variable directly
         )
         print("✅ SQLite database tables created and initial data populated.")
         print(f"   - SQLite database engine: {db_manager.engine}")
@@ -71,9 +72,7 @@ def main():
             for coll in active_collections:
                 print(f"     * {coll.name} (ID: {coll.id}, Count: {coll.count()})")
         else:
-            print(
-                "   - No active vector collections currently (this might be normal if just initialized)."
-            )
+            print("   - No active vector collections currently (this might be normal if just initialized).")
 
         print("🎉 Database initialization successful!")
 
@@ -91,12 +90,11 @@ if __name__ == "__main__":
     # A simple check: see if the database subdirectory exists
     if not os.path.isdir(os.path.join(SCRIPT_DIR, "database")):
         print(
-            "❌ Error: This script does not seem to be in the correct 'backend' directory, or the 'database' subdirectory was not found."
+            "❌ Error: This script does not seem to be in the correct 'backend' directory, "
+            "or the 'database' subdirectory was not found."
         )
         print(f"   Script location: {SCRIPT_DIR}")
-        print(
-            "   Please run this script from the 'backend' directory, e.g.: python init_db.py"
-        )
+        print("   Please run this script from the 'backend' directory, e.g.: python init_db.py")
         # sys.exit(1) # Temporarily commented out to allow running from other locations, but import might fail
 
     main()

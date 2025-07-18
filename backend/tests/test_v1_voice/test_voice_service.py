@@ -18,9 +18,7 @@ class TestVoiceServiceAPI:
         """Check if server is running before tests"""
         try:
             response = requests.get(f"{server_url}/api/v1/auth/login", timeout=5)
-            assert (
-                response.status_code == 405
-            ), f"Unexpected status code: {response.status_code}"
+            assert response.status_code == 405, f"Unexpected status code: {response.status_code}"
         except Exception as e:
             pytest.skip(f"Server not available: {e}")
 
@@ -29,18 +27,14 @@ class TestVoiceServiceAPI:
         """Get the Flask server URL based on start.py configuration"""
         # Get configuration from environment variables (same as start.py)
         host = os.getenv("FLASK_HOST", "127.0.0.1")  # Use 127.0.0.1 for local testing
-        port = int(
-            os.getenv("PORT", os.getenv("FLASK_PORT", 10000))
-        )  # Default port from start.py
+        port = int(os.getenv("PORT", os.getenv("FLASK_PORT", 10000)))  # Default port from start.py
         return f"http://{host}:{port}"
 
     @pytest.fixture(scope="class", autouse=True)
     def check_curl_available(self):
         """Check if curl is available on the system"""
         try:
-            result = subprocess.run(
-                ["curl", "--version"], capture_output=True, text=True
-            )
+            result = subprocess.run(["curl", "--version"], capture_output=True, text=True)
             if result.returncode != 0:
                 pytest.skip("curl is not available on this system")
         except FileNotFoundError:
@@ -81,9 +75,7 @@ class TestVoiceServiceAPI:
             "-H",
             "Content-Type: application/json",
             "-d",
-            json.dumps(
-                {"email": test_user["email"], "password": test_user["password"]}
-            ),
+            json.dumps({"email": test_user["email"], "password": test_user["password"]}),
         ]
         result = subprocess.run(login_cmd, capture_output=True, text=True)
         response = json.loads(result.stdout)
@@ -158,9 +150,7 @@ class TestVoiceServiceAPI:
             assert response["data"]["name"] == "Test Sample"
             assert response["data"]["status"] == "ready"
 
-    def test_upload_voice_sample_missing_name(
-        self, server_url, auth_tokens, test_audio_file
-    ):
+    def test_upload_voice_sample_missing_name(self, server_url, auth_tokens, test_audio_file):
         """Test uploading a voice sample without name"""
         curl_cmd = [
             "curl",
@@ -615,10 +605,7 @@ class TestVoiceServiceAPI:
         response = json.loads(result.stdout)
         # Flask-JWT-Extended returns {"msg": "Invalid token"} or {"msg": "Invalid header string ..."}
         assert "msg" in response
-        assert (
-            "Invalid token" in response["msg"]
-            or "Invalid header string" in response["msg"]
-        )
+        assert "Invalid token" in response["msg"] or "Invalid header string" in response["msg"]
 
 
 def run_tests():

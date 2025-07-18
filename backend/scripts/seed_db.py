@@ -6,23 +6,20 @@ Creates sample data for testing and development
 import os
 import sys
 from datetime import datetime, timedelta, timezone
-import json
-from pathlib import Path
-
-# Add the backend directory to the Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from database import get_database_manager
 from database.models import (
     User,
     VoiceSample,
     VoiceModel,
     SynthesisJob,
-    PhonemeAlignment,
+    # PhonemeAlignment,
     UsageStat,
-    SystemSetting,
+    # SystemSetting,
 )
 from api.utils.password import hash_password
+
+# Add the backend directory to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def utc_now():
@@ -147,11 +144,7 @@ def create_synthesis_jobs(session, users, models):
             for i, text in enumerate(texts):
                 # Create jobs with different statuses
                 status = ["completed", "processing", "pending", "failed"][i % 4]
-                progress = (
-                    1.0
-                    if status == "completed"
-                    else (0.0 if status == "pending" else 0.5)
-                )
+                progress = 1.0 if status == "completed" else (0.0 if status == "pending" else 0.5)
 
                 job = SynthesisJob(
                     user_id=user.id,
@@ -166,9 +159,7 @@ def create_synthesis_jobs(session, users, models):
                     sample_rate=22050,
                     status=status,
                     progress=progress,
-                    started_at=utc_now() - timedelta(hours=1)
-                    if status != "pending"
-                    else None,
+                    started_at=utc_now() - timedelta(hours=1) if status != "pending" else None,
                     completed_at=utc_now() if status == "completed" else None,
                 )
 
@@ -249,7 +240,7 @@ def main():
         print(f"- Voice Samples: {len(samples)}")
         print(f"- Voice Models: {len(models)}")
         print(f"- Synthesis Jobs: {len(jobs)}")
-        print(f"- Usage Stats per User: 7 days")
+        print("- Usage Stats per User: 7 days")
 
     except Exception as e:
         session.rollback()

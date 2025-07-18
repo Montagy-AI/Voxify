@@ -18,9 +18,7 @@ class TestFileServiceAPI:
         """Check if server is running before tests"""
         try:
             response = requests.get(f"{server_url}/api/v1/auth/login", timeout=5)
-            assert (
-                response.status_code == 405
-            ), f"Unexpected status code: {response.status_code}"
+            assert response.status_code == 405, f"Unexpected status code: {response.status_code}"
         except Exception as e:
             pytest.skip(f"Server not available: {e}")
 
@@ -29,9 +27,7 @@ class TestFileServiceAPI:
         """Get the Flask server URL based on start.py configuration"""
         # Get configuration from environment variables (same as start.py)
         host = os.getenv("FLASK_HOST", "127.0.0.1")  # Use 127.0.0.1 for local testing
-        port = int(
-            os.getenv("PORT", os.getenv("FLASK_PORT", 10000))
-        )  # Default port from start.py
+        port = int(os.getenv("PORT", os.getenv("FLASK_PORT", 10000)))  # Default port from start.py
         return f"http://{host}:{port}"
 
     @pytest.fixture(scope="class")
@@ -43,9 +39,7 @@ class TestFileServiceAPI:
     def check_curl_available(self):
         """Check if curl is available on the system"""
         try:
-            result = subprocess.run(
-                ["curl", "--version"], capture_output=True, text=True
-            )
+            result = subprocess.run(["curl", "--version"], capture_output=True, text=True)
             if result.returncode != 0:
                 pytest.skip("curl is not available on this system")
         except FileNotFoundError:
@@ -86,9 +80,7 @@ class TestFileServiceAPI:
             "-H",
             "Content-Type: application/json",
             "-d",
-            json.dumps(
-                {"email": test_user["email"], "password": test_user["password"]}
-            ),
+            json.dumps({"email": test_user["email"], "password": test_user["password"]}),
         ]
         result = subprocess.run(login_cmd, capture_output=True, text=True)
         response = json.loads(result.stdout)
@@ -184,9 +176,7 @@ class TestFileServiceAPI:
         assert "error" in response
         assert response["error"]["code"] == "FILE_NOT_FOUND"
 
-    def test_download_synthesis_file_with_valid_job(
-        self, server_url, auth_tokens, test_job_id, null_device
-    ):
+    def test_download_synthesis_file_with_valid_job(self, server_url, auth_tokens, test_job_id, null_device):
         """Test download synthesis file with valid job ID"""
         if not test_job_id:
             pytest.skip("No test job ID available")
@@ -268,9 +258,7 @@ class TestFileServiceAPI:
         assert "error" in response
         assert response["error"]["code"] == "FILE_NOT_FOUND"
 
-    def test_delete_synthesis_file_with_valid_job(
-        self, server_url, auth_tokens, test_job_id
-    ):
+    def test_delete_synthesis_file_with_valid_job(self, server_url, auth_tokens, test_job_id):
         """Test delete synthesis file with valid job ID"""
         if not test_job_id:
             pytest.skip("No test job ID available")
@@ -402,9 +390,7 @@ class TestFileServiceAPI:
         # Should return 405 Method Not Allowed
         assert "405" in result.stdout or "Method Not Allowed" in result.stdout
 
-    def test_download_synthesis_file_with_headers(
-        self, server_url, auth_tokens, test_job_id, null_device
-    ):
+    def test_download_synthesis_file_with_headers(self, server_url, auth_tokens, test_job_id, null_device):
         """Test download synthesis file with additional headers"""
         if not test_job_id:
             pytest.skip("No test job ID available")

@@ -8,9 +8,7 @@ from api.v1.voice.samples import allowed_file, extract_audio_metadata
 
 # Add the backend and backend/api directories to Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../backend"))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../backend")))
 
 
 class TestVoiceSampleValidation:
@@ -45,35 +43,21 @@ class TestVoiceSampleValidation:
         ]
 
         for filename in invalid_files:
-            assert (
-                allowed_file(filename) is False
-            ), f"File {filename} should not be allowed"
+            assert allowed_file(filename) is False, f"File {filename} should not be allowed"
 
     def test_allowed_file_edge_cases(self):
         """Test file extension validation with edge cases"""
         # Test files starting with dot (hidden files) - these are actually allowed by the current implementation
-        assert (
-            allowed_file(".wav") is True
-        ), "Hidden .wav file is allowed by current implementation"
-        assert (
-            allowed_file(".mp3") is True
-        ), "Hidden .mp3 file is allowed by current implementation"
+        assert allowed_file(".wav") is True, "Hidden .wav file is allowed by current implementation"
+        assert allowed_file(".mp3") is True, "Hidden .mp3 file is allowed by current implementation"
 
         # Test files with multiple dots
-        assert (
-            allowed_file("file.backup.wav") is True
-        ), "File with multiple dots should be allowed"
-        assert (
-            allowed_file("file.backup.txt") is False
-        ), "File with multiple dots should not be allowed"
+        assert allowed_file("file.backup.wav") is True, "File with multiple dots should be allowed"
+        assert allowed_file("file.backup.txt") is False, "File with multiple dots should not be allowed"
 
         # Test files with only extension
-        assert (
-            allowed_file("wav") is False
-        ), "File with only extension should not be allowed"
-        assert (
-            allowed_file("mp3") is False
-        ), "File with only extension should not be allowed"
+        assert allowed_file("wav") is False, "File with only extension should not be allowed"
+        assert allowed_file("mp3") is False, "File with only extension should not be allowed"
 
     @patch("api.v1.voice.samples.sf.SoundFile")
     def test_extract_audio_metadata_success(self, mock_soundfile):
@@ -240,9 +224,7 @@ class TestVoiceFileOperations:
         # Test with real Path objects instead of mocks
         sample_id = "test-uuid-123"
         file_extension = ".wav"
-        expected_path = os.path.join(
-            "data", "files", "samples", "user123", f"{sample_id}{file_extension}"
-        )
+        expected_path = os.path.join("data", "files", "samples", "user123", f"{sample_id}{file_extension}")
 
         # Simulate the path generation logic from the actual code
         storage_dir = Path("data/files/samples/user123")
