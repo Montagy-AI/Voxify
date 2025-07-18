@@ -70,7 +70,12 @@ python-dotenv==1.0.0 # Manage environment variables
 # ============================================================================
 # Production Deployment
 # ============================================================================
-waitress>=3.0.1
+waitress==3.0.1
+# gunicorn==21.2.0
+# uvicorn==0.23.2
+
+# Process management
+# supervisor==4.2.5
 
 # ============================================================================
 # Monitoring & Logging
