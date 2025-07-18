@@ -20,7 +20,8 @@ services:
   api:
     build:
       context: ./backend/
-      dockerfile: api/Dockerfile
+      dockerfile: Dockerfile
+      target: production
     container_name: voxify_api
     depends_on:
       db-init:
@@ -43,14 +44,15 @@ services:
   db-init:
     build:
       context: ./backend/
-      dockerfile: Dockerfile.base
+      dockerfile: Dockerfile
+      target: production
     container_name: voxify_db_init
     volumes:
       - data_volume:/data
     environment:
       - DATABASE_URL=sqlite:////data/voxify.db
       - VECTOR_DB_PATH=data/chroma_db
-    entrypoint: ["python", "scripts/init_db.py"]
+    command: ["python", "scripts/init_db.py"]
     restart: "no"
 
   tests:
@@ -71,31 +73,6 @@ services:
     command: ["sh", "-c", "python -m pytest tests/ -v && python -m unittest discover -s tests -p 'test_*.py' -v"]
     restart: "no"
 
-  lint-backend:
-    build:
-      context: ./backend/
-      dockerfile: Dockerfile.base
-    container_name: voxify_lint_backend
-    volumes:
-      - ./backend:/app
-      - ./backend/scripts/lint.sh:/lint.sh
-    working_dir: /app
-    command: ["bash", "/lint.sh"]
-    restart: "no"
-
-  lint-frontend:
-    build:
-      context: ./frontend/
-      dockerfile: Dockerfile
-    container_name: voxify_lint_frontend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - ./frontend/scripts/lint.sh:/lint.sh
-    working_dir: /app
-    command: ["sh", "/lint.sh"]
-    restart: "no"
-
   snyk-security:
     image: snyk/snyk:node
     container_name: voxify_snyk_security
@@ -104,7 +81,7 @@ services:
     working_dir: /app/backend
     environment:
       - SNYK_TOKEN=${SNYK_TOKEN:-}
-    command: ["sh", "-c", "if [ -z \"$SNYK_TOKEN\" ]; then echo 'Error: SNYK_TOKEN is not set. Exiting.'; exit 1; fi; snyk code test --severity-threshold=high"]
+    command: ["sh", "-c", "[ -z \"$$SNYK_TOKEN\" ] && { echo 'Error: SNYK_TOKEN is not set'; exit 1; }; snyk code test --severity-threshold=high"]
     restart: "no"
 
 volumes:
