@@ -11,14 +11,10 @@ import uuid
 from resemblyzer import VoiceEncoder, preprocess_wav
 
 # Initialize ChromaDB client
-chroma_client = chromadb.Client(
-    Settings(persist_directory="data/embeddings", anonymized_telemetry=False)
-)
+chroma_client = chromadb.Client(Settings(persist_directory="data/embeddings", anonymized_telemetry=False))
 
 # Initialize the voice embeddings collection
-voice_collection = chroma_client.get_or_create_collection(
-    name="voice_embeddings", metadata={"hnsw:space": "cosine"}
-)
+voice_collection = chroma_client.get_or_create_collection(name="voice_embeddings", metadata={"hnsw:space": "cosine"})
 
 # Initialize Resemblyzer voice encoder
 voice_encoder = VoiceEncoder()

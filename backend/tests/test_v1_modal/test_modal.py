@@ -48,11 +48,7 @@ if __name__ == "__main__":
     try:
         result = response.json()
         print("📋 Response received:")
-        print(
-            json.dumps(result, indent=2)[:500] + "..."
-            if len(str(result)) > 500
-            else json.dumps(result, indent=2)
-        )
+        print(json.dumps(result, indent=2)[:500] + "..." if len(str(result)) > 500 else json.dumps(result, indent=2))
 
     except json.JSONDecodeError:
         print(f"❌ Invalid JSON response: {response.text}")

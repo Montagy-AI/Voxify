@@ -13,9 +13,7 @@ from api.v1.job.routes import (
 
 # Add the backend and backend/api directories to Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../backend"))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../backend")))
 
 
 class TestJobValidation:
@@ -121,10 +119,7 @@ class TestJobValidation:
         is_valid, errors = validate_synthesis_job_data(data)
         assert is_valid is False
         assert "output_format" in errors
-        assert (
-            errors["output_format"]
-            == "Output format must be one of: wav, mp3, flac, ogg"
-        )
+        assert errors["output_format"] == "Output format must be one of: wav, mp3, flac, ogg"
 
     def test_validate_synthesis_job_data_valid_output_formats(self):
         """Test validation with valid output formats"""

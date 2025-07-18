@@ -32,8 +32,8 @@ jobs:
           pip install -r requirements-dev.txt 
       
       - name: Run backend linting
+        working-directory: backend
         run: |
-          cd backend
           black --check .
           flake8 .
 
