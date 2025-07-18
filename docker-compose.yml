@@ -54,7 +54,8 @@ services:
     environment:
       - DATABASE_URL=sqlite:////data/voxify.db
       - VECTOR_DB_PATH=data/chroma_db
-    command: ["python", "init_db.py"]
+      - PYTHONPATH=/app
+    command: ["python", "scripts/init_db.py"]
     restart: "no"
 
   tests:
