@@ -45,7 +45,7 @@ torchaudio>=2.0.0
 # ============================================================================
 # Web & API
 # ============================================================================
-requests==2.31.0
+requests==2.32.4
 urllib3>=1.26.0,<2.0.0 # An important dependency for requests, sometimes requires specifying a version range
 
 # File handling
