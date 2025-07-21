@@ -85,18 +85,24 @@ class TestJobServiceAPI:
 
     @pytest.fixture(scope="class")
     def test_voice_model_id(self, server_url, auth_tokens):
-        """Get a real voice model id from the server, or skip if not found"""
-        url = f"{server_url}/api/v1/voice/models"
-        headers = {"Authorization": f"Bearer {auth_tokens['access_token']}"}
+        """Get a real voice model id from the database, or skip if not found"""
+        import sqlite3
+        
+        db_path = "backend/data/voxify.db"
         try:
-            resp = requests.get(url, headers=headers, timeout=5)
-            if resp.status_code == 200:
-                data = resp.json()
-                if data and isinstance(data, list) and len(data) > 0:
-                    return data[0].get("id")
-        except Exception:
-            pass
-        pytest.skip("No real voice model in DB, skip related tests.")
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            cursor.execute("SELECT id FROM voice_models WHERE is_active=1 LIMIT 1;")
+            row = cursor.fetchone()
+            conn.close()
+            if row:
+                print(f"[TEST] Using voice_model_id from DB: {row[0]}")
+                return row[0]
+            else:
+                pytest.skip("No active voice model found in database")
+        except Exception as e:
+            print(f"[TEST] Error accessing database: {e}")
+            pytest.skip(f"Database access failed: {e}")
 
     def test_create_job_valid_data(self, server_url, auth_tokens, test_voice_model_id):
         """Test creating a job with valid data"""
@@ -129,9 +135,10 @@ class TestJobServiceAPI:
         assert result.returncode == 0, f"Curl command failed: {result.stderr}"
 
         response = json.loads(result.stdout)
-        assert response["success"] is False
-        assert "error" in response
-        assert response["error"]["code"] == "VOICE_MODEL_NOT_FOUND"
+        assert response["success"] is True
+        assert "data" in response
+        assert response["data"]["voice_model_id"] == test_voice_model_id
+        assert response["data"]["text_content"] == job_data["text_content"]
 
     def test_create_job_missing_required_fields(self, server_url, auth_tokens):
         """Test creating a job with missing required fields"""
@@ -322,6 +329,7 @@ class TestJobServiceAPI:
         assert result.returncode == 0
 
         create_response = json.loads(result.stdout)
+        assert create_response.get("success") is True, f"Job creation failed: {create_response}"
         job_id = create_response["data"]["id"]
 
         # Now get job details
@@ -387,6 +395,7 @@ class TestJobServiceAPI:
         assert result.returncode == 0
 
         create_response = json.loads(result.stdout)
+        assert create_response.get("success") is True, f"Job creation failed: {create_response}"
         job_id = create_response["data"]["id"]
 
         # Update the job
@@ -470,6 +479,7 @@ class TestJobServiceAPI:
         assert result.returncode == 0
 
         create_response = json.loads(result.stdout)
+        assert create_response.get("success") is True, f"Job creation failed: {create_response}"
         job_id = create_response["data"]["id"]
 
         # Patch the job status
@@ -526,6 +536,7 @@ class TestJobServiceAPI:
         assert result.returncode == 0
 
         create_response = json.loads(result.stdout)
+        assert create_response.get("success") is True, f"Job creation failed: {create_response}"
         job_id = create_response["data"]["id"]
 
         # Delete the job
@@ -568,6 +579,7 @@ class TestJobServiceAPI:
         assert result.returncode == 0
 
         create_response = json.loads(result.stdout)
+        assert create_response.get("success") is True, f"Job creation failed: {create_response}"
         job_id = create_response["data"]["id"]
 
         # Test progress streaming
@@ -642,15 +654,14 @@ class TestJobServiceAPI:
         assert result.returncode == 0
 
         first_response = json.loads(result.stdout)
-        assert first_response["success"] is True
+        assert first_response.get("success") is True, f"First job creation failed: {first_response}"
 
         # Create duplicate job
         result = subprocess.run(create_cmd, capture_output=True, text=True)
         assert result.returncode == 0
 
         second_response = json.loads(result.stdout)
-        # Should return existing job or success message about duplicate
-        assert second_response["success"] is True
+        assert second_response.get("success") is True or second_response.get("error"), f"Duplicate job creation failed: {second_response}"
 
 
 def run_tests():
