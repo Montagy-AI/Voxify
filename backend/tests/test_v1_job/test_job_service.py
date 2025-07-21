@@ -87,7 +87,7 @@ class TestJobServiceAPI:
     def test_voice_model_id(self, server_url, auth_tokens):
         """Get a real voice model id from the database, or skip if not found"""
         import sqlite3
-        
+
         db_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "voxify.db")
         try:
             conn = sqlite3.connect(db_path)
@@ -661,7 +661,9 @@ class TestJobServiceAPI:
         assert result.returncode == 0
 
         second_response = json.loads(result.stdout)
-        assert second_response.get("success") is True or second_response.get("error"), f"Duplicate job creation failed: {second_response}"
+        assert second_response.get("success") is True or second_response.get(
+            "error"
+        ), f"Duplicate job creation failed: {second_response}"
 
 
 def run_tests():

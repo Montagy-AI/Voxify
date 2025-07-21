@@ -97,21 +97,21 @@ class TestFileServiceAPI:
         try:
             from database import get_database_manager
             from database.models import VoiceModel, VoiceSample, User
-            
+
             # Debug: Print database URL
             db_url = os.getenv("DATABASE_URL", "sqlite:///data/voxify.db")
             print(f"[TEST] Using database URL: {db_url}")
-            
+
             db_manager = get_database_manager()
             session = db_manager.get_session()
-            
+
             # Get the first available active voice model
             voice_model = session.query(VoiceModel).filter_by(is_active=True).first()
-            
+
             # If no voice model exists, create one for testing
             if not voice_model:
                 print("[TEST] No active voice model found, creating one for testing...")
-                
+
                 # First, ensure we have a test user
                 test_user = session.query(User).filter_by(email="filetest@example.com").first()
                 if not test_user:
@@ -121,11 +121,11 @@ class TestFileServiceAPI:
                         email="filetest@example.com",
                         password_hash="test_hash",
                         first_name="File",
-                        last_name="Tester"
+                        last_name="Tester",
                     )
                     session.add(test_user)
                     session.commit()
-                
+
                 # Create a test voice sample
                 voice_sample = VoiceSample(
                     id="test-sample-file",
@@ -136,11 +136,11 @@ class TestFileServiceAPI:
                     format="wav",
                     duration=5.0,
                     sample_rate=22050,
-                    status="ready"
+                    status="ready",
                 )
                 session.add(voice_sample)
                 session.commit()
-                
+
                 # Create a test voice model
                 voice_model = VoiceModel(
                     id="test-model-file",
@@ -148,23 +148,23 @@ class TestFileServiceAPI:
                     name="Test Voice Model",
                     model_path="/test/path/model.pth",
                     training_status="completed",
-                    is_active=True
+                    is_active=True,
                 )
                 session.add(voice_model)
                 session.commit()
-                
+
                 print(f"[TEST] Created test voice model: {voice_model.id}")
-            
+
             voice_model_id = str(voice_model.id)  # Ensure it's a string
             print(f"[TEST] Using voice model ID: {voice_model_id}")
             session.close()
-                
+
         except Exception as e:
             print(f"[TEST] Error accessing database: {e}")
             # Fallback to a test ID if database access fails
             voice_model_id = "test-voice-model"
             print(f"[TEST] Using fallback voice model ID: {voice_model_id}")
-        
+
         # Create a test job
         job_data = {
             "text_content": "Hello, this is a test for file download.",
@@ -192,7 +192,7 @@ class TestFileServiceAPI:
         result = subprocess.run(job_cmd, capture_output=True, text=True)
         print(f"[TEST] Job creation response: {result.stdout}")
         print(f"[TEST] Job creation stderr: {result.stderr}")
-        
+
         try:
             response = json.loads(result.stdout)
             job_id = response.get("data", {}).get("id")
