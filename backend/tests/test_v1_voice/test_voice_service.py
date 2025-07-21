@@ -86,28 +86,8 @@ class TestVoiceServiceAPI:
 
     @pytest.fixture(scope="class")
     def test_audio_file(self):
-        """Create a test audio file for upload testing"""
-        # Create a simple WAV file for testing
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-            # Write a minimal WAV header (44 bytes)
-            wav_header = (
-                b"RIFF"  # Chunk ID
-                + (36).to_bytes(4, "little")  # Chunk size
-                + b"WAVE"  # Format
-                + b"fmt "  # Subchunk1 ID
-                + (16).to_bytes(4, "little")  # Subchunk1 size
-                + (1).to_bytes(2, "little")  # Audio format (PCM)
-                + (1).to_bytes(2, "little")  # Number of channels
-                + (22050).to_bytes(4, "little")  # Sample rate
-                + (22050).to_bytes(4, "little")  # Byte rate
-                + (1).to_bytes(2, "little")  # Block align
-                + (8).to_bytes(2, "little")  # Bits per sample
-                + b"data"  # Subchunk2 ID
-                + (0).to_bytes(4, "little")  # Subchunk2 size
-            )
-            f.write(wav_header)
-            f.flush()
-            return f.name
+        """Use the local file_example_WAV_1MG.wav as the test audio file."""
+        return os.path.join(os.path.dirname(__file__), "file_example_WAV_1MG.wav")
 
     def test_upload_voice_sample_valid(self, server_url, auth_tokens, test_audio_file):
         """Test uploading a valid voice sample"""
