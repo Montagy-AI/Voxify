@@ -4,7 +4,7 @@ SQLAlchemy models for the Voxify platform hybrid storage system
 """
 
 from sqlalchemy import (
-    create_engine, Column, String, Integer, Float, Boolean, Text, 
+    create_engine, Column, String, Integer, Float, Boolean, Text,
     DateTime, ForeignKey, CheckConstraint, Index, func, UniqueConstraint
 )
 from sqlalchemy.ext.declarative import declarative_base
@@ -33,7 +33,7 @@ class TimestampMixin:
 class User(Base, TimestampMixin):
     """User account model"""
     __tablename__ = 'users'
-    
+
     id = Column(String, primary_key=True, default=generate_uuid)
     email = Column(String, unique=True, nullable=False)
     password_hash = Column(String, nullable=False)
@@ -43,26 +43,25 @@ class User(Base, TimestampMixin):
     is_active = Column(Boolean, default=True, nullable=False)
     email_verified = Column(Boolean, default=False, nullable=False)
     last_login_at = Column(DateTime)
-    
+
     # Relationships
     voice_samples = relationship("VoiceSample", back_populates="user", cascade="all, delete-orphan")
     synthesis_jobs = relationship("SynthesisJob", back_populates="user", cascade="all, delete-orphan")
-    usage_stats = relationship("UsageStat", back_populates="user", cascade="all, delete-orphan")
-    
+
     # Constraints
     __table_args__ = (
         CheckConstraint('storage_used_bytes >= 0', name='check_storage_used_bytes'),
         Index('idx_users_email', 'email'),
         Index('idx_users_active', 'is_active'),
     )
-    
+
     @property
     def full_name(self) -> str:
         """Get user's full name"""
         if self.first_name and self.last_name:
             return f"{self.first_name} {self.last_name}"
         return self.first_name or self.last_name or self.email
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for API responses"""
         return {
@@ -81,53 +80,53 @@ class User(Base, TimestampMixin):
 class VoiceSample(Base, TimestampMixin):
     """Voice sample model for uploaded audio files"""
     __tablename__ = 'voice_samples'
-    
+
     id = Column(String, primary_key=True, default=generate_uuid)
     user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     name = Column(String, nullable=False)
     description = Column(Text)
-    
+
     # File information
     file_path = Column(String, nullable=False)
     file_size = Column(Integer, nullable=False)
     original_filename = Column(String)
     file_hash = Column(String)  # SHA256 hash for deduplication
-    
+
     # Audio properties
     format = Column(String, nullable=False)
     duration = Column(Float, nullable=False)
     sample_rate = Column(Integer, nullable=False)
     channels = Column(Integer, default=1)
     bit_depth = Column(Integer)
-    
+
     # Language and quality metrics
     language = Column(String, default='en-US')
     quality_score = Column(Float)  # 0-10 scale
     noise_level = Column(Float)
     clarity_score = Column(Float)
     signal_to_noise_ratio = Column(Float)
-    
+
     # Processing status
     status = Column(String, default='uploaded', nullable=False)
     processing_error = Column(Text)
     processing_start_time = Column(DateTime)
     processing_end_time = Column(DateTime)
-    
+
     # Vector database associations
     voice_embedding_id = Column(String)  # Reference to Chroma
     speaker_embedding_id = Column(String)  # Reference to speaker identity
-    
+
     # Metadata and categorization
     tags = Column(TEXT)  # JSON array of user tags
     is_public = Column(Boolean, default=False)
     gender = Column(String)  # Detected gender
     age_group = Column(String)  # Detected age group
     accent = Column(String)  # Detected accent
-    
+
     # Relationships
     user = relationship("User", back_populates="voice_samples")
     voice_models = relationship("VoiceModel", back_populates="voice_sample", cascade="all, delete-orphan")
-    
+
     # Constraints
     __table_args__ = (
         CheckConstraint('status IN ("uploaded", "processing", "ready", "failed")', name='check_status'),
@@ -142,7 +141,7 @@ class VoiceSample(Base, TimestampMixin):
         Index('idx_voice_samples_created', 'created_at'),
         Index('idx_voice_samples_file_hash', 'file_hash'),
     )
-    
+
     @property
     def tags_list(self) -> List[str]:
         """Get tags as a list"""
@@ -152,12 +151,12 @@ class VoiceSample(Base, TimestampMixin):
             except (json.JSONDecodeError, TypeError):
                 return []
         return []
-    
+
     @tags_list.setter
     def tags_list(self, value: List[str]):
         """Set tags from a list"""
         self.tags = json.dumps(value) if value else None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for API responses"""
         return {
@@ -188,26 +187,26 @@ class VoiceSample(Base, TimestampMixin):
 class VoiceModel(Base, TimestampMixin):
     """Voice model for trained AI models"""
     __tablename__ = 'voice_models'
-    
+
     id = Column(String, primary_key=True, default=generate_uuid)
     voice_sample_id = Column(String, ForeignKey('voice_samples.id', ondelete='CASCADE'), nullable=False)
     name = Column(String, nullable=False)
     description = Column(Text)
-    
+
     # Model file information
     model_path = Column(String, nullable=False)
     model_type = Column(String, default='tacotron2')
     model_size = Column(Integer)
     model_version = Column(String, default='1.0')
     model_hash = Column(String)
-    
+
     # Training configuration
     training_config = Column(TEXT)  # JSON training parameters
     training_epochs = Column(Integer)
     learning_rate = Column(Float)
     batch_size = Column(Integer)
     dataset_size = Column(Integer)
-    
+
     # Training status and progress
     training_status = Column(String, default='pending', nullable=False)
     training_progress = Column(Float, default=0.0)
@@ -215,23 +214,23 @@ class VoiceModel(Base, TimestampMixin):
     training_end_time = Column(DateTime)
     training_error = Column(Text)
     training_logs_path = Column(String)
-    
+
     # Quality metrics and evaluation
     quality_metrics = Column(TEXT)  # JSON quality metrics
     mel_loss = Column(Float)
     validation_score = Column(Float)
     mos_score = Column(Float)  # Mean Opinion Score
     similarity_score = Column(Float)
-    
+
     # Model status and management
     is_active = Column(Boolean, default=True)
     is_default = Column(Boolean, default=False)
     deployment_status = Column(String, default='offline')
-    
+
     # Relationships
     voice_sample = relationship("VoiceSample", back_populates="voice_models")
     synthesis_jobs = relationship("SynthesisJob", back_populates="voice_model")
-    
+
     # Constraints
     __table_args__ = (
         CheckConstraint('training_status IN ("pending", "training", "completed", "failed")', name='check_training_status'),
@@ -242,7 +241,7 @@ class VoiceModel(Base, TimestampMixin):
         Index('idx_voice_models_active', 'is_active'),
         Index('idx_voice_models_deployment', 'deployment_status'),
     )
-    
+
     @property
     def training_config_dict(self) -> Dict[str, Any]:
         """Get training config as dictionary"""
@@ -252,12 +251,12 @@ class VoiceModel(Base, TimestampMixin):
             except (json.JSONDecodeError, TypeError):
                 return {}
         return {}
-    
+
     @training_config_dict.setter
     def training_config_dict(self, value: Dict[str, Any]):
         """Set training config from dictionary"""
         self.training_config = json.dumps(value) if value else None
-    
+
     @property
     def quality_metrics_dict(self) -> Dict[str, Any]:
         """Get quality metrics as dictionary"""
@@ -267,12 +266,12 @@ class VoiceModel(Base, TimestampMixin):
             except (json.JSONDecodeError, TypeError):
                 return {}
         return {}
-    
+
     @quality_metrics_dict.setter
     def quality_metrics_dict(self, value: Dict[str, Any]):
         """Set quality metrics from dictionary"""
         self.quality_metrics = json.dumps(value) if value else None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for API responses"""
         return {
@@ -301,18 +300,18 @@ class VoiceModel(Base, TimestampMixin):
 class SynthesisJob(Base, TimestampMixin):
     """TTS synthesis job model"""
     __tablename__ = 'synthesis_jobs'
-    
+
     id = Column(String, primary_key=True, default=generate_uuid)
     user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     voice_model_id = Column(String, ForeignKey('voice_models.id', ondelete='CASCADE'), nullable=False)
-    
+
     # Input text information
     text_content = Column(Text, nullable=False)
     text_hash = Column(String, nullable=False)
     text_language = Column(String, default='en-US')
     text_length = Column(Integer)
     word_count = Column(Integer)
-    
+
     # Synthesis configuration
     config = Column(TEXT)  # JSON synthesis parameters
     output_format = Column(String, default='wav')
@@ -320,40 +319,39 @@ class SynthesisJob(Base, TimestampMixin):
     speed = Column(Float, default=1.0)
     pitch = Column(Float, default=1.0)
     volume = Column(Float, default=1.0)
-    
+
     # Output information
     output_path = Column(String)
     output_size = Column(Integer)
     duration = Column(Float)
-    
+
     # Timing alignment data (project requirement)
     word_timestamps = Column(TEXT)  # JSON array
     syllable_timestamps = Column(TEXT)  # JSON array
     phoneme_timestamps = Column(TEXT)  # JSON array
-    
+
     # Job status and progress
     status = Column(String, default='pending', nullable=False)
     progress = Column(Float, default=0.0)
     error_message = Column(Text)
     processing_node = Column(String)
-    
+
     # Caching information
     cache_hit = Column(Boolean, default=False)
     cached_result_id = Column(String)
-    
+
     # Performance metrics
     processing_time_ms = Column(Integer)
     queue_time_ms = Column(Integer)
-    
+
     # Timestamps
     started_at = Column(DateTime)
     completed_at = Column(DateTime)
-    
+
     # Relationships
     user = relationship("User", back_populates="synthesis_jobs")
     voice_model = relationship("VoiceModel", back_populates="synthesis_jobs")
-    phoneme_alignments = relationship("PhonemeAlignment", back_populates="synthesis_job", cascade="all, delete-orphan")
-    
+
     # Constraints
     __table_args__ = (
         CheckConstraint('status IN ("pending", "processing", "completed", "failed", "cancelled")', name='check_synthesis_status'),
@@ -367,7 +365,7 @@ class SynthesisJob(Base, TimestampMixin):
         Index('idx_synthesis_jobs_model_id', 'voice_model_id'),
         Index('idx_synthesis_jobs_created', 'created_at'),
     )
-    
+
     @property
     def config_dict(self) -> Dict[str, Any]:
         """Get configuration as dictionary"""
@@ -377,12 +375,12 @@ class SynthesisJob(Base, TimestampMixin):
             except (json.JSONDecodeError, TypeError):
                 return {}
         return {}
-    
+
     @config_dict.setter
     def config_dict(self, value: Dict[str, Any]):
         """Set configuration from dictionary"""
         self.config = json.dumps(value) if value else None
-    
+
     @property
     def word_timestamps_list(self) -> List[Dict[str, Any]]:
         """Get word timestamps as list"""
@@ -392,12 +390,12 @@ class SynthesisJob(Base, TimestampMixin):
             except (json.JSONDecodeError, TypeError):
                 return []
         return []
-    
+
     @word_timestamps_list.setter
     def word_timestamps_list(self, value: List[Dict[str, Any]]):
         """Set word timestamps from list"""
         self.word_timestamps = json.dumps(value) if value else None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for API responses"""
         return {
@@ -432,28 +430,28 @@ class SynthesisJob(Base, TimestampMixin):
 class SynthesisCache(Base, TimestampMixin):
     """Synthesis cache for performance optimization"""
     __tablename__ = 'synthesis_cache'
-    
+
     id = Column(String, primary_key=True, default=generate_uuid)
     text_hash = Column(String, nullable=False)
     voice_model_id = Column(String, ForeignKey('voice_models.id', ondelete='CASCADE'), nullable=False)
     config_hash = Column(String, nullable=False)
-    
+
     # Cached content
     output_path = Column(String, nullable=False)
     duration = Column(Float, nullable=False)
     word_timestamps = Column(TEXT)
     syllable_timestamps = Column(TEXT)
     phoneme_timestamps = Column(TEXT)
-    
+
     # Cache metadata
     hit_count = Column(Integer, default=0)
     last_accessed = Column(DateTime, default=utc_now)
     file_size = Column(Integer)
-    
+
     # Cache management
     expires_at = Column(DateTime)
     is_permanent = Column(Boolean, default=False)
-    
+
     # Constraints
     __table_args__ = (
         CheckConstraint('duration > 0', name='check_cache_duration_positive'),
@@ -464,91 +462,11 @@ class SynthesisCache(Base, TimestampMixin):
         Index('idx_synthesis_cache_expires', 'expires_at'),
     )
 
-class PhonemeAlignment(Base):
-    """Detailed phoneme alignments for synthesis jobs"""
-    __tablename__ = 'phoneme_alignments'
-    
-    id = Column(String, primary_key=True, default=generate_uuid)
-    synthesis_job_id = Column(String, ForeignKey('synthesis_jobs.id', ondelete='CASCADE'), nullable=False)
-    sequence_number = Column(Integer, nullable=False)
-    
-    # Text unit information
-    text_unit = Column(String, nullable=False)
-    unit_type = Column(String, nullable=False)  # 'word', 'syllable', 'phoneme'
-    parent_unit_id = Column(String)
-    
-    # Timing information
-    start_time = Column(Float, nullable=False)
-    end_time = Column(Float, nullable=False)
-    duration = Column(Float, nullable=False)
-    
-    # Audio features
-    confidence = Column(Float)  # 0-1 alignment confidence
-    pitch_mean = Column(Float)
-    pitch_std = Column(Float)
-    energy_mean = Column(Float)
-    energy_std = Column(Float)
-    
-    created_at = Column(DateTime, default=utc_now)
-    
-    # Relationships
-    synthesis_job = relationship("SynthesisJob", back_populates="phoneme_alignments")
-    
-    # Constraints
-    __table_args__ = (
-        CheckConstraint('unit_type IN ("word", "syllable", "phoneme")', name='check_unit_type'),
-        CheckConstraint('start_time >= 0', name='check_start_time_positive'),
-        CheckConstraint('end_time > start_time', name='check_end_time_after_start'),
-        CheckConstraint('duration > 0', name='check_alignment_duration_positive'),
-        CheckConstraint('confidence IS NULL OR (confidence >= 0 AND confidence <= 1)', name='check_confidence_range'),
-        Index('idx_phoneme_alignments_job', 'synthesis_job_id'),
-        Index('idx_phoneme_alignments_time', 'start_time', 'end_time'),
-        Index('idx_phoneme_alignments_type', 'unit_type'),
-    )
-
-class UsageStat(Base):
-    """Daily usage statistics per user"""
-    __tablename__ = 'usage_stats'
-    
-    id = Column(String, primary_key=True, default=generate_uuid)
-    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
-    date = Column(String, nullable=False)  # DATE in YYYY-MM-DD format
-    
-    # Usage metrics
-    voice_samples_uploaded = Column(Integer, default=0)
-    models_trained = Column(Integer, default=0)
-    synthesis_requests = Column(Integer, default=0)
-    synthesis_duration = Column(Float, default=0.0)
-    storage_used = Column(Integer, default=0)
-    
-    # API call statistics
-    api_calls_auth = Column(Integer, default=0)
-    api_calls_voice = Column(Integer, default=0)
-    api_calls_tts = Column(Integer, default=0)
-    api_calls_admin = Column(Integer, default=0)
-    
-    # Performance metrics
-    avg_synthesis_time = Column(Float, default=0.0)
-    cache_hit_rate = Column(Float, default=0.0)
-    
-    created_at = Column(DateTime, default=utc_now)
-    
-    # Relationships
-    user = relationship("User", back_populates="usage_stats")
-    
-    # Constraints
-    __table_args__ = (
-        CheckConstraint('synthesis_duration >= 0', name='check_synthesis_duration_positive'),
-        CheckConstraint('storage_used >= 0', name='check_storage_used_positive'),
-        CheckConstraint('cache_hit_rate >= 0 AND cache_hit_rate <= 1', name='check_cache_hit_rate_range'),
-        Index('idx_usage_stats_user_date', 'user_id', 'date', unique=True),
-        Index('idx_usage_stats_date', 'date'),
-    )
 
 class SystemSetting(Base):
     """System settings and configuration"""
     __tablename__ = 'system_settings'
-    
+
     key = Column(String, primary_key=True)
     value = Column(String, nullable=False)
     data_type = Column(String, default='string')
@@ -556,12 +474,12 @@ class SystemSetting(Base):
     is_public = Column(Boolean, default=False)
     updated_at = Column(DateTime, default=utc_now)
     updated_by = Column(String)
-    
+
     # Constraints
     __table_args__ = (
         CheckConstraint('data_type IN ("string", "integer", "float", "boolean", "json")', name='check_data_type'),
     )
-    
+
     def get_typed_value(self) -> Any:
         """Get value converted to appropriate type"""
         if self.data_type == 'integer':
@@ -580,7 +498,7 @@ class SystemSetting(Base):
 class SchemaVersion(Base):
     """Schema version tracking for migrations"""
     __tablename__ = 'schema_version'
-    
+
     version = Column(String, primary_key=True)
     applied_at = Column(DateTime, default=utc_now)
     description = Column(Text)
@@ -588,11 +506,11 @@ class SchemaVersion(Base):
 # Database connection and session management
 class DatabaseManager:
     """Database manager for Voxify platform"""
-    
+
     def __init__(self, database_url: str = "sqlite:///data/voxify.db"):
         """
         Initialize database manager
-        
+
         Parameters
         ----------
         database_url : str
@@ -604,26 +522,26 @@ class DatabaseManager:
             connect_args={"check_same_thread": False} if "sqlite" in database_url else {}
         )
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
-    
+
     def create_tables(self):
         """Create all database tables"""
         Base.metadata.create_all(bind=self.engine)
-    
+
     def drop_tables(self):
         """Drop all database tables (use with caution!)"""
         Base.metadata.drop_all(bind=self.engine)
-    
+
     def get_session(self):
         """Get a database session"""
         return self.SessionLocal()
-    
+
     def init_default_data(self):
         """Initialize default system data"""
         session = self.get_session()
         try:
             # Add default system settings
             default_settings = [
-                SystemSetting(key='max_voice_sample_size_mb', value='50', data_type='integer', 
+                SystemSetting(key='max_voice_sample_size_mb', value='50', data_type='integer',
                             description='Maximum voice sample file size in MB', is_public=True),
                 SystemSetting(key='max_synthesis_text_length', value='1000', data_type='integer',
                             description='Maximum text length for synthesis', is_public=True),
@@ -636,12 +554,12 @@ class DatabaseManager:
                 SystemSetting(key='maintenance_mode', value='false', data_type='boolean',
                             description='System maintenance mode flag', is_public=True)
             ]
-            
+
             for setting in default_settings:
                 existing = session.query(SystemSetting).filter_by(key=setting.key).first()
                 if not existing:
                     session.add(setting)
-            
+
             # Add schema version
             existing_version = session.query(SchemaVersion).filter_by(version='1.0.0').first()
             if not existing_version:
@@ -650,7 +568,7 @@ class DatabaseManager:
                     description='Initial database schema for Voxify platform'
                 )
                 session.add(version)
-            
+
             session.commit()
         except Exception as e:
             session.rollback()
@@ -664,5 +582,5 @@ def get_database_manager(database_url: str = None) -> DatabaseManager:
     if database_url is None:
         import os
         database_url = os.getenv('DATABASE_URL', 'sqlite:///data/voxify.db')
-    
-    return DatabaseManager(database_url) 
+
+    return DatabaseManager(database_url)

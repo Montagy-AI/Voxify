@@ -10,7 +10,7 @@ from .models import (
     # Database Manager
     DatabaseManager,
     get_database_manager,
-    
+
     # ORM Models
     Base,
     User,
@@ -18,11 +18,9 @@ from .models import (
     VoiceModel,
     SynthesisJob,
     SynthesisCache,
-    PhonemeAlignment,
-    UsageStat,
     SystemSetting,
     SchemaVersion,
-    
+
     # Utility functions
     generate_uuid,
     TimestampMixin
@@ -43,24 +41,22 @@ __all__ = [
     # Database Management
     "DatabaseManager",
     "get_database_manager",
-    "ChromaVectorDB", 
+    "ChromaVectorDB",
     "create_vector_db",
-    
+
     # ORM Models
     "Base",
     "User",
-    "VoiceSample", 
+    "VoiceSample",
     "VoiceModel",
     "SynthesisJob",
     "SynthesisCache",
-    "PhonemeAlignment",
-    "UsageStat",
     "SystemSetting",
     "SchemaVersion",
-    
+
     # Configuration
     "VectorDBConfig",
-    
+
     # Utilities
     "generate_uuid",
     "TimestampMixin"
@@ -70,14 +66,14 @@ __all__ = [
 def initialize_database(database_url: str = None, vector_db_path: str = None):
     """
     Initialize both SQLite and Vector databases
-    
+
     Parameters
     ----------
     database_url : str, optional
         SQLite database URL (default: sqlite:///data/voxify.db)
-    vector_db_path : str, optional  
+    vector_db_path : str, optional
         Vector database path (default: data/chroma_db)
-        
+
     Returns
     -------
     tuple
@@ -94,5 +90,5 @@ def initialize_database(database_url: str = None, vector_db_path: str = None):
     db_manager.init_default_data()
     # Initialize vector database
     vector_db = create_vector_db()
-    
-    return db_manager, vector_db 
+
+    return db_manager, vector_db
