@@ -88,7 +88,7 @@ class TestJobServiceAPI:
         """Get a real voice model id from the database, or skip if not found"""
         import sqlite3
         
-        db_path = "backend/data/voxify.db"
+        db_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "voxify.db")
         try:
             conn = sqlite3.connect(db_path)
             cursor = conn.cursor()

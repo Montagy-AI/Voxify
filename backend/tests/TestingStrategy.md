@@ -53,7 +53,7 @@ This project uses automated testing to ensure the reliability and correctness of
 2. Ensure `curl` is installed and available in your system path.
 3. In another terminal, run all tests with:
    ```bash
-   pytest backend/tests/
+   python -m pytest tests/ -v
    ```
 4. To run a specific module:
    ```bash
