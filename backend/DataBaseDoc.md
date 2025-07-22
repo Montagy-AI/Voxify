@@ -69,7 +69,7 @@ CREATE TABLE voice_samples (
 - Vector database associations
 
 #### Voice Models Table
-Tracks trained AI models and their performance metrics.
+Tracks configuration for voice models used.
 
 ```sql
 CREATE TABLE voice_models (
@@ -114,33 +114,6 @@ CREATE TABLE synthesis_jobs (
 - **API configuration storage**: Store include_timestamps, timestamp_granularity settings
 - **Audio format flexibility**: Support wav, mp3, flac output formats
 
-#### Audio Files Table
-Manages generated audio files and their metadata.
-
-```sql
-CREATE TABLE audio_files (
-    id TEXT PRIMARY KEY,                    -- UUID
-    synthesis_job_id TEXT NOT NULL REFERENCES synthesis_jobs(id),
-    file_path TEXT NOT NULL,               -- Local or cloud storage path
-    filename TEXT NOT NULL,                -- Original filename
-    format TEXT NOT NULL,                  -- wav, mp3, flac
-    file_size INTEGER NOT NULL,            -- bytes
-    duration REAL NOT NULL,                -- seconds
-    sample_rate INTEGER NOT NULL,          -- Hz
-    checksum TEXT,                         -- File integrity check
-    is_public BOOLEAN DEFAULT FALSE,       -- Public access flag
-    download_count INTEGER DEFAULT 0,      -- Usage tracking
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP,                  -- Auto-cleanup timestamp
-    last_accessed_at TIMESTAMP             -- For cleanup policies
-);
-```
-
-**Key Features:**
-- **File lifecycle management**: Automatic cleanup of expired files
-- **Integrity verification**: Checksum validation
-- **Usage tracking**: Download statistics
-- **Access control**: Public/private file access
 
 ### Vector Database Collections
 
@@ -159,7 +132,7 @@ CREATE TABLE audio_files (
 
 ## Data Flow and Relationships
 
-### 1. User Registration → Voice Upload → Model Training
+### 1. User Registration → Voice Upload → TTS Synthesis
 ```mermaid
 graph TD
     A[User Registration] --> B[Voice Sample Upload]
@@ -167,20 +140,19 @@ graph TD
     C --> D[Extract Voice Features]
     D --> E[Store in SQLite]
     D --> F[Store Vector in Chroma]
-    E --> G[Model Training]
-    F --> H[Similarity Search Ready]
+    E --> G[TTS Synthesis Ready]
+    F --> G
 ```
 
-### 2. TTS Synthesis Process
 ```mermaid
 graph TD
-    A[TTS Request] --> B[Check Cache]
-    B -->|Hit| C[Return Cached Result]
-    B -->|Miss| D[Text Processing]
-    D --> E[Voice Synthesis]
-    E --> F[Timing Alignment]
-    F --> G[Store Results]
-    G --> H[Cache for Future]
+A[TTS Request] --> B[Check Cache]
+B -->|Hit| C[Return Cached Result]
+B -->|Miss| D[Text Processing]
+D --> E[Voice Synthesis]
+E --> F[Timing Alignment]
+F --> G[Store Results]
+G --> H[Cache for Future]
 ```
 
 ## Key Design Decisions

@@ -102,19 +102,13 @@ class VoiceSample(Base, TimestampMixin):
     # Language and quality metrics
     language = Column(String, default='en-US')
     quality_score = Column(Float)  # 0-10 scale
-    noise_level = Column(Float)
-    clarity_score = Column(Float)
-    signal_to_noise_ratio = Column(Float)
 
     # Processing status
     status = Column(String, default='uploaded', nullable=False)
     processing_error = Column(Text)
-    processing_start_time = Column(DateTime)
-    processing_end_time = Column(DateTime)
 
     # Vector database associations
     voice_embedding_id = Column(String)  # Reference to Chroma
-    speaker_embedding_id = Column(String)  # Reference to speaker identity
 
     # Metadata and categorization
     tags = Column(TEXT)  # JSON array of user tags
@@ -172,8 +166,6 @@ class VoiceSample(Base, TimestampMixin):
             'channels': self.channels,
             'language': self.language,
             'quality_score': self.quality_score,
-            'noise_level': self.noise_level,
-            'clarity_score': self.clarity_score,
             'status': self.status,
             'tags': self.tags_list,
             'is_public': self.is_public,
@@ -185,7 +177,7 @@ class VoiceSample(Base, TimestampMixin):
         }
 
 class VoiceModel(Base, TimestampMixin):
-    """Cloned voices."""
+    """Configurations for voice clones."""
     __tablename__ = 'voice_models'
 
     id = Column(String, primary_key=True, default=generate_uuid)
@@ -487,8 +479,6 @@ class DatabaseManager:
                             description='Default audio sample rate', is_public=True),
                 SystemSetting(key='cache_expiry_days', value='30', data_type='integer',
                             description='Cache expiration time in days', is_public=False),
-                SystemSetting(key='max_concurrent_training_jobs', value='3', data_type='integer',
-                            description='Maximum concurrent training jobs', is_public=False),
                 SystemSetting(key='maintenance_mode', value='false', data_type='boolean',
                             description='System maintenance mode flag', is_public=True)
             ]

@@ -80,8 +80,6 @@ def create_voice_samples(session, users):
                 is_public=True,
                 gender='male' if i % 2 == 0 else 'female',
                 tags_list=['test', 'english', 'high-quality'],
-                processing_start_time=utc_now() - timedelta(days=1),
-                processing_end_time=utc_now() - timedelta(days=1, minutes=5)
             )
             session.add(sample)
             samples.append(sample)
@@ -95,7 +93,7 @@ def create_voice_models(session, samples):
         model = VoiceModel(
             voice_sample_id=sample.id,
             name=f'Model for {sample.name}',
-            description='Model trained from voice sample',
+            description='Model configurations for {sample.name}',
             model_path=f'data/models/{sample.id}/model.pth',
             model_type='tacotron2',
             model_size=256 * 1024 * 1024,  # 256MB

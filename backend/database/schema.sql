@@ -54,22 +54,16 @@ CREATE TABLE voice_samples (
     channels INTEGER DEFAULT 1,            -- Number of audio channels
     bit_depth INTEGER,                     -- Bit depth
 
-    -- Language and quality metrics
+    -- Language and quality score
     language TEXT DEFAULT 'en-US',
     quality_score REAL,                    -- 0-10 audio quality score
-    noise_level REAL,                      -- Noise level assessment
-    clarity_score REAL,                    -- Speech clarity score
-    signal_to_noise_ratio REAL,           -- SNR measurement
 
     -- Processing status
     status TEXT DEFAULT 'uploaded',        -- uploaded, processing, ready, failed
     processing_error TEXT,
-    processing_start_time TIMESTAMP,
-    processing_end_time TIMESTAMP,
 
     -- Vector database associations
     voice_embedding_id TEXT,               -- Reference to Chroma voice embedding
-    speaker_embedding_id TEXT,             -- Reference to speaker identity embedding
 
     -- Metadata and categorization
     tags TEXT,                             -- JSON array of user tags
@@ -101,7 +95,7 @@ CREATE INDEX idx_voice_samples_file_hash ON voice_samples(file_hash);
 -- Voice Model Management Tables
 -- =============================================================================
 
--- Voice models table for trained AI models
+-- Voice models table for voice model configurations
 CREATE TABLE voice_models (
     id TEXT PRIMARY KEY,                    -- UUID
     voice_sample_id TEXT NOT NULL,
@@ -252,7 +246,6 @@ CREATE TABLE usage_stats (
 
     -- Usage metrics
     voice_samples_uploaded INTEGER DEFAULT 0,
-    models_trained INTEGER DEFAULT 0,
     synthesis_requests INTEGER DEFAULT 0,
     synthesis_duration REAL DEFAULT 0.0,   -- Total synthesis duration in seconds
     storage_used INTEGER DEFAULT 0,        -- Storage used in bytes
@@ -302,46 +295,8 @@ INSERT INTO system_settings (key, value, data_type, description, is_public) VALU
 ('max_synthesis_text_length', '1000', 'integer', 'Maximum text length for synthesis', TRUE),
 ('default_sample_rate', '22050', 'integer', 'Default audio sample rate', TRUE),
 ('cache_expiry_days', '30', 'integer', 'Cache expiration time in days', FALSE),
-('max_concurrent_training_jobs', '3', 'integer', 'Maximum concurrent training jobs', FALSE),
 ('maintenance_mode', 'false', 'boolean', 'System maintenance mode flag', TRUE);
 
--- =============================================================================
--- Database Maintenance Views
--- =============================================================================
-
--- View for user statistics summary
-CREATE VIEW user_summary AS
-SELECT
-    u.id,
-    u.email,
-    COUNT(DISTINCT vs.id) as voice_samples_count,
-    COUNT(DISTINCT vm.id) as models_count,
-    COUNT(DISTINCT sj.id) as synthesis_jobs_count,
-    u.storage_used_bytes,
-    u.created_at,
-    u.last_login_at
-FROM users u
-LEFT JOIN voice_samples vs ON u.id = vs.user_id AND vs.status = 'ready'
-LEFT JOIN voice_models vm ON vs.id = vm.voice_sample_id AND vm.is_active = TRUE
-LEFT JOIN synthesis_jobs sj ON u.id = sj.user_id AND sj.status = 'completed'
-GROUP BY u.id;
-
--- View for model performance metrics
-CREATE VIEW model_performance AS
-SELECT
-    vm.id,
-    vm.name,
-    vm.voice_sample_id,
-    vm.training_status,
-    vm.quality_metrics,
-    vm.similarity_score,
-    COUNT(sj.id) as usage_count,
-    AVG(sj.processing_time_ms) as avg_processing_time,
-    vm.created_at
-FROM voice_models vm
-LEFT JOIN synthesis_jobs sj ON vm.id = sj.voice_model_id AND sj.status = 'completed'
-WHERE vm.is_active = TRUE
-GROUP BY vm.id;
 
 -- =============================================================================
 -- Database Triggers for Automatic Updates

@@ -608,42 +608,6 @@ Authorization: Bearer <access_token>
 }
 ```
 
----
-
-## Voice Sample Training
-
-### Train Voice Clone Model
-```http
-POST /api/v1/voice/samples/{sample_id}/train
-Content-Type: application/json
-Authorization: Bearer <access_token>
-
-{
-    "config": {
-        "epochs": 100,
-        "learning_rate": 0.001,
-        "batch_size": 32,
-        "enable_timestamp_alignment": true
-    }
-}
-```
-
-**Response**:
-```json
-{
-    "success": true,
-    "data": {
-        "training_job_id": "job_train_1234567890",
-        "estimated_duration": 1800,
-        "status": "pending",
-        "features": {
-            "timestamp_alignment_enabled": true,
-            "voice_quality_enhancement": true
-        }
-    },
-    "message": "Voice training job created with timestamp alignment support"
-}
-```
 
 ---
 
