@@ -10,7 +10,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - REACT_APP_API_URL=http://localhost:10000
+      - REACT_APP_API_URL=http://localhost:8000
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -27,7 +27,7 @@ services:
       db-init:
         condition: service_completed_successfully
     ports:
-      - "10000:10000"
+      - "8000:8000"
     environment:
       - FLASK_ENV=development
       - DATABASE_URL=sqlite:////data/voxify.db
@@ -38,7 +38,7 @@ services:
       - data_volume:/data
     restart: unless-stopped
     healthcheck:  # Add health check for the API
-      test: ["CMD", "curl", "-f", "http://localhost:10000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
