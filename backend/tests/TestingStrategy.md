@@ -7,7 +7,7 @@ This project uses automated testing to ensure the reliability and correctness of
 - **Framework:** All tests use `pytest` for automation and fixtures.
 - **API Testing:** Most tests use `requests` and `subprocess` to interact with the running Flask server, often leveraging `curl` commands for realistic end-to-end coverage.
 - **Test Data:** Each test module creates its own test user and authentication tokens to ensure isolation and repeatability.
-- **Environment:** Tests are designed to run against a locally running server (default: `127.0.0.1:10000`), with environment variables configurable for host/port.
+- **Environment:** Tests are designed to run against a locally running server (default: `127.0.0.1:8000`), with environment variables configurable for host/port.
 
 ## 3. Test Structure
 
@@ -49,7 +49,7 @@ This project uses automated testing to ensure the reliability and correctness of
    cd backend
    python start.py
    ```
-   The default address is `127.0.0.1:10000`.
+   The default address is `127.0.0.1:8000`.
 2. Ensure `curl` is installed and available in your system path.
 3. In another terminal, run all tests with:
    ```bash
