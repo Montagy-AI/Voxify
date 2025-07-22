@@ -17,12 +17,12 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     // For FormData, remove Content-Type to let browser set it with boundary
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type'];
     }
-    
+
     return config;
   },
   (error) => {
@@ -37,7 +37,11 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // If error is 401 and not a refresh token request
-    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/refresh')) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url.includes('/auth/refresh')
+    ) {
       originalRequest._retry = true;
 
       try {
@@ -68,8 +72,10 @@ api.interceptors.response.use(
 // Helper function to create audio URL for playback
 export const createAudioUrl = (jobId, isVoiceClone = false) => {
   const token = localStorage.getItem('access_token');
-  const endpoint = isVoiceClone ? `/file/voice-clone/${jobId}` : `/file/synthesis/${jobId}`;
+  const endpoint = isVoiceClone
+    ? `/file/voice-clone/${jobId}`
+    : `/file/synthesis/${jobId}`;
   return `${api.defaults.baseURL}${endpoint}?token=${token}`;
 };
 
-export default api; 
+export default api;

@@ -5,7 +5,6 @@ Handles voice clone creation, management, and selection
 
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-import uuid
 import os
 from datetime import datetime, timezone
 from database import get_database_manager
@@ -15,7 +14,8 @@ from .f5_tts_service import get_f5_tts_service, VoiceCloneConfig
 # Import the blueprint from __init__.py
 from . import voice_bp
 
-@voice_bp.route('/clones', methods=['POST'])
+
+@voice_bp.route("/clones", methods=["POST"])
 @jwt_required()
 def create_voice_clone():
     """
@@ -42,26 +42,23 @@ def create_voice_clone():
         if not data:
             missing_fields.append("no data")
         else:
-            if 'sample_ids' not in data:
+            if "sample_ids" not in data:
                 missing_fields.append("sample_ids")
-            if 'name' not in data:
+            if "name" not in data:
                 missing_fields.append("name")
-            if 'ref_text' not in data:
+            if "ref_text" not in data:
                 missing_fields.append("ref_text")
 
         error_msg = f'Missing required fields: {", ".join(missing_fields)}'
         print(f"[DEBUG] Validation error: {error_msg}")
-        return jsonify({
-            'success': False,
-            'error': error_msg
-        }), 400
+        return jsonify({"success": False, "error": error_msg}), 400
 
-    sample_ids = data['sample_ids']
+    sample_ids = data["sample_ids"]
     if not sample_ids or len(sample_ids) == 0:
-        return jsonify({
-            'success': False,
-            'error': 'At least one sample_id is required'
-        }), 400
+        return (
+            jsonify({"success": False, "error": "At least one sample_id is required"}),
+            400,
+        )
 
     try:
         # Get database session
@@ -69,25 +66,34 @@ def create_voice_clone():
 
         # Verify samples belong to user and get primary sample
         with db.get_session() as session:
-            samples = session.query(VoiceSample).filter(
-                VoiceSample.id.in_(sample_ids),
-                VoiceSample.user_id == user_id,
-                VoiceSample.status == 'ready'
-            ).all()
+            samples = (
+                session.query(VoiceSample)
+                .filter(
+                    VoiceSample.id.in_(sample_ids),
+                    VoiceSample.user_id == user_id,
+                    VoiceSample.status == "ready",
+                )
+                .all()
+            )
 
             if len(samples) != len(sample_ids):
-                return jsonify({
-                    'success': False,
-                    'error': 'Some samples not found or not ready'
-                }), 400
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "error": "Some samples not found or not ready",
+                        }
+                    ),
+                    400,
+                )
 
             # Use the first sample as primary reference
             primary_sample = samples[0]
             if not os.path.exists(primary_sample.file_path):
-                return jsonify({
-                    'success': False,
-                    'error': 'Primary sample file not found'
-                }), 400
+                return (
+                    jsonify({"success": False, "error": "Primary sample file not found"}),
+                    400,
+                )
 
         # Get F5-TTS service
         f5_service = get_f5_tts_service()
@@ -95,18 +101,23 @@ def create_voice_clone():
         # Validate primary audio file
         is_valid, validation_message = f5_service.validate_audio_file(primary_sample.file_path)
         if not is_valid:
-            return jsonify({
-                'success': False,
-                'error': f'Audio validation failed: {validation_message}'
-            }), 400
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "error": f"Audio validation failed: {validation_message}",
+                    }
+                ),
+                400,
+            )
 
         # Create voice clone configuration
         clone_config = VoiceCloneConfig(
-            name=data['name'],
+            name=data["name"],
             ref_audio_path=primary_sample.file_path,
-            ref_text=data['ref_text'],
-            description=data.get('description'),
-            language=data.get('language', 'zh-CN')
+            ref_text=data["ref_text"],
+            description=data.get("description"),
+            language=data.get("language", "zh-CN"),
         )
 
         # Create voice clone using F5-TTS
@@ -116,43 +127,49 @@ def create_voice_clone():
         print(f"[DEBUG] Storing clone info in database: {clone_info}")
         with db.get_session() as session:
             voice_model = VoiceModel(
-                id=clone_info['id'],
+                id=clone_info["id"],
                 voice_sample_id=primary_sample.id,
                 name=clone_info['name'],
                 description=clone_info.get('description'),
                 model_path=clone_info['ref_audio_path'],
                 model_type='f5_tts',
                 is_active=True,
-                deployment_status='online'  # Fixed: 'ready' is not a valid status
+                deployment_status="online",  # Fixed: 'ready' is not a valid status
             )
             session.add(voice_model)
             session.commit()
             print(f"[DEBUG] Voice model saved successfully with ID: {voice_model.id}")
-
-        return jsonify({
-            'success': True,
-            'data': {
-                'clone_id': clone_info['id'],
-                'name': clone_info['name'],
-                'description': clone_info.get('description'),
-                'status': 'ready',
-                'language': clone_info['language'],
-                'sample_ids': sample_ids,
-                'created_at': clone_info['created_at'],
-                'message': 'Voice clone created successfully using F5-TTS'
-            }
-        }), 201
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "data": {
+                        "clone_id": clone_info["id"],
+                        "name": clone_info["name"],
+                        "description": clone_info.get("description"),
+                        "status": "ready",
+                        "language": clone_info["language"],
+                        "sample_ids": sample_ids,
+                        "created_at": clone_info["created_at"],
+                        "message": "Voice clone created successfully using F5-TTS",
+                    },
+                }
+            ),
+            201,
+        )
 
     except Exception as e:
         print(f"[DEBUG] Exception occurred: {type(e).__name__}: {str(e)}")
         import traceback
-        print(f"[DEBUG] Traceback: {traceback.format_exc()}")
-        return jsonify({
-            'success': False,
-            'error': f'Failed to create voice clone: {str(e)}'
-        }), 500
 
-@voice_bp.route('/clones', methods=['GET'])
+        print(f"[DEBUG] Traceback: {traceback.format_exc()}")
+        return (
+            jsonify({"success": False, "error": f"Failed to create voice clone: {str(e)}"}),
+            500,
+        )
+
+
+@voice_bp.route("/clones", methods=["GET"])
 @jwt_required()
 def list_voice_clones():
     """
@@ -166,8 +183,8 @@ def list_voice_clones():
         JSON response with list of voice clones and pagination info
     """
     user_id = get_jwt_identity()
-    page = request.args.get('page', 1, type=int)
-    page_size = request.args.get('page_size', 20, type=int)
+    page = request.args.get("page", 1, type=int)
+    page_size = request.args.get("page_size", 20, type=int)
 
     try:
         # Get database session
@@ -175,16 +192,16 @@ def list_voice_clones():
 
         with db.get_session() as session:
             # Query voice models for the user
-            query = session.query(VoiceModel).join(VoiceSample).filter(
-                VoiceSample.user_id == user_id,
-                VoiceModel.model_type == 'f5_tts'
+            query = (
+                session.query(VoiceModel)
+                .join(VoiceSample)
+                .filter(VoiceSample.user_id == user_id, VoiceModel.model_type == "f5_tts")
             )
 
             total_count = query.count()
-            voice_models = query.order_by(VoiceModel.created_at.desc())\
-                .offset((page - 1) * page_size)\
-                .limit(page_size)\
-                .all()
+            voice_models = (
+                query.order_by(VoiceModel.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+            )
 
             # Get F5-TTS service to get additional clone info
             f5_service = get_f5_tts_service()
@@ -205,7 +222,7 @@ def list_voice_clones():
                         'model_type': model.model_type
                     }
                     clones.append(clone_data)
-                except Exception as e:
+                except Exception:
                     # If F5-TTS service fails, use database info only
                     clone_data = {
                         'clone_id': model.id,
@@ -233,12 +250,13 @@ def list_voice_clones():
             })
 
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': f'Failed to list voice clones: {str(e)}'
-        }), 500
+        return (
+            jsonify({"success": False, "error": f"Failed to list voice clones: {str(e)}"}),
+            500,
+        )
 
-@voice_bp.route('/clones/<clone_id>', methods=['GET'])
+
+@voice_bp.route("/clones/<clone_id>", methods=["GET"])
 @jwt_required()
 def get_voice_clone(clone_id: str):
     """
@@ -260,17 +278,22 @@ def get_voice_clone(clone_id: str):
 
         with db.get_session() as session:
             # Verify clone belongs to user
-            voice_model = session.query(VoiceModel).join(VoiceSample).filter(
-                VoiceModel.id == clone_id,
-                VoiceSample.user_id == user_id,
-                VoiceModel.model_type == 'f5_tts'
-            ).first()
+            voice_model = (
+                session.query(VoiceModel)
+                .join(VoiceSample)
+                .filter(
+                    VoiceModel.id == clone_id,
+                    VoiceSample.user_id == user_id,
+                    VoiceModel.model_type == "f5_tts",
+                )
+                .first()
+            )
 
             if not voice_model:
-                return jsonify({
-                    'success': False,
-                    'error': 'Voice clone not found'
-                }), 404
+                return (
+                    jsonify({"success": False, "error": "Voice clone not found"}),
+                    404,
+                )
 
             # Get F5-TTS service
             f5_service = get_f5_tts_service()
@@ -280,69 +303,79 @@ def get_voice_clone(clone_id: str):
                 clone_info = f5_service.get_clone_info(clone_id)
 
                 # Get associated samples
-                samples = session.query(VoiceSample).filter(
-                    VoiceSample.id.in_(clone_info.get('sample_ids', [voice_model.voice_sample_id]))
-                ).all()
+                samples = (
+                    session.query(VoiceSample)
+                    .filter(VoiceSample.id.in_(clone_info.get("sample_ids", [voice_model.voice_sample_id])))
+                    .all()
+                )
 
                 sample_data = []
                 for sample in samples:
-                    sample_data.append({
-                        'sample_id': sample.id,
-                        'name': sample.name,
-                        'duration': sample.duration,
-                        'format': sample.format,
-                        'quality_score': sample.quality_score
-                    })
+                    sample_data.append(
+                        {
+                            "sample_id": sample.id,
+                            "name": sample.name,
+                            "duration": sample.duration,
+                            "format": sample.format,
+                            "quality_score": sample.quality_score,
+                        }
+                    )
 
-                return jsonify({
-                    'success': True,
-                    'data': {
-                        'clone_id': clone_id,
-                        'name': voice_model.name,
-                        'description': voice_model.description,
-                        'status': voice_model.deployment_status,
-                        'language': clone_info.get('language', 'zh-CN'),
-                        'ref_text': clone_info.get('ref_text'),
-                        'quality_metrics': {
-                            'similarity_score': voice_model.similarity_score or 0.95,
-                            'stability_score': 0.92,  # F5-TTS generally stable
-                            'model_type': 'f5_tts'
+                return jsonify(
+                    {
+                        "success": True,
+                        "data": {
+                            "clone_id": clone_id,
+                            "name": voice_model.name,
+                            "description": voice_model.description,
+                            'status': voice_model.deployment_status,
+                            "language": clone_info.get("language", "zh-CN"),
+                            "ref_text": clone_info.get("ref_text"),
+                            "quality_metrics": {
+                                "similarity_score": voice_model.similarity_score or 0.95,
+                                "stability_score": 0.92,  # F5-TTS generally stable
+                                "model_type": "f5_tts",
+                            },
+                            "samples": sample_data,
+                            "created_at": voice_model.created_at.isoformat() if voice_model.created_at else None,
+                            "is_active": voice_model.is_active,
                         },
-                        'samples': sample_data,
-                        'created_at': voice_model.created_at.isoformat() if voice_model.created_at else None,
-                        'is_active': voice_model.is_active
                     }
-                })
+                )
 
             except Exception as e:
                 # If F5-TTS service fails, return database info only
-                return jsonify({
-                    'success': True,
-                    'data': {
-                        'clone_id': clone_id,
-                        'name': voice_model.name,
-                        'description': voice_model.description,
-                        'status': voice_model.deployment_status,
-                        'language': 'zh-CN',
-                        'quality_metrics': {
-                            'similarity_score': voice_model.similarity_score or 0.95,
-                            'stability_score': 0.92,
-                            'model_type': 'f5_tts'
+                return jsonify(
+                    {
+                        "success": True,
+                        "data": {
+                            "clone_id": clone_id,
+                            "name": voice_model.name,
+                            "description": voice_model.description,
+                            'status': voice_model.deployment_status,
+                            "language": "zh-CN",
+                            "quality_metrics": {
+                                "similarity_score": voice_model.similarity_score or 0.95,
+                                "stability_score": 0.92,
+                                "model_type": "f5_tts",
+                            },
+                            "samples": [],
+                            "created_at": voice_model.created_at.isoformat() if voice_model.created_at else None,
+                            "is_active": voice_model.is_active,
+                            "error": f"Clone details partially unavailable: {str(e)}",
                         },
-                        'samples': [],
-                        'created_at': voice_model.created_at.isoformat() if voice_model.created_at else None,
-                        'is_active': voice_model.is_active,
-                        'error': f'Clone details partially unavailable: {str(e)}'
                     }
-                })
+                )
+
 
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': f'Failed to get voice clone: {str(e)}'
-        }), 500
+        return (
+            jsonify({"success": False, "error": f"Failed to get voice clone: {str(e)}"}),
+            500,
+        )
 
-@voice_bp.route('/clones/<clone_id>', methods=['DELETE'])
+
+@voice_bp.route("/clones/<clone_id>", methods=["DELETE"])
 @jwt_required()
 def delete_voice_clone(clone_id: str):
     """
@@ -362,23 +395,28 @@ def delete_voice_clone(clone_id: str):
 
         with db.get_session() as session:
             # Verify clone belongs to user
-            voice_model = session.query(VoiceModel).join(VoiceSample).filter(
-                VoiceModel.id == clone_id,
-                VoiceSample.user_id == user_id,
-                VoiceModel.model_type == 'f5_tts'
-            ).first()
+            voice_model = (
+                session.query(VoiceModel)
+                .join(VoiceSample)
+                .filter(
+                    VoiceModel.id == clone_id,
+                    VoiceSample.user_id == user_id,
+                    VoiceModel.model_type == "f5_tts",
+                )
+                .first()
+            )
 
             if not voice_model:
-                return jsonify({
-                    'success': False,
-                    'error': 'Voice clone not found'
-                }), 404
+                return (
+                    jsonify({"success": False, "error": "Voice clone not found"}),
+                    404,
+                )
 
             # Delete from F5-TTS service
             f5_service = get_f5_tts_service()
             try:
                 f5_service.delete_clone(clone_id)
-            except Exception as e:
+            except Exception:
                 # Log error but continue with database deletion
                 pass
 
@@ -386,20 +424,21 @@ def delete_voice_clone(clone_id: str):
             session.delete(voice_model)
             session.commit()
 
-            return jsonify({
-                'success': True,
-                'data': {
-                    'message': 'Voice clone deleted successfully'
+            return jsonify(
+                {
+                    "success": True,
+                    "data": {"message": "Voice clone deleted successfully"},
                 }
-            })
+            )
 
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': f'Failed to delete voice clone: {str(e)}'
-        }), 500
+        return (
+            jsonify({"success": False, "error": f"Failed to delete voice clone: {str(e)}"}),
+            500,
+        )
 
-@voice_bp.route('/clones/<clone_id>/select', methods=['POST'])
+
+@voice_bp.route("/clones/<clone_id>/select", methods=["POST"])
 @jwt_required()
 def select_voice_clone(clone_id: str):
     """
@@ -419,46 +458,52 @@ def select_voice_clone(clone_id: str):
 
         with db.get_session() as session:
             # Verify clone belongs to user
-            voice_model = session.query(VoiceModel).join(VoiceSample).filter(
-                VoiceModel.id == clone_id,
-                VoiceSample.user_id == user_id,
-                VoiceModel.model_type == 'f5_tts'
-            ).first()
+            voice_model = (
+                session.query(VoiceModel)
+                .join(VoiceSample)
+                .filter(
+                    VoiceModel.id == clone_id,
+                    VoiceSample.user_id == user_id,
+                    VoiceModel.model_type == "f5_tts",
+                )
+                .first()
+            )
 
             if not voice_model:
-                return jsonify({
-                    'success': False,
-                    'error': 'Voice clone not found'
-                }), 404
+                return (
+                    jsonify({"success": False, "error": "Voice clone not found"}),
+                    404,
+                )
 
             # Deactivate all other clones for this user
             session.query(VoiceModel).join(VoiceSample).filter(
-                VoiceSample.user_id == user_id,
-                VoiceModel.model_type == 'f5_tts'
-            ).update({'is_default': False})
+                VoiceSample.user_id == user_id, VoiceModel.model_type == "f5_tts"
+            ).update({"is_default": False})
 
             # Activate selected clone
             voice_model.is_default = True
             voice_model.is_active = True
             session.commit()
-
-            return jsonify({
-                'success': True,
-                'data': {
-                    'clone_id': clone_id,
-                    'name': voice_model.name,
-                    'message': 'Voice clone selected successfully'
+            
+            return jsonify(
+                {
+                    "success": True,
+                    "data": {
+                        "clone_id": clone_id,
+                        "name": voice_model.name,
+                        "message": "Voice clone selected successfully",
+                    },
                 }
-            })
+            )
 
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': f'Failed to select voice clone: {str(e)}'
-        }), 500
+        return (
+            jsonify({"success": False, "error": f"Failed to select voice clone: {str(e)}"}),
+            500,
+        )
 
 
-@voice_bp.route('/clones/<clone_id>/synthesize', methods=['POST'])
+@voice_bp.route("/clones/<clone_id>/synthesize", methods=["POST"])
 @jwt_required()
 def synthesize_with_clone(clone_id: str):
     """
@@ -478,11 +523,11 @@ def synthesize_with_clone(clone_id: str):
     user_id = get_jwt_identity()
     data = request.get_json()
 
-    if not data or 'text' not in data:
-        return jsonify({
-            'success': False,
-            'error': 'Text is required for synthesis'
-        }), 400
+    if not data or "text" not in data:
+        return (
+            jsonify({"success": False, "error": "Text is required for synthesis"}),
+            400,
+        )
 
     try:
         # Get database session
@@ -490,17 +535,22 @@ def synthesize_with_clone(clone_id: str):
 
         with db.get_session() as session:
             # Verify clone belongs to user
-            voice_model = session.query(VoiceModel).join(VoiceSample).filter(
-                VoiceModel.id == clone_id,
-                VoiceSample.user_id == user_id,
-                VoiceModel.model_type == 'f5_tts'
-            ).first()
+            voice_model = (
+                session.query(VoiceModel)
+                .join(VoiceSample)
+                .filter(
+                    VoiceModel.id == clone_id,
+                    VoiceSample.user_id == user_id,
+                    VoiceModel.model_type == "f5_tts",
+                )
+                .first()
+            )
 
             if not voice_model:
-                return jsonify({
-                    'success': False,
-                    'error': 'Voice clone not found'
-                }), 404
+                return (
+                    jsonify({"success": False, "error": "Voice clone not found"}),
+                    404,
+                )
 
             # Get F5-TTS service
             f5_service = get_f5_tts_service()
@@ -510,12 +560,13 @@ def synthesize_with_clone(clone_id: str):
 
             # Create TTS configuration
             from .f5_tts_service import TTSConfig
+
             tts_config = TTSConfig(
-                text=data['text'],
-                ref_audio_path=clone_info['ref_audio_path'],
-                ref_text=clone_info['ref_text'],
-                language=data.get('language', clone_info.get('language', 'zh-CN')),
-                speed=data.get('speed', 1.0)
+                text=data["text"],
+                ref_audio_path=clone_info["ref_audio_path"],
+                ref_text=clone_info["ref_text"],
+                language=data.get("language", clone_info.get("language", "zh-CN")),
+                speed=data.get("speed", 1.0),
             )
 
             # Perform synthesis
@@ -523,44 +574,47 @@ def synthesize_with_clone(clone_id: str):
 
             # Store synthesis job in database
             from database.models import SynthesisJob
+
             synthesis_job = SynthesisJob(
                 user_id=user_id,
                 voice_model_id=clone_id,
-                text_content=data['text'],
-                text_hash=str(hash(data['text'])),
+                text_content=data["text"],
+                text_hash=str(hash(data["text"])),
                 text_language=tts_config.language,
-                text_length=len(data['text']),
-                word_count=len(data['text'].split()),
+                text_length=len(data["text"]),
+                word_count=len(data["text"].split()),
                 output_path=output_path,
-                status='completed',
+                status="completed",
                 progress=1.0,  # Fixed: should be 1.0 not 100.0 for database constraint
                 started_at=datetime.now(timezone.utc),
                 completed_at=datetime.now(timezone.utc),
                 speed=tts_config.speed,
                 pitch=1.0,  # Add default pitch
                 volume=1.0,  # Add default volume
-                output_format=data.get('output_format', 'wav'),
-                sample_rate=data.get('sample_rate', 22050)
+                output_format=data.get("output_format", "wav"),
+                sample_rate=data.get("sample_rate", 22050),
             )
             session.add(synthesis_job)
             session.commit()
 
-            return jsonify({
-                'success': True,
-                'data': {
-                    'job_id': synthesis_job.id,
-                    'clone_id': clone_id,
-                    'text': data['text'],
-                    'output_path': output_path,
-                    'status': 'completed',
-                    'language': tts_config.language,
-                    'speed': tts_config.speed,
-                    'message': 'Speech synthesis completed successfully'
+            return jsonify(
+                {
+                    "success": True,
+                    "data": {
+                        "job_id": synthesis_job.id,
+                        "clone_id": clone_id,
+                        "text": data["text"],
+                        "output_path": output_path,
+                        "status": "completed",
+                        "language": tts_config.language,
+                        "speed": tts_config.speed,
+                        "message": "Speech synthesis completed successfully",
+                    },
                 }
-            })
+            )
 
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': f'Failed to synthesize speech: {str(e)}'
-        }), 500
+        return (
+            jsonify({"success": False, "error": f"Failed to synthesize speech: {str(e)}"}),
+            500,
+        )

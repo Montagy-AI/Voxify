@@ -5,7 +5,6 @@ Handles voice sample upload, processing, and management
 
 import os
 import uuid
-import tempfile
 import soundfile as sf
 from pathlib import Path
 from datetime import datetime, timezone
@@ -19,23 +18,26 @@ from .embeddings import generate_voice_embedding, delete_voice_embedding
 from . import voice_bp
 
 # Allowed audio file extensions
-ALLOWED_EXTENSIONS = {'wav', 'mp3'}
+ALLOWED_EXTENSIONS = {"wav", "mp3"}
+
 
 def allowed_file(filename: str) -> bool:
     """Check if the file extension is allowed."""
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def extract_audio_metadata(file_path: str) -> dict:
     """Extract metadata from audio file."""
     with sf.SoundFile(file_path) as audio_file:
         return {
-            'duration': len(audio_file) / audio_file.samplerate,
-            'sample_rate': audio_file.samplerate,
-            'channels': audio_file.channels,
-            'format': audio_file.format
+            "duration": len(audio_file) / audio_file.samplerate,
+            "sample_rate": audio_file.samplerate,
+            "channels": audio_file.channels,
+            "format": audio_file.format,
         }
 
-@voice_bp.route('/samples', methods=['POST'])
+
+@voice_bp.route("/samples", methods=["POST"])
 @jwt_required()
 def upload_voice_sample():
     """
@@ -56,28 +58,30 @@ def upload_voice_sample():
     print(f"[DEBUG] Request form: {request.form}")
 
     # Validate name parameter
-    name = request.form.get('name')
+    name = request.form.get("name")
     print(f"[DEBUG] Extracted name from form: '{name}'")
     if not name or not name.strip():
-        return jsonify({
-            'success': False,
-            'error': 'Name is required for voice samples'
-        }), 400
+        return (
+            jsonify({"success": False, "error": "Name is required for voice samples"}),
+            400,
+        )
 
     # Validate file
-    if 'file' not in request.files:
-        return jsonify({
-            'success': False,
-            'error': 'No file provided'
-        }), 400
+    if "file" not in request.files:
+        return jsonify({"success": False, "error": "No file provided"}), 400
 
-    file = request.files['file']
+    file = request.files["file"]
     print(f"[DEBUG] Uploaded file: {file.filename if file else 'None'}")
     if not file or not file.filename or not allowed_file(file.filename):
-        return jsonify({
-            'success': False,
-            'error': 'Invalid file type. Only WAV and MP3 files are allowed'
-        }), 400
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": "Invalid file type. Only WAV and MP3 files are allowed",
+                }
+            ),
+            400,
+        )
 
     try:
         # Generate unique sample ID
@@ -89,7 +93,7 @@ def upload_voice_sample():
         print(f"[DEBUG] Created storage directory: {storage_dir}")
 
         # Define permanent file path
-        file_extension = Path(file.filename).suffix.lower() or '.wav'
+        file_extension = Path(file.filename).suffix.lower() or ".wav"
         permanent_path = storage_dir / f"{sample_id}{file_extension}"
         print(f"[DEBUG] Saving file to: {permanent_path}")
 
@@ -125,39 +129,43 @@ def upload_voice_sample():
             session.add(voice_sample)
             session.commit()
 
-        return jsonify({
-            'success': True,
-            'data': {
-                'sample_id': sample_id,
-                'name': name,
-                'duration': metadata['duration'],
-                'format': metadata['format'],
-                'status': 'ready',
-                'message': 'Voice sample uploaded and processed successfully.'
-            }
-        }),
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "data": {
+                        "sample_id": sample_id,
+                        "name": name,
+                        "duration": metadata["duration"],
+                        "format": metadata["format"],
+                        "status": "ready",
+                        "message": "Voice sample uploaded and processed successfully.",
+                    },
+                }
+            ),
+            201,
+        )
 
     except Exception as e:
-        # Clean up permanent file if it exists and was created
-        if 'permanent_path' in locals() and permanent_path.exists():
+        if "permanent_path" in locals() and permanent_path.exists():
             try:
                 permanent_path.unlink()
-            except:
+            except Exception:
                 pass
 
-        # Clean up embedding if it was created
-        if 'embedding_id' in locals():
+        if "embedding_id" in locals():
             try:
                 delete_voice_embedding(embedding_id)
-            except:
+            except Exception:
                 pass
+              
+        return (
+            jsonify({"success": False, "error": f"Error processing voice sample: {str(e)}"}),
+            500,
+        )
 
-        return jsonify({
-            'success': False,
-            'error': f'Error processing voice sample: {str(e)}'
-        }), 500
 
-@voice_bp.route('/samples', methods=['GET'])
+@voice_bp.route("/samples", methods=["GET"])
 @jwt_required()
 def list_voice_samples():
     """
@@ -186,27 +194,27 @@ def list_voice_samples():
         if status:
             query = query.filter_by(status=status)
 
-        samples = query.order_by(VoiceSample.created_at.desc())\
-            .offset((page - 1) * page_size)\
-            .limit(page_size)\
-            .all()
+        samples = query.order_by(VoiceSample.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
 
         total = query.count()
 
-        return jsonify({
-            'success': True,
-            'data': {
-                'samples': [sample.to_dict() for sample in samples],
-                'pagination': {
-                    'page': page,
-                    'page_size': page_size,
-                    'total_count': total,
-                    'total_pages': (total + page_size - 1) // page_size
-                }
+        return jsonify(
+            {
+                "success": True,
+                "data": {
+                    "samples": [sample.to_dict() for sample in samples],
+                    "pagination": {
+                        "page": page,
+                        "page_size": page_size,
+                        "total_count": total,
+                        "total_pages": (total + page_size - 1) // page_size,
+                    },
+                },
             }
-        })
+        )
 
-@voice_bp.route('/samples/<sample_id>', methods=['GET'])
+
+@voice_bp.route("/samples/<sample_id>", methods=["GET"])
 @jwt_required()
 def get_voice_sample(sample_id: str):
     """
@@ -225,17 +233,12 @@ def get_voice_sample(sample_id: str):
     with db.get_session() as session:
         sample = session.query(VoiceSample).filter_by(id=sample_id, user_id=user_id).first()
         if not sample:
-            return jsonify({
-                'success': False,
-                'error': 'Voice sample not found'
-            }), 404
+            return jsonify({"success": False, "error": "Voice sample not found"}), 404
 
-        return jsonify({
-            'success': True,
-            'data': sample.to_dict()
-        })
+        return jsonify({"success": True, "data": sample.to_dict()})
 
-@voice_bp.route('/samples/<sample_id>', methods=['DELETE'])
+
+@voice_bp.route("/samples/<sample_id>", methods=["DELETE"])
 @jwt_required()
 def delete_voice_sample(sample_id: str):
     """
@@ -254,10 +257,7 @@ def delete_voice_sample(sample_id: str):
     with db.get_session() as session:
         sample = session.query(VoiceSample).filter_by(id=sample_id, user_id=user_id).first()
         if not sample:
-            return jsonify({
-                'success': False,
-                'error': 'Voice sample not found'
-            }), 404
+            return jsonify({"success": False, "error": "Voice sample not found"}), 404
 
         # Delete the voice embedding from ChromaDB
         if sample.voice_embedding_id:
@@ -267,9 +267,4 @@ def delete_voice_sample(sample_id: str):
         session.delete(sample)
         session.commit()
 
-        return jsonify({
-            'success': True,
-            'data': {
-                'message': 'Voice sample deleted successfully'
-            }
-        })
+        return jsonify({"success": True, "data": {"message": "Voice sample deleted successfully"}})

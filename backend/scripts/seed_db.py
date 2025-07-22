@@ -6,57 +6,57 @@ Creates sample data for testing and development
 import os
 import sys
 from datetime import datetime, timedelta, timezone
-import json
-from pathlib import Path
+from database import get_database_manager
+from database.models import (
+    User, 
+    VoiceSample, 
+    VoiceModel, 
+    SynthesisJob,
+    SystemSetting
+)
+from api.utils.password import hash_password
 
 # Add the backend directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from database import get_database_manager
-from database.models import (
-    User, VoiceSample, VoiceModel, SynthesisJob,
-    SystemSetting
-)
-from api.utils.password import hash_password
 
 def utc_now():
     """Get current UTC time with timezone info"""
     return datetime.now(timezone.utc)
 
+
 def create_test_users(session):
     """Create test users"""
     users = [
         {
-            'email': 'test@example.com',
-            'password': 'Test123!',
-            'first_name': 'Test',
-            'last_name': 'User',
-            'is_active': True,
-            'email_verified': True,
-            'last_login_at': utc_now()
+            "email": "test@example.com",
+            "password": "Test123!",
+            "first_name": "Test",
+            "last_name": "User",
+            "is_active": True,
+            "email_verified": True,
+            "last_login_at": utc_now(),
         },
         {
-            'email': 'admin@example.com',
-            'password': 'Admin123!',
-            'first_name': 'Admin',
-            'last_name': 'User',
-            'is_active': True,
-            'email_verified': True,
-            'last_login_at': utc_now()
-        }
+            "email": "admin@example.com",
+            "password": "Admin123!",
+            "first_name": "Admin",
+            "last_name": "User",
+            "is_active": True,
+            "email_verified": True,
+            "last_login_at": utc_now(),
+        },
     ]
 
     created_users = []
     for user_data in users:
-        password = user_data.pop('password')
-        user = User(
-            password_hash=hash_password(password),
-            **user_data
-        )
+        password = user_data.pop("password")
+        user = User(password_hash=hash_password(password), **user_data)
         session.add(user)
         created_users.append(user)
 
     return created_users
+
 
 def create_voice_samples(session, users):
     """Create voice samples for users"""
@@ -65,18 +65,18 @@ def create_voice_samples(session, users):
         for i in range(2):  # 2 samples per user
             sample = VoiceSample(
                 user_id=user.id,
-                name=f'{user.first_name}\'s Voice Sample {i+1}',
-                description='This is a test voice sample',
-                file_path=f'data/files/samples/{user.id}/sample_{i+1}.wav',
+                name=f"{user.first_name}'s Voice Sample {i+1}",
+                description="This is a test voice sample",
+                file_path=f"data/files/samples/{user.id}/sample_{i+1}.wav",
                 file_size=1024 * 1024,  # 1MB
-                original_filename=f'original_sample_{i+1}.wav',
-                format='wav',
+                original_filename=f"original_sample_{i+1}.wav",
+                format="wav",
                 duration=5.0,
                 sample_rate=22050,
                 channels=1,
-                status='ready',
+                status="ready",
                 quality_score=9.5,
-                language='en-US',
+                language="en-US",
                 is_public=True,
                 gender='male' if i % 2 == 0 else 'female',
                 tags_list=['test', 'english', 'high-quality'],
@@ -85,6 +85,7 @@ def create_voice_samples(session, users):
             samples.append(sample)
 
     return samples
+
 
 def create_voice_models(session, samples):
     """Create voice models for samples"""
@@ -99,12 +100,13 @@ def create_voice_models(session, samples):
             model_size=256 * 1024 * 1024,  # 256MB
             model_version='1.0',
             is_active=True,
-            deployment_status='online'
+            deployment_status="online",
         )
         session.add(model)
         models.append(model)
 
     return models
+
 
 def create_synthesis_jobs(session, users, models):
     """Create synthesis jobs"""
@@ -113,46 +115,40 @@ def create_synthesis_jobs(session, users, models):
         "Hello, this is a test voice synthesis.",
         "Artificial Intelligence is changing our lives.",
         "Voice synthesis technology is becoming more natural.",
-        "Have a great day!"
+        "Have a great day!",
     ]
 
     for user in users:
         for model in models:
             for i, text in enumerate(texts):
                 # Create jobs with different statuses
-                status = ['completed', 'processing', 'pending', 'failed'][i % 4]
-                progress = 1.0 if status == 'completed' else (
-                    0.0 if status == 'pending' else 0.5
-                )
+                status = ["completed", "processing", "pending", "failed"][i % 4]
+                progress = 1.0 if status == "completed" else (0.0 if status == "pending" else 0.5)
 
                 job = SynthesisJob(
                     user_id=user.id,
                     voice_model_id=model.id,
                     text_content=text,
                     text_hash=str(hash(text)),
-                    text_language='en-US',
+                    text_language="en-US",
                     text_length=len(text),
                     word_count=len(text.split()),
-                    config_dict={
-                        'speed': 1.0,
-                        'pitch': 1.0,
-                        'volume': 1.0
-                    },
-                    output_format='wav',
+                    config_dict={"speed": 1.0, "pitch": 1.0, "volume": 1.0},
+                    output_format="wav",
                     sample_rate=22050,
                     status=status,
                     progress=progress,
-                                    started_at=utc_now() - timedelta(hours=1) if status != 'pending' else None,
-                completed_at=utc_now() if status == 'completed' else None
+                    started_at=utc_now() - timedelta(hours=1) if status != "pending" else None,
+                    completed_at=utc_now() if status == "completed" else None,
                 )
 
-                if status == 'completed':
-                    job.output_path = f'data/files/synthesis/output/{job.id}.wav'
+                if status == "completed":
+                    job.output_path = f"data/files/synthesis/output/{job.id}.wav"
                     job.output_size = 1024 * 1024  # 1MB
                     job.duration = 5.0
                     job.processing_time_ms = 1500
                     job.queue_time_ms = 500
-                elif status == 'failed':
+                elif status == "failed":
                     job.error_message = "Model inference failed: Out of memory"
 
                 session.add(job)
@@ -160,6 +156,7 @@ def create_synthesis_jobs(session, users, models):
 
     return jobs
 
+  
 def main():
     """Main function to seed the database"""
     print("🌱 Starting to seed test data...")
@@ -198,7 +195,7 @@ def main():
         print(f"- Voice Samples: {len(samples)}")
         print(f"- Voice Models: {len(models)}")
         print(f"- Synthesis Jobs: {len(jobs)}")
-        print(f"- Usage Stats per User: 7 days")
+        print("- Usage Stats per User: 7 days")
 
     except Exception as e:
         session.rollback()
@@ -207,5 +204,5 @@ def main():
     finally:
         session.close()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -4,35 +4,51 @@ SQLAlchemy models for the Voxify platform hybrid storage system
 """
 
 from sqlalchemy import (
-    create_engine, Column, String, Integer, Float, Boolean, Text,
-    DateTime, ForeignKey, CheckConstraint, Index, func, UniqueConstraint
+    create_engine,
+    Column,
+    String,
+    Integer,
+    Float,
+    Boolean,
+    Text,
+    DateTime,
+    ForeignKey,
+    CheckConstraint,
+    Index,
+    UniqueConstraint,
 )
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.dialects.sqlite import TEXT
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 import json
 
 Base = declarative_base()
+
 
 def generate_uuid():
     """Generate UUID for primary keys"""
     return str(uuid.uuid4())
 
+
 def utc_now():
     """Get current UTC time with timezone info"""
     return datetime.now(timezone.utc)
 
+
 class TimestampMixin:
     """Mixin for created_at and updated_at timestamps"""
+
     created_at = Column(DateTime, default=utc_now, nullable=False)
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
 
+
 class User(Base, TimestampMixin):
     """User account model"""
-    __tablename__ = 'users'
+
+    __tablename__ = "users"
 
     id = Column(String, primary_key=True, default=generate_uuid)
     email = Column(String, unique=True, nullable=False)
@@ -50,9 +66,9 @@ class User(Base, TimestampMixin):
 
     # Constraints
     __table_args__ = (
-        CheckConstraint('storage_used_bytes >= 0', name='check_storage_used_bytes'),
-        Index('idx_users_email', 'email'),
-        Index('idx_users_active', 'is_active'),
+        CheckConstraint("storage_used_bytes >= 0", name="check_storage_used_bytes"),
+        Index("idx_users_email", "email"),
+        Index("idx_users_active", "is_active"),
     )
 
     @property
@@ -65,24 +81,26 @@ class User(Base, TimestampMixin):
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for API responses"""
         return {
-            'id': self.id,
-            'email': self.email,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'full_name': self.full_name,
-            'storage_used_bytes': self.storage_used_bytes,
-            'is_active': self.is_active,
-            'email_verified': self.email_verified,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'last_login_at': self.last_login_at.isoformat() if self.last_login_at else None
+            "id": self.id,
+            "email": self.email,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "full_name": self.full_name,
+            "storage_used_bytes": self.storage_used_bytes,
+            "is_active": self.is_active,
+            "email_verified": self.email_verified,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "last_login_at": self.last_login_at.isoformat() if self.last_login_at else None,
         }
+
 
 class VoiceSample(Base, TimestampMixin):
     """Voice sample model for uploaded audio files"""
-    __tablename__ = 'voice_samples'
+    
+    __tablename__ = "voice_samples"
 
     id = Column(String, primary_key=True, default=generate_uuid)
-    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     name = Column(String, nullable=False)
     description = Column(Text)
 
@@ -100,11 +118,11 @@ class VoiceSample(Base, TimestampMixin):
     bit_depth = Column(Integer)
 
     # Language and quality metrics
-    language = Column(String, default='en-US')
+    language = Column(String, default="en-US")
     quality_score = Column(Float)  # 0-10 scale
 
     # Processing status
-    status = Column(String, default='uploaded', nullable=False)
+    status = Column(String, default="uploaded", nullable=False)
     processing_error = Column(Text)
 
     # Vector database associations
@@ -123,17 +141,23 @@ class VoiceSample(Base, TimestampMixin):
 
     # Constraints
     __table_args__ = (
-        CheckConstraint('status IN ("uploaded", "processing", "ready", "failed")', name='check_status'),
-        CheckConstraint('duration > 0', name='check_duration_positive'),
-        CheckConstraint('sample_rate > 0', name='check_sample_rate_positive'),
-        CheckConstraint('channels > 0', name='check_channels_positive'),
-        CheckConstraint('quality_score IS NULL OR (quality_score >= 0 AND quality_score <= 10)', name='check_quality_score_range'),
-        Index('idx_voice_samples_user_id', 'user_id'),
-        Index('idx_voice_samples_status', 'status'),
-        Index('idx_voice_samples_language', 'language'),
-        Index('idx_voice_samples_quality', 'quality_score'),
-        Index('idx_voice_samples_created', 'created_at'),
-        Index('idx_voice_samples_file_hash', 'file_hash'),
+        CheckConstraint(
+            'status IN ("uploaded", "processing", "ready", "failed")',
+            name="check_status",
+        ),
+        CheckConstraint("duration > 0", name="check_duration_positive"),
+        CheckConstraint("sample_rate > 0", name="check_sample_rate_positive"),
+        CheckConstraint("channels > 0", name="check_channels_positive"),
+        CheckConstraint(
+            "quality_score IS NULL OR (quality_score >= 0 AND quality_score <= 10)",
+            name="check_quality_score_range",
+        ),
+        Index("idx_voice_samples_user_id", "user_id"),
+        Index("idx_voice_samples_status", "status"),
+        Index("idx_voice_samples_language", "language"),
+        Index("idx_voice_samples_quality", "quality_score"),
+        Index("idx_voice_samples_created", "created_at"),
+        Index("idx_voice_samples_file_hash", "file_hash"),
     )
 
     @property
@@ -176,20 +200,22 @@ class VoiceSample(Base, TimestampMixin):
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
 
+
 class VoiceModel(Base, TimestampMixin):
     """Configurations for voice clones."""
+    
     __tablename__ = 'voice_models'
 
     id = Column(String, primary_key=True, default=generate_uuid)
-    voice_sample_id = Column(String, ForeignKey('voice_samples.id', ondelete='CASCADE'), nullable=False)
+    voice_sample_id = Column(String, ForeignKey("voice_samples.id", ondelete="CASCADE"), nullable=False)
     name = Column(String, nullable=False)
     description = Column(Text)
 
     # Model file information
     model_path = Column(String, nullable=False)
-    model_type = Column(String, default='tacotron2')
+    model_type = Column(String, default="tacotron2")
     model_size = Column(Integer)
-    model_version = Column(String, default='1.0')
+    model_version = Column(String, default="1.0")
     model_hash = Column(String)
 
     # Model status and management
@@ -209,7 +235,6 @@ class VoiceModel(Base, TimestampMixin):
         Index('idx_voice_models_deployment', 'deployment_status'),
     )
 
-
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for API responses"""
         return {
@@ -227,24 +252,26 @@ class VoiceModel(Base, TimestampMixin):
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
 
+
 class SynthesisJob(Base, TimestampMixin):
     """TTS synthesis job model"""
-    __tablename__ = 'synthesis_jobs'
+
+    __tablename__ = "synthesis_jobs"
 
     id = Column(String, primary_key=True, default=generate_uuid)
-    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
-    voice_model_id = Column(String, ForeignKey('voice_models.id', ondelete='CASCADE'), nullable=False)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    voice_model_id = Column(String, ForeignKey("voice_models.id", ondelete="CASCADE"), nullable=False)
 
     # Input text information
     text_content = Column(Text, nullable=False)
     text_hash = Column(String, nullable=False)
-    text_language = Column(String, default='en-US')
+    text_language = Column(String, default="en-US")
     text_length = Column(Integer)
     word_count = Column(Integer)
 
     # Synthesis configuration
     config = Column(TEXT)  # JSON synthesis parameters
-    output_format = Column(String, default='wav')
+    output_format = Column(String, default="wav")
     sample_rate = Column(Integer, default=22050)
     speed = Column(Float, default=1.0)
     pitch = Column(Float, default=1.0)
@@ -261,7 +288,7 @@ class SynthesisJob(Base, TimestampMixin):
     phoneme_timestamps = Column(TEXT)  # JSON array
 
     # Job status and progress
-    status = Column(String, default='pending', nullable=False)
+    status = Column(String, default="pending", nullable=False)
     progress = Column(Float, default=0.0)
     error_message = Column(Text)
     processing_node = Column(String)
@@ -284,16 +311,19 @@ class SynthesisJob(Base, TimestampMixin):
 
     # Constraints
     __table_args__ = (
-        CheckConstraint('status IN ("pending", "processing", "completed", "failed", "cancelled")', name='check_synthesis_status'),
-        CheckConstraint('progress >= 0.0 AND progress <= 1.0', name='check_synthesis_progress'),
-        CheckConstraint('speed >= 0.1 AND speed <= 3.0', name='check_speed_range'),
-        CheckConstraint('pitch >= 0.1 AND pitch <= 3.0', name='check_pitch_range'),
-        CheckConstraint('volume >= 0.0 AND volume <= 3.0', name='check_volume_range'),
-        Index('idx_synthesis_jobs_user_id', 'user_id'),
-        Index('idx_synthesis_jobs_status', 'status'),
-        Index('idx_synthesis_jobs_text_hash', 'text_hash'),
-        Index('idx_synthesis_jobs_model_id', 'voice_model_id'),
-        Index('idx_synthesis_jobs_created', 'created_at'),
+        CheckConstraint(
+            'status IN ("pending", "processing", "completed", "failed", "cancelled")',
+            name="check_synthesis_status",
+        ),
+        CheckConstraint("progress >= 0.0 AND progress <= 1.0", name="check_synthesis_progress"),
+        CheckConstraint("speed >= 0.1 AND speed <= 3.0", name="check_speed_range"),
+        CheckConstraint("pitch >= 0.1 AND pitch <= 3.0", name="check_pitch_range"),
+        CheckConstraint("volume >= 0.0 AND volume <= 3.0", name="check_volume_range"),
+        Index("idx_synthesis_jobs_user_id", "user_id"),
+        Index("idx_synthesis_jobs_status", "status"),
+        Index("idx_synthesis_jobs_text_hash", "text_hash"),
+        Index("idx_synthesis_jobs_model_id", "voice_model_id"),
+        Index("idx_synthesis_jobs_created", "created_at"),
     )
 
     @property
@@ -329,41 +359,43 @@ class SynthesisJob(Base, TimestampMixin):
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for API responses"""
         return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'voice_model_id': self.voice_model_id,
-            'text_content': self.text_content,
-            'text_hash': self.text_hash,
-            'text_language': self.text_language,
-            'text_length': self.text_length,
-            'word_count': self.word_count,
-            'config': self.config_dict,
-            'output_format': self.output_format,
-            'sample_rate': self.sample_rate,
-            'speed': self.speed,
-            'pitch': self.pitch,
-            'volume': self.volume,
-            'output_path': self.output_path,
-            'output_size': self.output_size,
-            'duration': self.duration,
-            'word_timestamps': self.word_timestamps_list,
-            'status': self.status,
-            'progress': self.progress,
-            'error_message': self.error_message,
-            'cache_hit': self.cache_hit,
-            'processing_time_ms': self.processing_time_ms,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'started_at': self.started_at.isoformat() if self.started_at else None,
-            'completed_at': self.completed_at.isoformat() if self.completed_at else None
+            "id": self.id,
+            "user_id": self.user_id,
+            "voice_model_id": self.voice_model_id,
+            "text_content": self.text_content,
+            "text_hash": self.text_hash,
+            "text_language": self.text_language,
+            "text_length": self.text_length,
+            "word_count": self.word_count,
+            "config": self.config_dict,
+            "output_format": self.output_format,
+            "sample_rate": self.sample_rate,
+            "speed": self.speed,
+            "pitch": self.pitch,
+            "volume": self.volume,
+            "output_path": self.output_path,
+            "output_size": self.output_size,
+            "duration": self.duration,
+            "word_timestamps": self.word_timestamps_list,
+            "status": self.status,
+            "progress": self.progress,
+            "error_message": self.error_message,
+            "cache_hit": self.cache_hit,
+            "processing_time_ms": self.processing_time_ms,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "started_at": self.started_at.isoformat() if self.started_at else None,
+            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
         }
+
 
 class SynthesisCache(Base, TimestampMixin):
     """Synthesis cache for performance optimization"""
+
     __tablename__ = 'synthesis_cache'
 
     id = Column(String, primary_key=True, default=generate_uuid)
     text_hash = Column(String, nullable=False)
-    voice_model_id = Column(String, ForeignKey('voice_models.id', ondelete='CASCADE'), nullable=False)
+    voice_model_id = Column(String, ForeignKey("voice_models.id", ondelete="CASCADE"), nullable=False)
     config_hash = Column(String, nullable=False)
 
     # Cached content
@@ -384,22 +416,23 @@ class SynthesisCache(Base, TimestampMixin):
 
     # Constraints
     __table_args__ = (
-        CheckConstraint('duration > 0', name='check_cache_duration_positive'),
-        CheckConstraint('hit_count >= 0', name='check_hit_count_positive'),
-        UniqueConstraint('text_hash', 'voice_model_id', 'config_hash', name='unique_cache_key'),
-        Index('idx_synthesis_cache_hash', 'text_hash'),
-        Index('idx_synthesis_cache_model', 'voice_model_id'),
-        Index('idx_synthesis_cache_expires', 'expires_at'),
+        CheckConstraint("duration > 0", name="check_cache_duration_positive"),
+        CheckConstraint("hit_count >= 0", name="check_hit_count_positive"),
+        UniqueConstraint("text_hash", "voice_model_id", "config_hash", name="unique_cache_key"),
+        Index("idx_synthesis_cache_hash", "text_hash"),
+        Index("idx_synthesis_cache_model", "voice_model_id"),
+        Index("idx_synthesis_cache_expires", "expires_at"),
     )
 
 
 class SystemSetting(Base):
     """System settings and configuration"""
-    __tablename__ = 'system_settings'
+
+    __tablename__ = "system_settings"
 
     key = Column(String, primary_key=True)
     value = Column(String, nullable=False)
-    data_type = Column(String, default='string')
+    data_type = Column(String, default="string")
     description = Column(Text)
     is_public = Column(Boolean, default=False)
     updated_at = Column(DateTime, default=utc_now)
@@ -407,31 +440,37 @@ class SystemSetting(Base):
 
     # Constraints
     __table_args__ = (
-        CheckConstraint('data_type IN ("string", "integer", "float", "boolean", "json")', name='check_data_type'),
+        CheckConstraint(
+            'data_type IN ("string", "integer", "float", "boolean", "json")',
+            name="check_data_type",
+        ),
     )
 
     def get_typed_value(self) -> Any:
         """Get value converted to appropriate type"""
-        if self.data_type == 'integer':
+        if self.data_type == "integer":
             return int(self.value)
-        elif self.data_type == 'float':
+        elif self.data_type == "float":
             return float(self.value)
-        elif self.data_type == 'boolean':
-            return self.value.lower() in ('true', '1', 'yes', 'on')
-        elif self.data_type == 'json':
+        elif self.data_type == "boolean":
+            return self.value.lower() in ("true", "1", "yes", "on")
+        elif self.data_type == "json":
             try:
                 return json.loads(self.value)
             except (json.JSONDecodeError, TypeError):
                 return None
         return self.value
 
+
 class SchemaVersion(Base):
     """Schema version tracking for migrations"""
-    __tablename__ = 'schema_version'
+
+    __tablename__ = "schema_version"
 
     version = Column(String, primary_key=True)
     applied_at = Column(DateTime, default=utc_now)
     description = Column(Text)
+
 
 # Database connection and session management
 class DatabaseManager:
@@ -449,7 +488,7 @@ class DatabaseManager:
         self.engine = create_engine(
             database_url,
             echo=False,  # Set to True for SQL debugging
-            connect_args={"check_same_thread": False} if "sqlite" in database_url else {}
+            connect_args={"check_same_thread": False} if "sqlite" in database_url else {},
         )
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
 
@@ -471,16 +510,41 @@ class DatabaseManager:
         try:
             # Add default system settings
             default_settings = [
-                SystemSetting(key='max_voice_sample_size_mb', value='50', data_type='integer',
-                            description='Maximum voice sample file size in MB', is_public=True),
-                SystemSetting(key='max_synthesis_text_length', value='1000', data_type='integer',
-                            description='Maximum text length for synthesis', is_public=True),
-                SystemSetting(key='default_sample_rate', value='22050', data_type='integer',
-                            description='Default audio sample rate', is_public=True),
-                SystemSetting(key='cache_expiry_days', value='30', data_type='integer',
-                            description='Cache expiration time in days', is_public=False),
-                SystemSetting(key='maintenance_mode', value='false', data_type='boolean',
-                            description='System maintenance mode flag', is_public=True)
+                SystemSetting(
+                    key="max_voice_sample_size_mb",
+                    value="50",
+                    data_type="integer",
+                    description="Maximum voice sample file size in MB",
+                    is_public=True,
+                ),
+                SystemSetting(
+                    key="max_synthesis_text_length",
+                    value="1000",
+                    data_type="integer",
+                    description="Maximum text length for synthesis",
+                    is_public=True,
+                ),
+                SystemSetting(
+                    key="default_sample_rate",
+                    value="22050",
+                    data_type="integer",
+                    description="Default audio sample rate",
+                    is_public=True,
+                ),
+                SystemSetting(
+                    key="cache_expiry_days",
+                    value="30",
+                    data_type="integer",
+                    description="Cache expiration time in days",
+                    is_public=False,
+                ),
+                SystemSetting(
+                    key="maintenance_mode",
+                    value="false",
+                    data_type="boolean",
+                    description="System maintenance mode flag",
+                    is_public=True,
+                ),
             ]
 
             for setting in default_settings:
@@ -489,11 +553,11 @@ class DatabaseManager:
                     session.add(setting)
 
             # Add schema version
-            existing_version = session.query(SchemaVersion).filter_by(version='1.0.0').first()
+            existing_version = session.query(SchemaVersion).filter_by(version="1.0.0").first()
             if not existing_version:
                 version = SchemaVersion(
-                    version='1.0.0',
-                    description='Initial database schema for Voxify platform'
+                    version="1.0.0",
+                    description="Initial database schema for Voxify platform",
                 )
                 session.add(version)
 
@@ -504,11 +568,13 @@ class DatabaseManager:
         finally:
             session.close()
 
+
 # Utility functions
 def get_database_manager(database_url: str = None) -> DatabaseManager:
     """Get database manager instance"""
     if database_url is None:
         import os
-        database_url = os.getenv('DATABASE_URL', 'sqlite:///data/voxify.db')
+
+        database_url = os.getenv("DATABASE_URL", "sqlite:///data/voxify.db")
 
     return DatabaseManager(database_url)
