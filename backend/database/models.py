@@ -185,7 +185,7 @@ class VoiceSample(Base, TimestampMixin):
         }
 
 class VoiceModel(Base, TimestampMixin):
-    """Voice model for trained AI models"""
+    """Cloned voices."""
     __tablename__ = 'voice_models'
 
     id = Column(String, primary_key=True, default=generate_uuid)
@@ -200,28 +200,6 @@ class VoiceModel(Base, TimestampMixin):
     model_version = Column(String, default='1.0')
     model_hash = Column(String)
 
-    # Training configuration
-    training_config = Column(TEXT)  # JSON training parameters
-    training_epochs = Column(Integer)
-    learning_rate = Column(Float)
-    batch_size = Column(Integer)
-    dataset_size = Column(Integer)
-
-    # Training status and progress
-    training_status = Column(String, default='pending', nullable=False)
-    training_progress = Column(Float, default=0.0)
-    training_start_time = Column(DateTime)
-    training_end_time = Column(DateTime)
-    training_error = Column(Text)
-    training_logs_path = Column(String)
-
-    # Quality metrics and evaluation
-    quality_metrics = Column(TEXT)  # JSON quality metrics
-    mel_loss = Column(Float)
-    validation_score = Column(Float)
-    mos_score = Column(Float)  # Mean Opinion Score
-    similarity_score = Column(Float)
-
     # Model status and management
     is_active = Column(Boolean, default=True)
     is_default = Column(Boolean, default=False)
@@ -233,44 +211,12 @@ class VoiceModel(Base, TimestampMixin):
 
     # Constraints
     __table_args__ = (
-        CheckConstraint('training_status IN ("pending", "training", "completed", "failed")', name='check_training_status'),
-        CheckConstraint('training_progress >= 0.0 AND training_progress <= 1.0', name='check_training_progress'),
         CheckConstraint('deployment_status IN ("offline", "online", "deploying")', name='check_deployment_status'),
         Index('idx_voice_models_sample_id', 'voice_sample_id'),
-        Index('idx_voice_models_status', 'training_status'),
         Index('idx_voice_models_active', 'is_active'),
         Index('idx_voice_models_deployment', 'deployment_status'),
     )
 
-    @property
-    def training_config_dict(self) -> Dict[str, Any]:
-        """Get training config as dictionary"""
-        if self.training_config:
-            try:
-                return json.loads(self.training_config)
-            except (json.JSONDecodeError, TypeError):
-                return {}
-        return {}
-
-    @training_config_dict.setter
-    def training_config_dict(self, value: Dict[str, Any]):
-        """Set training config from dictionary"""
-        self.training_config = json.dumps(value) if value else None
-
-    @property
-    def quality_metrics_dict(self) -> Dict[str, Any]:
-        """Get quality metrics as dictionary"""
-        if self.quality_metrics:
-            try:
-                return json.loads(self.quality_metrics)
-            except (json.JSONDecodeError, TypeError):
-                return {}
-        return {}
-
-    @quality_metrics_dict.setter
-    def quality_metrics_dict(self, value: Dict[str, Any]):
-        """Set quality metrics from dictionary"""
-        self.quality_metrics = json.dumps(value) if value else None
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for API responses"""
@@ -282,14 +228,6 @@ class VoiceModel(Base, TimestampMixin):
             'model_type': self.model_type,
             'model_size': self.model_size,
             'model_version': self.model_version,
-            'training_config': self.training_config_dict,
-            'training_status': self.training_status,
-            'training_progress': self.training_progress,
-            'quality_metrics': self.quality_metrics_dict,
-            'mel_loss': self.mel_loss,
-            'validation_score': self.validation_score,
-            'mos_score': self.mos_score,
-            'similarity_score': self.similarity_score,
             'is_active': self.is_active,
             'is_default': self.is_default,
             'deployment_status': self.deployment_status,

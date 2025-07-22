@@ -115,28 +115,6 @@ CREATE TABLE voice_models (
     model_version TEXT DEFAULT '1.0',      -- Model version
     model_hash TEXT,                       -- Model file hash
 
-    -- Training configuration
-    training_config TEXT,                  -- JSON training parameters
-    training_epochs INTEGER,
-    learning_rate REAL,
-    batch_size INTEGER,
-    dataset_size INTEGER,                  -- Training dataset size
-
-    -- Training status and progress
-    training_status TEXT DEFAULT 'pending', -- pending, training, completed, failed
-    training_progress REAL DEFAULT 0.0,     -- 0.0-1.0 progress
-    training_start_time TIMESTAMP,
-    training_end_time TIMESTAMP,
-    training_error TEXT,
-    training_logs_path TEXT,               -- Training logs file path
-
-    -- Quality metrics and evaluation
-    quality_metrics TEXT,                   -- JSON quality metrics
-    mel_loss REAL,                         -- Training loss
-    validation_score REAL,                 -- Validation score
-    mos_score REAL,                        -- Mean Opinion Score
-    similarity_score REAL,                 -- Voice similarity score
-
     -- Model status and management
     is_active BOOLEAN DEFAULT TRUE,
     is_default BOOLEAN DEFAULT FALSE,       -- User's default model
@@ -146,14 +124,11 @@ CREATE TABLE voice_models (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (voice_sample_id) REFERENCES voice_samples (id) ON DELETE CASCADE,
-    CHECK (training_status IN ('pending', 'training', 'completed', 'failed')),
-    CHECK (training_progress >= 0.0 AND training_progress <= 1.0),
     CHECK (deployment_status IN ('offline', 'online', 'deploying'))
 );
 
 -- Indexes for voice_models table
 CREATE INDEX idx_voice_models_sample_id ON voice_models(voice_sample_id);
-CREATE INDEX idx_voice_models_status ON voice_models(training_status);
 CREATE INDEX idx_voice_models_active ON voice_models(is_active);
 CREATE INDEX idx_voice_models_deployment ON voice_models(deployment_status);
 

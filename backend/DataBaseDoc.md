@@ -59,7 +59,6 @@ CREATE TABLE voice_samples (
     quality_score REAL,                    -- 0-10 scale
     status TEXT DEFAULT 'uploaded',        -- uploaded, processing, ready, failed
     voice_embedding_id TEXT,               -- Reference to Chroma
-    speaker_embedding_id TEXT,             -- Reference to speaker identity
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
@@ -79,9 +78,6 @@ CREATE TABLE voice_models (
     name TEXT NOT NULL,
     model_path TEXT NOT NULL,
     model_type TEXT DEFAULT 'tacotron2',
-    training_status TEXT DEFAULT 'pending',
-    training_progress REAL DEFAULT 0.0,
-    quality_metrics TEXT,                   -- JSON format
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -114,8 +110,6 @@ CREATE TABLE synthesis_jobs (
 
 **Special Features:**
 - **Syllable-to-time mapping**: Project requirement for accurate timing
-- **Word-to-time mapping**: Enhanced synthesis control
-- **Phoneme alignment**: Detailed linguistic timing data
 - **Smart caching**: Avoid reprocessing identical requests
 - **API configuration storage**: Store include_timestamps, timestamp_granularity settings
 - **Audio format flexibility**: Support wav, mp3, flac output formats
