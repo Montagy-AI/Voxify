@@ -189,6 +189,7 @@ class VoiceSample(Base, TimestampMixin):
             "user_id": self.user_id,
             "name": self.name,
             "description": self.description,
+            "file_path": self.file_path,
             "file_size": self.file_size,
             "original_filename": self.original_filename,
             "format": self.format,
