@@ -483,14 +483,31 @@ def select_voice_clone(clone_id: str):
                 )
 
             # Deactivate all other clones for this user
-            session.query(VoiceModel).join(VoiceSample).filter(
-                VoiceSample.user_id == user_id, VoiceModel.model_type == "f5_tts"
-            ).update({"is_default": False})
-
-            # Activate selected clone
-            voice_model.is_default = True
-            voice_model.is_active = True
-            session.commit()
+            # Use a simpler approach without joins to avoid SQLAlchemy issues
+            try:
+                # First, get all voice models for this user
+                user_voice_models = (
+                    session.query(VoiceModel)
+                    .join(VoiceSample)
+                    .filter(
+                        VoiceSample.user_id == user_id, 
+                        VoiceModel.model_type == "f5_tts"
+                    )
+                    .all()
+                )
+                
+                # Set all to not default
+                for model in user_voice_models:
+                    model.is_default = False
+                
+                # Set the selected one as default
+                voice_model.is_default = True
+                voice_model.is_active = True
+                
+                session.commit()
+            except Exception as e:
+                session.rollback()
+                raise e
 
             return jsonify(
                 {
