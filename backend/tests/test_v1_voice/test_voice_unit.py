@@ -1486,38 +1486,23 @@ class TestVoiceSecurityValidation:
     def test_rate_limiting_validation(self):
         """Test rate limiting validation"""
         def mock_check_rate_limit(user_id, operation, limits):
-            """Mock rate limiting check"""
-            # Simulate rate limiting logic
-            if operation not in limits:
-                return True, "No limit for operation"
-            
-            limit = limits[operation]
-            # Mock current usage (in real implementation, this would check database)
-            current_usage = 5  # Mock value
-            
-            if current_usage >= limit:
-                return False, f"Rate limit exceeded for {operation}"
-            else:
-                return True, f"Rate limit OK ({current_usage}/{limit})"
-
-        # Test rate limiting
-        limits = {
-            "upload": 10,
-            "synthesis": 50,
-            "clone_creation": 5,
-        }
+            # Mock rate limiting logic
+            if operation == "voice_clone_creation":
+                return {"allowed": True, "remaining": 5, "reset_time": 3600}
+            elif operation == "synthesis":
+                return {"allowed": False, "remaining": 0, "reset_time": 1800}
+            return {"allowed": True, "remaining": 10, "reset_time": 7200}
         
-        # Test within limits
-        is_allowed, message = mock_check_rate_limit("user123", "upload", limits)
-        assert is_allowed is True
-        assert "Rate limit OK" in message
-
-        # Test exceeding limits (mock scenario)
-        # In real implementation, this would check actual usage
-        limits["upload"] = 3  # Lower limit for testing
-        is_allowed, message = mock_check_rate_limit("user123", "upload", limits)
-        # This would depend on the mock current_usage value
+        # Test allowed operation
+        result = mock_check_rate_limit("user123", "voice_clone_creation", {"max_per_hour": 10})
+        assert result["allowed"] is True
+        assert result["remaining"] == 5
+        
+        # Test blocked operation
+        result = mock_check_rate_limit("user123", "synthesis", {"max_per_hour": 10})
+        assert result["allowed"] is False
+        assert result["remaining"] == 0
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+    pytest.main([__file__, "-v"])
