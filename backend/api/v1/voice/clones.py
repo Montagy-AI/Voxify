@@ -427,6 +427,15 @@ def delete_voice_clone(clone_id: str):
                 # Log error but continue with database deletion
                 pass
 
+            # Delete related synthesis jobs first
+            from database.models import SynthesisJob
+            synthesis_jobs = session.query(SynthesisJob).filter(
+                SynthesisJob.voice_model_id == clone_id
+            ).all()
+            
+            for job in synthesis_jobs:
+                session.delete(job)
+            
             # Delete from database
             session.delete(voice_model)
             session.commit()
