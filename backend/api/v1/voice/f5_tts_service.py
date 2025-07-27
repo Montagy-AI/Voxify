@@ -126,6 +126,8 @@ class F5TTSService:
                 "text": config.text,
                 "reference_audio_b64": audio_b64,
                 "reference_text": config.ref_text or "",  # Use ref_text or empty for auto-transcription
+                "language": config.language,  # Pass language parameter for multilingual support
+                "speed": config.speed,  # Pass speed parameter
             }
 
             logger.info("Sending request to remote F5-TTS API...")
