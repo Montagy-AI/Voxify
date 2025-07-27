@@ -67,7 +67,9 @@ services:
       api:
         condition: service_healthy
     volumes:
+      - .:/app
       - data_volume:/data
+    working_dir: /app/backend
     environment:
       - DATABASE_URL=sqlite:////data/voxify.db
       - VECTOR_DB_PATH=data/chroma_db

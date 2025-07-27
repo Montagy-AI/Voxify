@@ -41,8 +41,10 @@ frontend/.next/
 # Logs
 logs
 *.log
+.coverage
 
 # Temporary files
 *.tmp
 *.temp
 .cache/
+backend/.coverage
