@@ -27,7 +27,11 @@ def get_voice_models():
                     "name": "F5-TTS Zero-Shot",
                     "description": "Zero-shot voice cloning using F5-TTS",
                     "type": "zero_shot",
-                    "languages": ["en-US", "zh-CN"],
+                    "languages": [
+                        "zh-CN", "zh-TW", "en-US", "en-GB",  # Native support
+                        "ja-JP", "fr-FR", "de-DE", "es-ES", "it-IT", "ru-RU", "hi-IN", "fi-FI",  # Specialized models
+                        "ko-KR", "pt-BR", "ar-SA", "th-TH", "vi-VN"  # Basic support
+                    ],
                     "max_duration": 30,
                     "min_duration": 3,
                 }
