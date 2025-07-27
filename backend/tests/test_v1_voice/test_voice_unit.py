@@ -10,7 +10,12 @@ import json
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/../.."))
 
 from api.v1.voice.samples import allowed_file, extract_audio_metadata
-from api.v1.voice.embeddings import generate_voice_embedding, delete_voice_embedding, get_voice_embedding, compare_embeddings
+from api.v1.voice.embeddings import (
+    generate_voice_embedding,
+    delete_voice_embedding,
+    get_voice_embedding,
+    compare_embeddings,
+)
 
 
 class TestVoiceSampleValidation:
@@ -45,21 +50,35 @@ class TestVoiceSampleValidation:
         ]
 
         for filename in invalid_files:
-            assert allowed_file(filename) is False, f"File {filename} should not be allowed"
+            assert (
+                allowed_file(filename) is False
+            ), f"File {filename} should not be allowed"
 
     def test_allowed_file_edge_cases(self):
         """Test file extension validation with edge cases"""
         # Test files starting with dot (hidden files) - these are actually allowed by the current implementation
-        assert allowed_file(".wav") is True, "Hidden .wav file is allowed by current implementation"
-        assert allowed_file(".mp3") is True, "Hidden .mp3 file is allowed by current implementation"
+        assert (
+            allowed_file(".wav") is True
+        ), "Hidden .wav file is allowed by current implementation"
+        assert (
+            allowed_file(".mp3") is True
+        ), "Hidden .mp3 file is allowed by current implementation"
 
         # Test files with multiple dots
-        assert allowed_file("file.backup.wav") is True, "File with multiple dots should be allowed"
-        assert allowed_file("file.backup.txt") is False, "File with multiple dots should not be allowed"
+        assert (
+            allowed_file("file.backup.wav") is True
+        ), "File with multiple dots should be allowed"
+        assert (
+            allowed_file("file.backup.txt") is False
+        ), "File with multiple dots should not be allowed"
 
         # Test files with only extension
-        assert allowed_file("wav") is False, "File with only extension should not be allowed"
-        assert allowed_file("mp3") is False, "File with only extension should not be allowed"
+        assert (
+            allowed_file("wav") is False
+        ), "File with only extension should not be allowed"
+        assert (
+            allowed_file("mp3") is False
+        ), "File with only extension should not be allowed"
 
     @patch("api.v1.voice.samples.sf.SoundFile")
     def test_extract_audio_metadata_success(self, mock_soundfile):
@@ -142,7 +161,9 @@ class TestVoiceEmbeddingOperations:
     @patch("api.v1.voice.embeddings.voice_encoder")
     @patch("api.v1.voice.embeddings.preprocess_wav")
     @patch("api.v1.voice.embeddings.voice_collection")
-    def test_generate_voice_embedding_success(self, mock_collection, mock_preprocess, mock_encoder):
+    def test_generate_voice_embedding_success(
+        self, mock_collection, mock_preprocess, mock_encoder
+    ):
         """Test successful voice embedding generation"""
         # Mock preprocessing
         mock_wav = Mock()
@@ -204,7 +225,11 @@ class TestVoiceEmbeddingOperations:
     @patch("api.v1.voice.embeddings.voice_collection")
     def test_get_voice_embedding_not_found(self, mock_collection):
         """Test voice embedding retrieval when not found"""
-        mock_collection.get.return_value = {"embeddings": [], "ids": [], "metadatas": []}
+        mock_collection.get.return_value = {
+            "embeddings": [],
+            "ids": [],
+            "metadatas": [],
+        }
 
         result = get_voice_embedding("nonexistent_id")
 
@@ -333,6 +358,7 @@ class TestVoiceCloneValidation:
 
     def test_clone_data_validation_edge_cases(self):
         """Test clone data validation with edge cases"""
+
         def mock_validate_clone_data(data):
             """Mock validation function for testing"""
             errors = {}
@@ -342,7 +368,9 @@ class TestVoiceCloneValidation:
                 return False, errors
 
             # Test empty sample_ids
-            if "sample_ids" in data and (not data["sample_ids"] or len(data["sample_ids"]) == 0):
+            if "sample_ids" in data and (
+                not data["sample_ids"] or len(data["sample_ids"]) == 0
+            ):
                 errors["sample_ids"] = "At least one sample_id is required"
 
             # Test empty name
@@ -350,7 +378,9 @@ class TestVoiceCloneValidation:
                 errors["name"] = "Clone name cannot be empty"
 
             # Test empty ref_text
-            if "ref_text" in data and (not data["ref_text"] or not data["ref_text"].strip()):
+            if "ref_text" in data and (
+                not data["ref_text"] or not data["ref_text"].strip()
+            ):
                 errors["ref_text"] = "Reference text cannot be empty"
 
             return len(errors) == 0, errors
@@ -488,7 +518,9 @@ class TestVoiceFileOperations:
         # Test with real Path objects instead of mocks
         sample_id = "test-uuid-123"
         file_extension = ".wav"
-        expected_path = os.path.join("data", "files", "samples", "user123", f"{sample_id}{file_extension}")
+        expected_path = os.path.join(
+            "data", "files", "samples", "user123", f"{sample_id}{file_extension}"
+        )
 
         # Simulate the path generation logic from the actual code
         storage_dir = Path("data/files/samples/user123")
@@ -561,8 +593,12 @@ class TestVoiceDatabaseOperations:
     def test_voice_sample_creation(self, mock_db_manager):
         """Test voice sample database creation"""
         mock_session = Mock()
-        mock_db_manager.return_value.get_session.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db_manager.return_value.get_session.return_value.__exit__ = Mock(return_value=None)
+        mock_db_manager.return_value.get_session.return_value.__enter__ = Mock(
+            return_value=mock_session
+        )
+        mock_db_manager.return_value.get_session.return_value.__exit__ = Mock(
+            return_value=None
+        )
 
         # Mock VoiceSample model
         with patch("api.v1.voice.samples.VoiceSample") as mock_voice_sample:
@@ -597,8 +633,12 @@ class TestVoiceDatabaseOperations:
     def test_voice_sample_query(self, mock_db_manager):
         """Test voice sample database querying"""
         mock_session = Mock()
-        mock_db_manager.return_value.get_session.return_value.__enter__ = Mock(return_value=mock_session)
-        mock_db_manager.return_value.get_session.return_value.__exit__ = Mock(return_value=None)
+        mock_db_manager.return_value.get_session.return_value.__enter__ = Mock(
+            return_value=mock_session
+        )
+        mock_db_manager.return_value.get_session.return_value.__exit__ = Mock(
+            return_value=None
+        )
 
         # Mock query results
         mock_sample1 = Mock()
@@ -624,7 +664,12 @@ class TestVoiceDatabaseOperations:
         mock_session.query.return_value = mock_query
 
         # Simulate query execution
-        samples = mock_session.query.return_value.filter_by(user_id="user123").order_by().offset().limit()
+        samples = (
+            mock_session.query.return_value.filter_by(user_id="user123")
+            .order_by()
+            .offset()
+            .limit()
+        )
         total = mock_session.query.return_value.filter_by(user_id="user123").count()
 
         assert len(samples) == 2
@@ -664,6 +709,7 @@ class TestVoiceCloneOperations:
 
     def test_clone_config_validation(self):
         """Test voice clone configuration validation"""
+
         def mock_validate_clone_config(config):
             """Mock clone configuration validation"""
             errors = []
@@ -724,7 +770,9 @@ class TestVoiceCloneOperations:
         # Verify required fields
         required_fields = ["id", "name", "ref_audio_path", "ref_text", "language"]
         for field in required_fields:
-            assert field in clone_info, f"Required field '{field}' missing from clone info"
+            assert (
+                field in clone_info
+            ), f"Required field '{field}' missing from clone info"
 
         # Verify data types
         assert isinstance(clone_info["id"], str)
@@ -734,6 +782,7 @@ class TestVoiceCloneOperations:
 
     def test_clone_selection_logic(self):
         """Test voice clone selection logic"""
+
         def mock_select_clone(clone_id, user_id):
             """Mock clone selection logic"""
             # Simulate database operations
@@ -768,6 +817,7 @@ class TestVoiceSynthesisOperations:
 
     def test_synthesis_config_validation(self):
         """Test synthesis configuration validation"""
+
         def mock_validate_synthesis_config(config):
             """Mock synthesis configuration validation"""
             errors = []
@@ -812,10 +862,11 @@ class TestVoiceSynthesisOperations:
 
     def test_synthesis_job_creation(self):
         """Test synthesis job creation logic"""
+
         def mock_create_synthesis_job(job_data):
             """Mock synthesis job creation"""
             required_fields = ["user_id", "voice_model_id", "text_content"]
-            
+
             for field in required_fields:
                 if field not in job_data:
                     return False, f"Missing required field: {field}"
@@ -849,6 +900,7 @@ class TestVoiceSynthesisOperations:
 
     def test_synthesis_output_validation(self):
         """Test synthesis output validation"""
+
         def mock_validate_synthesis_output(output_path, expected_duration):
             """Mock synthesis output validation"""
             if not output_path:
@@ -885,6 +937,7 @@ class TestVoiceQualityMetrics:
 
     def test_audio_quality_calculation(self):
         """Test audio quality metrics calculation"""
+
         def mock_calculate_quality_metrics(audio_data):
             """Mock quality metrics calculation"""
             metrics = {}
@@ -892,13 +945,18 @@ class TestVoiceQualityMetrics:
             # Simulate SNR calculation
             if audio_data.get("signal_power") and audio_data.get("noise_power"):
                 import math
-                snr = 10 * math.log10(audio_data["signal_power"] / audio_data["noise_power"])
+
+                snr = 10 * math.log10(
+                    audio_data["signal_power"] / audio_data["noise_power"]
+                )
                 metrics["snr"] = snr
                 metrics["quality_score"] = min(10.0, max(0.0, snr / 10.0))
 
             # Simulate clarity calculation
             if audio_data.get("frequency_response"):
-                clarity = sum(audio_data["frequency_response"]) / len(audio_data["frequency_response"])
+                clarity = sum(audio_data["frequency_response"]) / len(
+                    audio_data["frequency_response"]
+                )
                 metrics["clarity_score"] = clarity
 
             return metrics
@@ -914,10 +972,13 @@ class TestVoiceQualityMetrics:
         assert "snr" in metrics
         assert "quality_score" in metrics
         assert "clarity_score" in metrics
-        assert metrics["snr"] == pytest.approx(10.0, abs=0.1)  # 10 * log10(100/10) = 10 * log10(10) = 10 * 1 = 10
+        assert metrics["snr"] == pytest.approx(
+            10.0, abs=0.1
+        )  # 10 * log10(100/10) = 10 * log10(10) = 10 * 1 = 10
 
     def test_voice_similarity_calculation(self):
         """Test voice similarity calculation"""
+
         def mock_calculate_similarity(embedding1, embedding2):
             """Mock similarity calculation"""
             if not embedding1 or not embedding2:
@@ -925,6 +986,7 @@ class TestVoiceQualityMetrics:
 
             # Simulate cosine similarity calculation
             import numpy as np
+
             vec1 = np.array(embedding1)
             vec2 = np.array(embedding2)
 
@@ -963,7 +1025,7 @@ class TestF5TTSService:
 
         # Simulate service initialization
         service = mock_get_service()
-        
+
         assert service is not None
         mock_get_service.assert_called_once()
 
@@ -1040,6 +1102,7 @@ class TestF5TTSService:
 
         # Test clone creation
         from api.v1.voice.f5_tts_service import VoiceCloneConfig
+
         clone_config = VoiceCloneConfig(
             name="Test Clone",
             ref_audio_path="/path/to/audio.wav",
@@ -1048,7 +1111,7 @@ class TestF5TTSService:
         )
 
         result = mock_service.create_voice_clone(clone_config, ["sample1", "sample2"])
-        
+
         assert result["id"] == "clone-uuid-123"
         assert result["name"] == "Test Clone"
         mock_service.create_voice_clone.assert_called_once()
@@ -1065,6 +1128,7 @@ class TestF5TTSService:
 
         # Test synthesis
         from api.v1.voice.f5_tts_service import TTSConfig
+
         tts_config = TTSConfig(
             text="Hello, this is a test",
             ref_audio_path="/path/to/reference.wav",
@@ -1074,7 +1138,7 @@ class TestF5TTSService:
         )
 
         result = mock_service.synthesize_speech(tts_config, "clone123")
-        
+
         assert result == output_path
         mock_service.synthesize_speech.assert_called_once()
 
@@ -1097,7 +1161,7 @@ class TestF5TTSService:
 
         # Test info retrieval
         result = mock_service.get_clone_info("clone-uuid-123")
-        
+
         assert result["id"] == "clone-uuid-123"
         assert result["name"] == "Test Clone"
         assert "sample_ids" in result
@@ -1112,7 +1176,7 @@ class TestF5TTSService:
 
         # Test clone deletion
         result = mock_service.delete_clone("clone-uuid-123")
-        
+
         assert result is True
         mock_service.delete_clone.assert_called_once_with("clone-uuid-123")
 
@@ -1122,6 +1186,7 @@ class TestVoiceErrorHandling:
 
     def test_file_upload_error_handling(self):
         """Test file upload error handling"""
+
         def mock_handle_upload_error(error_type, file_path=None):
             """Mock upload error handling"""
             error_messages = {
@@ -1131,7 +1196,7 @@ class TestVoiceErrorHandling:
                 "storage_full": "Storage quota exceeded",
                 "processing_failed": "Failed to process audio file",
             }
-            
+
             return {
                 "success": False,
                 "error": error_messages.get(error_type, "Unknown error occurred"),
@@ -1155,6 +1220,7 @@ class TestVoiceErrorHandling:
 
     def test_database_error_handling(self):
         """Test database error handling"""
+
         def mock_handle_db_error(operation, error):
             """Mock database error handling"""
             error_messages = {
@@ -1164,7 +1230,7 @@ class TestVoiceErrorHandling:
                 "permission": "Access denied",
                 "timeout": "Database operation timed out",
             }
-            
+
             return {
                 "success": False,
                 "error": error_messages.get(operation, "Database error occurred"),
@@ -1188,6 +1254,7 @@ class TestVoiceErrorHandling:
 
     def test_service_error_handling(self):
         """Test external service error handling"""
+
         def mock_handle_service_error(service_name, error):
             """Mock service error handling"""
             error_messages = {
@@ -1196,7 +1263,7 @@ class TestVoiceErrorHandling:
                 "embedding": "Voice embedding generation failed",
                 "synthesis": "Speech synthesis failed",
             }
-            
+
             return {
                 "success": False,
                 "error": error_messages.get(service_name, "Service error occurred"),
@@ -1219,11 +1286,12 @@ class TestVoiceErrorHandling:
 
     def test_validation_error_formatting(self):
         """Test validation error formatting"""
+
         def mock_format_validation_errors(errors):
             """Mock validation error formatting"""
             if not errors:
                 return {"success": True, "data": {}}
-            
+
             return {
                 "success": False,
                 "error": "Validation failed",
@@ -1240,7 +1308,7 @@ class TestVoiceErrorHandling:
             "file": "File is required",
             "sample_ids": "At least one sample is required",
         }
-        
+
         result = mock_format_validation_errors(validation_errors)
         assert result["success"] is False
         assert "validation_errors" in result
@@ -1252,11 +1320,12 @@ class TestVoicePerformanceMetrics:
 
     def test_processing_time_calculation(self):
         """Test processing time calculation"""
+
         def mock_calculate_processing_time(start_time, end_time):
             """Mock processing time calculation"""
             if not start_time or not end_time:
                 return None
-            
+
             # Simulate time difference calculation
             time_diff = (end_time - start_time).total_seconds()
             return {
@@ -1267,14 +1336,15 @@ class TestVoicePerformanceMetrics:
         # Test processing time calculation
         start_time = datetime(2024, 1, 1, 12, 0, 0)
         end_time = datetime(2024, 1, 1, 12, 0, 2)  # 2 seconds later
-        
+
         result = mock_calculate_processing_time(start_time, end_time)
-        
+
         assert result["processing_time_ms"] == 2000
         assert result["processing_time_seconds"] == 2.0
 
     def test_file_size_metrics(self):
         """Test file size metrics calculation"""
+
         def mock_calculate_file_metrics(file_path, file_size):
             """Mock file size metrics calculation"""
             metrics = {
@@ -1282,52 +1352,57 @@ class TestVoicePerformanceMetrics:
                 "file_size_mb": file_size / (1024 * 1024),
                 "file_size_kb": file_size / 1024,
             }
-            
+
             # Add compression ratio if applicable
             if file_path.endswith(".mp3"):
                 metrics["compression_ratio"] = 0.1  # MP3 is typically 10% of original
             elif file_path.endswith(".wav"):
                 metrics["compression_ratio"] = 1.0  # WAV is uncompressed
-            
+
             return metrics
 
         # Test WAV file metrics
-        wav_metrics = mock_calculate_file_metrics("/path/to/audio.wav", 1024 * 1024)  # 1MB
+        wav_metrics = mock_calculate_file_metrics(
+            "/path/to/audio.wav", 1024 * 1024
+        )  # 1MB
         assert wav_metrics["file_size_bytes"] == 1024 * 1024
         assert wav_metrics["file_size_mb"] == 1.0
         assert wav_metrics["compression_ratio"] == 1.0
 
         # Test MP3 file metrics
-        mp3_metrics = mock_calculate_file_metrics("/path/to/audio.mp3", 1024 * 100)  # 100KB
+        mp3_metrics = mock_calculate_file_metrics(
+            "/path/to/audio.mp3", 1024 * 100
+        )  # 100KB
         assert mp3_metrics["file_size_bytes"] == 1024 * 100
         assert mp3_metrics["file_size_kb"] == 100
         assert mp3_metrics["compression_ratio"] == 0.1
 
     def test_quality_score_calculation(self):
         """Test quality score calculation"""
+
         def mock_calculate_quality_score(metrics):
             """Mock quality score calculation"""
             score = 0.0
-            
+
             # SNR contribution (0-4 points)
             if "snr" in metrics:
                 snr_score = min(4.0, metrics["snr"] / 10.0)
                 score += snr_score
-            
+
             # Clarity contribution (0-3 points)
             if "clarity_score" in metrics:
                 score += metrics["clarity_score"] * 3.0
-            
+
             # Duration contribution (0-2 points)
             if "duration" in metrics:
                 duration_score = min(2.0, metrics["duration"] / 10.0)
                 score += duration_score
-            
+
             # Format contribution (0-1 point)
             if "format" in metrics:
                 if metrics["format"].lower() in ["wav", "mp3"]:
                     score += 1.0
-            
+
             return min(10.0, max(0.0, score))
 
         # Test quality score calculation
@@ -1337,13 +1412,14 @@ class TestVoicePerformanceMetrics:
             "duration": 5.0,  # 1.0 point (5/10 = 0.5, but duration_score = min(2.0, 0.5) = 0.5)
             "format": "wav",  # 1.0 point
         }
-        
+
         quality_score = mock_calculate_quality_score(test_metrics)
         expected_score = 1.5 + 2.4 + 0.5 + 1.0  # 5.4
         assert quality_score == pytest.approx(expected_score, abs=0.1)
 
     def test_cache_performance_metrics(self):
         """Test cache performance metrics"""
+
         def mock_calculate_cache_metrics(cache_hits, cache_misses):
             """Mock cache performance metrics calculation"""
             total_requests = cache_hits + cache_misses
@@ -1353,10 +1429,10 @@ class TestVoicePerformanceMetrics:
                     "miss_rate": 0.0,
                     "total_requests": 0,
                 }
-            
+
             hit_rate = cache_hits / total_requests
             miss_rate = cache_misses / total_requests
-            
+
             return {
                 "hit_rate": hit_rate,
                 "miss_rate": miss_rate,
@@ -1382,31 +1458,32 @@ class TestVoiceSecurityValidation:
 
     def test_file_path_security_validation(self):
         """Test file path security validation"""
+
         def mock_validate_file_path(file_path, allowed_directories):
             """Mock file path security validation"""
             import os
-            
+
             # Check for path traversal attempts
             if ".." in file_path or "//" in file_path:
                 return False, "Path traversal detected"
-            
+
             # Check if path is within allowed directories
             normalized_path = os.path.normpath(file_path)
             for allowed_dir in allowed_directories:
                 normalized_allowed_dir = os.path.normpath(allowed_dir)
                 if normalized_path.startswith(normalized_allowed_dir):
                     return True, "Path is valid"
-            
+
             return False, "Path outside allowed directories"
 
         # Test valid paths
         allowed_dirs = ["/data/files/samples", "/data/files/synthesis"]
-        
+
         valid_paths = [
             "/data/files/samples/user123/audio.wav",
             "/data/files/synthesis/output.wav",
         ]
-        
+
         for path in valid_paths:
             is_valid, message = mock_validate_file_path(path, allowed_dirs)
             assert is_valid is True, f"Path {path} should be valid"
@@ -1417,19 +1494,20 @@ class TestVoiceSecurityValidation:
             "/data/files/samples//user123/audio.wav",  # Double slash
             "/etc/passwd",  # Outside allowed directories
         ]
-        
+
         for path in invalid_paths:
             is_valid, message = mock_validate_file_path(path, allowed_dirs)
             assert is_valid is False, f"Path {path} should be invalid"
 
     def test_user_authorization_validation(self):
         """Test user authorization validation"""
+
         def mock_validate_user_access(user_id, resource_id, resource_type):
             """Mock user authorization validation"""
             # Simulate database check for resource ownership
             if not user_id or not resource_id:
                 return False, "Invalid user or resource ID"
-            
+
             # Mock resource ownership check
             if resource_type == "sample":
                 # Simulate sample ownership check
@@ -1441,31 +1519,40 @@ class TestVoiceSecurityValidation:
                 return False, "Unknown resource type"
 
         # Test valid access
-        is_authorized, message = mock_validate_user_access("user123", "sample_user123_001", "sample")
+        is_authorized, message = mock_validate_user_access(
+            "user123", "sample_user123_001", "sample"
+        )
         assert is_authorized is True
 
         # Test invalid access
-        is_authorized, message = mock_validate_user_access("user123", "sample_user456_001", "sample")
+        is_authorized, message = mock_validate_user_access(
+            "user123", "sample_user456_001", "sample"
+        )
         assert is_authorized is False
 
         # Test invalid resource type
-        is_authorized, message = mock_validate_user_access("user123", "resource123", "unknown")
+        is_authorized, message = mock_validate_user_access(
+            "user123", "resource123", "unknown"
+        )
         assert is_authorized is False
 
     def test_input_sanitization(self):
         """Test input sanitization for security"""
+
         def mock_sanitize_input(input_data, input_type):
             """Mock input sanitization"""
             import re
-            
+
             if input_type == "filename":
                 # Remove dangerous characters
-                sanitized = re.sub(r'[<>:"/\\|?*]', '', input_data)
+                sanitized = re.sub(r'[<>:"/\\|?*]', "", input_data)
                 return sanitized[:255]  # Limit length
             elif input_type == "text":
                 # Remove script tags and dangerous HTML
-                sanitized = re.sub(r'<script.*?</script>', '', input_data, flags=re.IGNORECASE)
-                sanitized = re.sub(r'<.*?>', '', sanitized)
+                sanitized = re.sub(
+                    r"<script.*?</script>", "", input_data, flags=re.IGNORECASE
+                )
+                sanitized = re.sub(r"<.*?>", "", sanitized)
                 return sanitized
             else:
                 return input_data
@@ -1485,6 +1572,7 @@ class TestVoiceSecurityValidation:
 
     def test_rate_limiting_validation(self):
         """Test rate limiting validation"""
+
         def mock_check_rate_limit(user_id, operation, limits):
             # Mock rate limiting logic
             if operation == "voice_clone_creation":
@@ -1492,12 +1580,14 @@ class TestVoiceSecurityValidation:
             elif operation == "synthesis":
                 return {"allowed": False, "remaining": 0, "reset_time": 1800}
             return {"allowed": True, "remaining": 10, "reset_time": 7200}
-        
+
         # Test allowed operation
-        result = mock_check_rate_limit("user123", "voice_clone_creation", {"max_per_hour": 10})
+        result = mock_check_rate_limit(
+            "user123", "voice_clone_creation", {"max_per_hour": 10}
+        )
         assert result["allowed"] is True
         assert result["remaining"] == 5
-        
+
         # Test blocked operation
         result = mock_check_rate_limit("user123", "synthesis", {"max_per_hour": 10})
         assert result["allowed"] is False

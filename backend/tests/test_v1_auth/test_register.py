@@ -3,7 +3,9 @@ import os
 import sys
 
 # Add the backend directory to Python path
-backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+backend_dir = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
 sys.path.insert(0, backend_dir)
 
 from flask import Flask
@@ -33,7 +35,9 @@ class TestRegister(unittest.TestCase):
         )
 
         # The API should handle this successfully
-        self.assertIn(response.status_code, [201, 409])  # 201 for success, 409 if user already exists
+        self.assertIn(
+            response.status_code, [201, 409]
+        )  # 201 for success, 409 if user already exists
         data = response.get_json()
 
         if response.status_code == 201:
@@ -45,7 +49,9 @@ class TestRegister(unittest.TestCase):
 
     def test_register_no_data(self):
         """Test registration with no data"""
-        response = self.client.post("/api/v1/auth/register", data="{}", content_type="application/json")
+        response = self.client.post(
+            "/api/v1/auth/register", data="{}", content_type="application/json"
+        )
         self.assertEqual(response.status_code, 400)
         data = response.get_json()
         self.assertIsNotNone(data)
@@ -53,7 +59,9 @@ class TestRegister(unittest.TestCase):
 
     def test_register_missing_fields(self):
         """Test registration with missing required fields"""
-        response = self.client.post("/api/v1/auth/register", json={"password": "SecurePassword123!"})
+        response = self.client.post(
+            "/api/v1/auth/register", json={"password": "SecurePassword123!"}
+        )
         self.assertEqual(response.status_code, 400)
         data = response.get_json()
         self.assertEqual(data["error"]["code"], "MISSING_FIELDS")

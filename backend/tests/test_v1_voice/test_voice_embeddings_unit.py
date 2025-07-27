@@ -14,10 +14,10 @@ import uuid
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/../.."))
 
 from api.v1.voice.embeddings import (
-    generate_voice_embedding, 
-    delete_voice_embedding, 
-    get_voice_embedding, 
-    compare_embeddings
+    generate_voice_embedding,
+    delete_voice_embedding,
+    get_voice_embedding,
+    compare_embeddings,
 )
 
 
@@ -31,26 +31,26 @@ class TestVoiceEmbeddingGeneration:
         # Mock audio preprocessing
         mock_audio = np.random.rand(16000).astype(np.float32)
         mock_preprocess.return_value = mock_audio
-        
+
         # Mock embedding generation
         mock_embedding = np.random.rand(256).astype(np.float32)
-        
+
         # Mock the voice_encoder directly
         with patch("api.v1.voice.embeddings.voice_encoder") as mock_encoder:
             mock_encoder.embed_utterance.return_value = mock_embedding
-            
+
             # Mock ChromaDB collection
             mock_collection.add.return_value = None
-            
+
             # Test embedding generation
             embedding_id, embedding = generate_voice_embedding("/path/to/audio.wav")
-            
+
             # Verify results
             assert isinstance(embedding_id, str)
             assert len(embedding_id) > 0
             assert isinstance(embedding, np.ndarray)
             assert embedding.shape == (256,)
-            
+
             # Verify calls
             mock_preprocess.assert_called_once_with("/path/to/audio.wav")
             mock_encoder.embed_utterance.assert_called_once_with(mock_audio)
@@ -60,7 +60,7 @@ class TestVoiceEmbeddingGeneration:
     def test_generate_voice_embedding_preprocessing_error(self, mock_preprocess):
         """Test embedding generation with preprocessing error"""
         mock_preprocess.side_effect = Exception("Audio preprocessing failed")
-        
+
         with pytest.raises(Exception, match="Audio preprocessing failed"):
             generate_voice_embedding("/path/to/invalid.wav")
 
@@ -70,11 +70,11 @@ class TestVoiceEmbeddingGeneration:
         # Mock audio preprocessing
         mock_audio = np.random.rand(16000).astype(np.float32)
         mock_preprocess.return_value = mock_audio
-        
+
         # Mock encoder error
         with patch("api.v1.voice.embeddings.voice_encoder") as mock_encoder:
             mock_encoder.embed_utterance.side_effect = Exception("Encoder failed")
-            
+
             with pytest.raises(Exception, match="Encoder failed"):
                 generate_voice_embedding("/path/to/audio.wav")
 
@@ -83,9 +83,9 @@ class TestVoiceEmbeddingGeneration:
         """Test successful voice embedding deletion"""
         embedding_id = str(uuid.uuid4())
         mock_collection.delete.return_value = None
-        
+
         result = delete_voice_embedding(embedding_id)
-        
+
         assert result is True
         mock_collection.delete.assert_called_once_with(ids=[embedding_id])
 
@@ -94,7 +94,7 @@ class TestVoiceEmbeddingGeneration:
         """Test voice embedding deletion with error"""
         embedding_id = str(uuid.uuid4())
         mock_collection.delete.side_effect = Exception("Deletion failed")
-        
+
         # The function should return False, not raise an exception
         result = delete_voice_embedding(embedding_id)
         assert result is False
@@ -104,14 +104,14 @@ class TestVoiceEmbeddingGeneration:
         """Test successful voice embedding retrieval"""
         embedding_id = str(uuid.uuid4())
         mock_embedding = np.random.rand(256).astype(np.float32)
-        
+
         mock_collection.get.return_value = {
             "embeddings": [mock_embedding.tolist()],
-            "metadatas": [{"audio_path": "/path/to/audio.wav"}]
+            "metadatas": [{"audio_path": "/path/to/audio.wav"}],
         }
-        
+
         embedding = get_voice_embedding(embedding_id)
-        
+
         assert isinstance(embedding, np.ndarray)
         assert embedding.shape == (256,)
         mock_collection.get.assert_called_once_with(ids=[embedding_id])
@@ -120,13 +120,10 @@ class TestVoiceEmbeddingGeneration:
     def test_get_voice_embedding_not_found(self, mock_collection):
         """Test voice embedding retrieval when not found"""
         embedding_id = str(uuid.uuid4())
-        mock_collection.get.return_value = {
-            "embeddings": [],
-            "metadatas": []
-        }
-        
+        mock_collection.get.return_value = {"embeddings": [], "metadatas": []}
+
         embedding = get_voice_embedding(embedding_id)
-        
+
         assert embedding is None
 
     def test_compare_embeddings_success(self):
@@ -134,13 +131,13 @@ class TestVoiceEmbeddingGeneration:
         # Create test embeddings
         embedding1 = np.random.rand(256).astype(np.float32)
         embedding2 = np.random.rand(256).astype(np.float32)
-        
+
         # Normalize embeddings for cosine similarity
         embedding1_norm = embedding1 / np.linalg.norm(embedding1)
         embedding2_norm = embedding2 / np.linalg.norm(embedding2)
-        
+
         similarity = compare_embeddings(embedding1, embedding2)
-        
+
         # Verify similarity is between -1 and 1
         assert -1 <= similarity <= 1
         assert isinstance(similarity, float)
@@ -148,9 +145,9 @@ class TestVoiceEmbeddingGeneration:
     def test_compare_embeddings_identical(self):
         """Test embedding comparison with identical embeddings"""
         embedding = np.random.rand(256).astype(np.float32)
-        
+
         similarity = compare_embeddings(embedding, embedding)
-        
+
         # Should be very close to 1 for identical embeddings
         assert abs(similarity - 1.0) < 1e-6
 
@@ -159,9 +156,9 @@ class TestVoiceEmbeddingGeneration:
         # Create orthogonal embeddings
         embedding1 = np.array([1, 0, 0, 0, 0, 0, 0, 0] * 32, dtype=np.float32)
         embedding2 = np.array([0, 1, 0, 0, 0, 0, 0, 0] * 32, dtype=np.float32)
-        
+
         similarity = compare_embeddings(embedding1, embedding2)
-        
+
         # Should be close to 0 for orthogonal embeddings
         assert abs(similarity) < 1e-6
 
@@ -169,7 +166,7 @@ class TestVoiceEmbeddingGeneration:
         """Test embedding comparison with invalid input"""
         embedding1 = np.random.rand(256).astype(np.float32)
         embedding2 = np.random.rand(128).astype(np.float32)  # Different size
-        
+
         with pytest.raises(ValueError):
             compare_embeddings(embedding1, embedding2)
 
@@ -182,7 +179,7 @@ class TestVoiceEmbeddingValidation:
         # Valid embedding
         valid_embedding = np.random.rand(256).astype(np.float32)
         assert valid_embedding.shape == (256,)
-        
+
         # Invalid embedding (wrong dimension)
         invalid_embedding = np.random.rand(128).astype(np.float32)
         assert invalid_embedding.shape != (256,)
@@ -192,7 +189,7 @@ class TestVoiceEmbeddingValidation:
         # Valid data type
         valid_embedding = np.random.rand(256).astype(np.float32)
         assert valid_embedding.dtype == np.float32
-        
+
         # Invalid data type
         invalid_embedding = np.random.rand(256).astype(np.float64)
         assert invalid_embedding.dtype != np.float32
@@ -200,11 +197,11 @@ class TestVoiceEmbeddingValidation:
     def test_embedding_normalization(self):
         """Test embedding normalization"""
         embedding = np.random.rand(256).astype(np.float32)
-        
+
         # Normalize embedding
         norm = np.linalg.norm(embedding)
         normalized = embedding / norm
-        
+
         # Verify normalization
         assert abs(np.linalg.norm(normalized) - 1.0) < 1e-6
 
@@ -215,44 +212,44 @@ class TestVoiceEmbeddingPerformance:
     def test_embedding_generation_time(self):
         """Test embedding generation performance"""
         import time
-        
+
         # Mock embedding generation
         embedding = np.random.rand(256).astype(np.float32)
-        
+
         start_time = time.time()
         # Simulate embedding generation
         time.sleep(0.01)  # Simulate processing time
         end_time = time.time()
-        
+
         processing_time = end_time - start_time
-        
+
         # Should complete within reasonable time
         assert processing_time < 1.0  # Less than 1 second
 
     def test_embedding_comparison_performance(self):
         """Test embedding comparison performance"""
         import time
-        
+
         # Create test embeddings
         embedding1 = np.random.rand(256).astype(np.float32)
         embedding2 = np.random.rand(256).astype(np.float32)
-        
+
         start_time = time.time()
         similarity = compare_embeddings(embedding1, embedding2)
         end_time = time.time()
-        
+
         processing_time = end_time - start_time
-        
+
         # Should complete very quickly
         assert processing_time < 0.1  # Less than 100ms
 
     def test_multiple_embedding_comparisons(self):
         """Test performance of multiple embedding comparisons"""
         import time
-        
+
         # Create multiple embeddings
         embeddings = [np.random.rand(256).astype(np.float32) for _ in range(10)]
-        
+
         start_time = time.time()
         similarities = []
         for i in range(len(embeddings)):
@@ -260,9 +257,9 @@ class TestVoiceEmbeddingPerformance:
                 similarity = compare_embeddings(embeddings[i], embeddings[j])
                 similarities.append(similarity)
         end_time = time.time()
-        
+
         processing_time = end_time - start_time
-        
+
         # Should complete within reasonable time
         assert processing_time < 1.0  # Less than 1 second
         assert len(similarities) == 45  # 10 choose 2 = 45 comparisons
@@ -279,10 +276,10 @@ class TestVoiceEmbeddingErrorHandling:
     def test_none_embedding_comparison(self):
         """Test handling of None embeddings in comparison"""
         embedding = np.random.rand(256).astype(np.float32)
-        
+
         with pytest.raises(TypeError):
             compare_embeddings(None, embedding)
-        
+
         with pytest.raises(TypeError):
             compare_embeddings(embedding, None)
 
@@ -290,7 +287,7 @@ class TestVoiceEmbeddingErrorHandling:
         """Test handling of empty embeddings in comparison"""
         embedding = np.random.rand(256).astype(np.float32)
         empty_embedding = np.array([])
-        
+
         with pytest.raises(ValueError):
             compare_embeddings(embedding, empty_embedding)
 
@@ -298,11 +295,11 @@ class TestVoiceEmbeddingErrorHandling:
         """Test handling of zero embeddings in comparison"""
         embedding = np.random.rand(256).astype(np.float32)
         zero_embedding = np.zeros(256, dtype=np.float32)
-        
+
         # Should handle gracefully
         similarity = compare_embeddings(embedding, zero_embedding)
         assert isinstance(similarity, float)
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v"]) 
+    pytest.main([__file__, "-v"])

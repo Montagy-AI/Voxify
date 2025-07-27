@@ -144,7 +144,11 @@ def create_synthesis_jobs(session, users, models):
             for i, text in enumerate(texts):
                 # Create jobs with different statuses
                 status = ["completed", "processing", "pending", "failed"][i % 4]
-                progress = 1.0 if status == "completed" else (0.0 if status == "pending" else 0.5)
+                progress = (
+                    1.0
+                    if status == "completed"
+                    else (0.0 if status == "pending" else 0.5)
+                )
 
                 job = SynthesisJob(
                     user_id=user.id,
@@ -159,7 +163,9 @@ def create_synthesis_jobs(session, users, models):
                     sample_rate=22050,
                     status=status,
                     progress=progress,
-                    started_at=utc_now() - timedelta(hours=1) if status != "pending" else None,
+                    started_at=utc_now() - timedelta(hours=1)
+                    if status != "pending"
+                    else None,
                     completed_at=utc_now() if status == "completed" else None,
                 )
 

@@ -25,7 +25,9 @@ class TestVoiceServiceIntegration:
         """Check if server is running before tests"""
         try:
             response = requests.get(f"{server_url}/api/v1/auth/login", timeout=5)
-            assert response.status_code == 405, f"Unexpected status code: {response.status_code}"
+            assert (
+                response.status_code == 405
+            ), f"Unexpected status code: {response.status_code}"
         except Exception as e:
             pytest.skip(f"Server not available: {e}")
 
@@ -40,7 +42,9 @@ class TestVoiceServiceIntegration:
     def check_curl_available(self):
         """Check if curl is available on the system"""
         try:
-            result = subprocess.run(["curl", "--version"], capture_output=True, text=True)
+            result = subprocess.run(
+                ["curl", "--version"], capture_output=True, text=True
+            )
             if result.returncode != 0:
                 pytest.skip("curl is not available on this system")
         except FileNotFoundError:
@@ -81,7 +85,9 @@ class TestVoiceServiceIntegration:
             "-H",
             "Content-Type: application/json",
             "-d",
-            json.dumps({"email": test_user["email"], "password": test_user["password"]}),
+            json.dumps(
+                {"email": test_user["email"], "password": test_user["password"]}
+            ),
         ]
         result = subprocess.run(login_cmd, capture_output=True, text=True)
         response = json.loads(result.stdout)
@@ -97,7 +103,7 @@ class TestVoiceServiceIntegration:
 
     def test_complete_voice_workflow(self, server_url, auth_tokens, test_audio_file):
         """Test complete voice workflow: upload -> create clone -> synthesize"""
-        
+
         # Step 1: Upload voice sample
         print("\n=== Step 1: Uploading voice sample ===")
         upload_cmd = [
@@ -112,16 +118,18 @@ class TestVoiceServiceIntegration:
             "-F",
             f"file=@{test_audio_file}",
         ]
-        
+
         result = subprocess.run(upload_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Upload failed: {result.stderr}"
-        
+
         upload_response = json.loads(result.stdout)
-        assert upload_response.get("success") is True, f"Upload failed: {upload_response}"
-        
+        assert (
+            upload_response.get("success") is True
+        ), f"Upload failed: {upload_response}"
+
         sample_id = upload_response["data"]["sample_id"]
         print(f"Uploaded sample ID: {sample_id}")
-        
+
         # Step 2: Verify sample was uploaded
         print("\n=== Step 2: Verifying sample upload ===")
         list_cmd = [
@@ -132,26 +140,30 @@ class TestVoiceServiceIntegration:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
-        
+
         result = subprocess.run(list_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"List samples failed: {result.stderr}"
-        
+
         list_response = json.loads(result.stdout)
-        assert list_response.get("success") is True, f"List samples failed: {list_response}"
-        
+        assert (
+            list_response.get("success") is True
+        ), f"List samples failed: {list_response}"
+
         samples = list_response["data"]["samples"]
         assert len(samples) > 0, "No samples found"
-        
+
         # Find our uploaded sample
         uploaded_sample = None
         for sample in samples:
             if sample["id"] == sample_id:
                 uploaded_sample = sample
                 break
-        
+
         assert uploaded_sample is not None, "Uploaded sample not found in list"
-        assert uploaded_sample["status"] == "ready", f"Sample not ready: {uploaded_sample['status']}"
-        
+        assert (
+            uploaded_sample["status"] == "ready"
+        ), f"Sample not ready: {uploaded_sample['status']}"
+
         # Step 3: Create voice clone
         print("\n=== Step 3: Creating voice clone ===")
         clone_data = {
@@ -159,9 +171,9 @@ class TestVoiceServiceIntegration:
             "name": "Integration Test Clone",
             "ref_text": "This is a test reference text for voice cloning",
             "description": "Voice clone created during integration testing",
-            "language": "zh-CN"
+            "language": "zh-CN",
         }
-        
+
         clone_cmd = [
             "curl",
             "-X",
@@ -172,18 +184,20 @@ class TestVoiceServiceIntegration:
             "-H",
             "Content-Type: application/json",
             "-d",
-            json.dumps(clone_data)
+            json.dumps(clone_data),
         ]
-        
+
         result = subprocess.run(clone_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Clone creation failed: {result.stderr}"
-        
+
         clone_response = json.loads(result.stdout)
-        assert clone_response.get("success") is True, f"Clone creation failed: {clone_response}"
-        
+        assert (
+            clone_response.get("success") is True
+        ), f"Clone creation failed: {clone_response}"
+
         clone_id = clone_response["data"]["clone_id"]
         print(f"Created clone ID: {clone_id}")
-        
+
         # Step 4: Verify clone was created
         print("\n=== Step 4: Verifying clone creation ===")
         get_clone_cmd = [
@@ -194,17 +208,19 @@ class TestVoiceServiceIntegration:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
-        
+
         result = subprocess.run(get_clone_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Get clone failed: {result.stderr}"
-        
+
         get_clone_response = json.loads(result.stdout)
-        assert get_clone_response.get("success") is True, f"Get clone failed: {get_clone_response}"
-        
+        assert (
+            get_clone_response.get("success") is True
+        ), f"Get clone failed: {get_clone_response}"
+
         clone_info = get_clone_response["data"]
         assert clone_info["clone_id"] == clone_id, "Clone ID mismatch"
         assert clone_info["name"] == clone_data["name"], "Clone name mismatch"
-        
+
         # Step 5: Select the clone
         print("\n=== Step 5: Selecting voice clone ===")
         select_cmd = [
@@ -215,21 +231,23 @@ class TestVoiceServiceIntegration:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
-        
+
         result = subprocess.run(select_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Select clone failed: {result.stderr}"
-        
+
         select_response = json.loads(result.stdout)
-        assert select_response.get("success") is True, f"Select clone failed: {select_response}"
-        
+        assert (
+            select_response.get("success") is True
+        ), f"Select clone failed: {select_response}"
+
         # Step 6: Synthesize speech
         print("\n=== Step 6: Synthesizing speech ===")
         synthesis_data = {
             "text": "这是一个集成测试的语音合成。Hello, this is an integration test for speech synthesis.",
             "speed": 1.0,
-            "language": "zh-CN"
+            "language": "zh-CN",
         }
-        
+
         synthesize_cmd = [
             "curl",
             "-X",
@@ -240,15 +258,17 @@ class TestVoiceServiceIntegration:
             "-H",
             "Content-Type: application/json",
             "-d",
-            json.dumps(synthesis_data)
+            json.dumps(synthesis_data),
         ]
-        
+
         result = subprocess.run(synthesize_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Synthesis failed: {result.stderr}"
-        
+
         synthesis_response = json.loads(result.stdout)
-        assert synthesis_response.get("success") is True, f"Synthesis failed: {synthesis_response}"
-        
+        assert (
+            synthesis_response.get("success") is True
+        ), f"Synthesis failed: {synthesis_response}"
+
         # Step 7: Clean up - Delete clone
         print("\n=== Step 7: Cleaning up - Deleting clone ===")
         delete_clone_cmd = [
@@ -259,7 +279,7 @@ class TestVoiceServiceIntegration:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
-        
+
         result = subprocess.run(delete_clone_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Delete clone failed: {result.stderr}"
 
@@ -271,8 +291,10 @@ class TestVoiceServiceIntegration:
                 print("Attempting manual cleanup of synthesis jobs...")
                 # This is a fallback - in a real scenario, the API should handle this
                 pass
-        assert delete_response.get("success") is True, f"Delete clone failed: {delete_response}"
-        
+        assert (
+            delete_response.get("success") is True
+        ), f"Delete clone failed: {delete_response}"
+
         # Step 8: Clean up - Delete sample
         print("\n=== Step 8: Cleaning up - Deleting sample ===")
         delete_sample_cmd = [
@@ -283,20 +305,22 @@ class TestVoiceServiceIntegration:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
-        
+
         result = subprocess.run(delete_sample_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Delete sample failed: {result.stderr}"
-        
+
         delete_sample_response = json.loads(result.stdout)
-        assert delete_sample_response.get("success") is True, f"Delete sample failed: {delete_sample_response}"
-        
+        assert (
+            delete_sample_response.get("success") is True
+        ), f"Delete sample failed: {delete_sample_response}"
+
         print("\n=== Integration test completed successfully ===")
 
     def test_multiple_samples_workflow(self, server_url, auth_tokens, test_audio_file):
         """Test workflow with multiple voice samples"""
-        
+
         sample_ids = []
-        
+
         # Upload multiple samples
         for i in range(2):
             upload_cmd = [
@@ -311,24 +335,26 @@ class TestVoiceServiceIntegration:
                 "-F",
                 f"file=@{test_audio_file}",
             ]
-            
+
             result = subprocess.run(upload_cmd, capture_output=True, text=True)
             assert result.returncode == 0, f"Upload {i+1} failed: {result.stderr}"
-            
+
             upload_response = json.loads(result.stdout)
-            assert upload_response.get("success") is True, f"Upload {i+1} failed: {upload_response}"
-            
+            assert (
+                upload_response.get("success") is True
+            ), f"Upload {i+1} failed: {upload_response}"
+
             sample_ids.append(upload_response["data"]["sample_id"])
-        
+
         # Create clone with multiple samples
         clone_data = {
             "sample_ids": sample_ids,
             "name": "Multi-Sample Clone",
             "ref_text": "This clone uses multiple voice samples for better quality",
             "description": "Integration test with multiple samples",
-            "language": "zh-CN"
+            "language": "zh-CN",
         }
-        
+
         clone_cmd = [
             "curl",
             "-X",
@@ -339,17 +365,21 @@ class TestVoiceServiceIntegration:
             "-H",
             "Content-Type: application/json",
             "-d",
-            json.dumps(clone_data)
+            json.dumps(clone_data),
         ]
-        
+
         result = subprocess.run(clone_cmd, capture_output=True, text=True)
-        assert result.returncode == 0, f"Multi-sample clone creation failed: {result.stderr}"
-        
+        assert (
+            result.returncode == 0
+        ), f"Multi-sample clone creation failed: {result.stderr}"
+
         clone_response = json.loads(result.stdout)
-        assert clone_response.get("success") is True, f"Multi-sample clone creation failed: {clone_response}"
-        
+        assert (
+            clone_response.get("success") is True
+        ), f"Multi-sample clone creation failed: {clone_response}"
+
         clone_id = clone_response["data"]["clone_id"]
-        
+
         # Clean up
         for sample_id in sample_ids:
             delete_cmd = [
@@ -361,7 +391,7 @@ class TestVoiceServiceIntegration:
                 f"Authorization: Bearer {auth_tokens['access_token']}",
             ]
             subprocess.run(delete_cmd, capture_output=True)
-        
+
         delete_clone_cmd = [
             "curl",
             "-X",
@@ -374,14 +404,14 @@ class TestVoiceServiceIntegration:
 
     def test_error_recovery_workflow(self, server_url, auth_tokens):
         """Test error recovery in voice workflow"""
-        
+
         # Test creating clone with non-existent sample
         clone_data = {
             "sample_ids": ["non-existent-sample-id"],
             "name": "Error Test Clone",
             "ref_text": "This should fail",
         }
-        
+
         clone_cmd = [
             "curl",
             "-X",
@@ -392,15 +422,17 @@ class TestVoiceServiceIntegration:
             "-H",
             "Content-Type: application/json",
             "-d",
-            json.dumps(clone_data)
+            json.dumps(clone_data),
         ]
-        
+
         result = subprocess.run(clone_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Error test failed: {result.stderr}"
-        
+
         clone_response = json.loads(result.stdout)
-        assert clone_response.get("success") is False, f"Expected failure but got: {clone_response}"
-        
+        assert (
+            clone_response.get("success") is False
+        ), f"Expected failure but got: {clone_response}"
+
         # Test accessing non-existent clone
         get_cmd = [
             "curl",
@@ -410,16 +442,18 @@ class TestVoiceServiceIntegration:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
-        
+
         result = subprocess.run(get_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Error test failed: {result.stderr}"
-        
+
         get_response = json.loads(result.stdout)
-        assert get_response.get("success") is False, f"Expected failure but got: {get_response}"
+        assert (
+            get_response.get("success") is False
+        ), f"Expected failure but got: {get_response}"
 
     def test_concurrent_operations(self, server_url, auth_tokens, test_audio_file):
         """Test concurrent operations on voice service"""
-        
+
         # Upload sample
         upload_cmd = [
             "curl",
@@ -433,22 +467,24 @@ class TestVoiceServiceIntegration:
             "-F",
             f"file=@{test_audio_file}",
         ]
-        
+
         result = subprocess.run(upload_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Upload failed: {result.stderr}"
-        
+
         upload_response = json.loads(result.stdout)
-        assert upload_response.get("success") is True, f"Upload failed: {upload_response}"
-        
+        assert (
+            upload_response.get("success") is True
+        ), f"Upload failed: {upload_response}"
+
         sample_id = upload_response["data"]["sample_id"]
-        
+
         # Create clone
         clone_data = {
             "sample_ids": [sample_id],
             "name": "Concurrent Test Clone",
             "ref_text": "Concurrent operation test",
         }
-        
+
         clone_cmd = [
             "curl",
             "-X",
@@ -459,17 +495,19 @@ class TestVoiceServiceIntegration:
             "-H",
             "Content-Type: application/json",
             "-d",
-            json.dumps(clone_data)
+            json.dumps(clone_data),
         ]
-        
+
         result = subprocess.run(clone_cmd, capture_output=True, text=True)
         assert result.returncode == 0, f"Clone creation failed: {result.stderr}"
-        
+
         clone_response = json.loads(result.stdout)
-        assert clone_response.get("success") is True, f"Clone creation failed: {clone_response}"
-        
+        assert (
+            clone_response.get("success") is True
+        ), f"Clone creation failed: {clone_response}"
+
         clone_id = clone_response["data"]["clone_id"]
-        
+
         # Test concurrent list operations
         list_samples_cmd = [
             "curl",
@@ -479,7 +517,7 @@ class TestVoiceServiceIntegration:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
-        
+
         list_clones_cmd = [
             "curl",
             "-X",
@@ -488,20 +526,28 @@ class TestVoiceServiceIntegration:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
-        
+
         # Run both commands concurrently
         result1 = subprocess.run(list_samples_cmd, capture_output=True, text=True)
         result2 = subprocess.run(list_clones_cmd, capture_output=True, text=True)
-        
-        assert result1.returncode == 0, f"Concurrent list samples failed: {result1.stderr}"
-        assert result2.returncode == 0, f"Concurrent list clones failed: {result2.stderr}"
-        
+
+        assert (
+            result1.returncode == 0
+        ), f"Concurrent list samples failed: {result1.stderr}"
+        assert (
+            result2.returncode == 0
+        ), f"Concurrent list clones failed: {result2.stderr}"
+
         samples_response = json.loads(result1.stdout)
         clones_response = json.loads(result2.stdout)
-        
-        assert samples_response.get("success") is True, f"Concurrent list samples failed: {samples_response}"
-        assert clones_response.get("success") is True, f"Concurrent list clones failed: {clones_response}"
-        
+
+        assert (
+            samples_response.get("success") is True
+        ), f"Concurrent list samples failed: {samples_response}"
+        assert (
+            clones_response.get("success") is True
+        ), f"Concurrent list clones failed: {clones_response}"
+
         # Clean up
         delete_sample_cmd = [
             "curl",
@@ -511,7 +557,7 @@ class TestVoiceServiceIntegration:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
-        
+
         delete_clone_cmd = [
             "curl",
             "-X",
@@ -520,16 +566,16 @@ class TestVoiceServiceIntegration:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
-        
+
         subprocess.run(delete_sample_cmd, capture_output=True)
         subprocess.run(delete_clone_cmd, capture_output=True)
 
     def test_performance_metrics(self, server_url, auth_tokens, test_audio_file):
         """Test performance metrics and response times"""
-        
+
         # Test upload performance
         start_time = time.time()
-        
+
         upload_cmd = [
             "curl",
             "-X",
@@ -542,26 +588,30 @@ class TestVoiceServiceIntegration:
             "-F",
             f"file=@{test_audio_file}",
         ]
-        
+
         result = subprocess.run(upload_cmd, capture_output=True, text=True)
         upload_time = time.time() - start_time
-        
-        assert result.returncode == 0, f"Performance test upload failed: {result.stderr}"
-        
+
+        assert (
+            result.returncode == 0
+        ), f"Performance test upload failed: {result.stderr}"
+
         upload_response = json.loads(result.stdout)
-        assert upload_response.get("success") is True, f"Performance test upload failed: {upload_response}"
-        
+        assert (
+            upload_response.get("success") is True
+        ), f"Performance test upload failed: {upload_response}"
+
         sample_id = upload_response["data"]["sample_id"]
-        
+
         # Test clone creation performance
         start_time = time.time()
-        
+
         clone_data = {
             "sample_ids": [sample_id],
             "name": "Performance Test Clone",
             "ref_text": "Performance testing",
         }
-        
+
         clone_cmd = [
             "curl",
             "-X",
@@ -572,22 +622,24 @@ class TestVoiceServiceIntegration:
             "-H",
             "Content-Type: application/json",
             "-d",
-            json.dumps(clone_data)
+            json.dumps(clone_data),
         ]
-        
+
         result = subprocess.run(clone_cmd, capture_output=True, text=True)
         clone_time = time.time() - start_time
-        
+
         assert result.returncode == 0, f"Performance test clone failed: {result.stderr}"
-        
+
         clone_response = json.loads(result.stdout)
-        assert clone_response.get("success") is True, f"Performance test clone failed: {clone_response}"
-        
+        assert (
+            clone_response.get("success") is True
+        ), f"Performance test clone failed: {clone_response}"
+
         clone_id = clone_response["data"]["clone_id"]
-        
+
         # Test list performance
         start_time = time.time()
-        
+
         list_cmd = [
             "curl",
             "-X",
@@ -596,22 +648,22 @@ class TestVoiceServiceIntegration:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
-        
+
         result = subprocess.run(list_cmd, capture_output=True, text=True)
         list_time = time.time() - start_time
-        
+
         assert result.returncode == 0, f"Performance test list failed: {result.stderr}"
-        
+
         # Performance assertions (adjust thresholds as needed)
         assert upload_time < 30.0, f"Upload took too long: {upload_time:.2f}s"
         assert clone_time < 60.0, f"Clone creation took too long: {clone_time:.2f}s"
         assert list_time < 5.0, f"List operation took too long: {list_time:.2f}s"
-        
+
         print(f"\nPerformance Metrics:")
         print(f"Upload time: {upload_time:.2f}s")
         print(f"Clone creation time: {clone_time:.2f}s")
         print(f"List operation time: {list_time:.2f}s")
-        
+
         # Clean up
         delete_sample_cmd = [
             "curl",
@@ -621,7 +673,7 @@ class TestVoiceServiceIntegration:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
-        
+
         delete_clone_cmd = [
             "curl",
             "-X",
@@ -630,7 +682,7 @@ class TestVoiceServiceIntegration:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
         ]
-        
+
         subprocess.run(delete_sample_cmd, capture_output=True)
         subprocess.run(delete_clone_cmd, capture_output=True)
 
@@ -641,4 +693,4 @@ def run_integration_tests():
 
 
 if __name__ == "__main__":
-    run_integration_tests() 
+    run_integration_tests()

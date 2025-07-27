@@ -53,5 +53,5 @@ def voice_service_info():
             "supported_formats": ["wav", "mp3"],
             "max_sample_duration": 30,
             "min_sample_duration": 3,
-        }
+        },
     }

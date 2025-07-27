@@ -16,9 +16,20 @@ import shutil
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/../.."))
 
 from database.models import (
-    Base, User, VoiceSample, VoiceModel, SynthesisJob, SynthesisCache,
-    PhonemeAlignment, UsageStat, SystemSetting, SchemaVersion,
-    DatabaseManager, get_database_manager, generate_uuid, TimestampMixin
+    Base,
+    User,
+    VoiceSample,
+    VoiceModel,
+    SynthesisJob,
+    SynthesisCache,
+    PhonemeAlignment,
+    UsageStat,
+    SystemSetting,
+    SchemaVersion,
+    DatabaseManager,
+    get_database_manager,
+    generate_uuid,
+    TimestampMixin,
 )
 from sqlalchemy import Column, String
 
@@ -30,7 +41,7 @@ class TestDatabaseUtilities:
         """Test UUID generation"""
         uuid1 = generate_uuid()
         uuid2 = generate_uuid()
-        
+
         assert isinstance(uuid1, str)
         assert isinstance(uuid2, str)
         assert uuid1 != uuid2
@@ -39,14 +50,15 @@ class TestDatabaseUtilities:
 
     def test_timestamp_mixin(self):
         """Test TimestampMixin functionality"""
+
         # Create a mock class with TimestampMixin
         class TestModel(Base, TimestampMixin):
             __tablename__ = "test_model"
             id = Column(String, primary_key=True, default=generate_uuid)
-        
+
         # Test that the mixin adds timestamp columns
-        assert hasattr(TestModel, 'created_at')
-        assert hasattr(TestModel, 'updated_at')
+        assert hasattr(TestModel, "created_at")
+        assert hasattr(TestModel, "updated_at")
 
 
 class TestUserModel:
@@ -58,9 +70,9 @@ class TestUserModel:
             email="test@example.com",
             password_hash="hashed_password",
             first_name="John",
-            last_name="Doe"
+            last_name="Doe",
         )
-        
+
         assert user.email == "test@example.com"
         assert user.password_hash == "hashed_password"
         assert user.first_name == "John"
@@ -76,15 +88,15 @@ class TestUserModel:
         # Test with both names
         user1 = User(first_name="John", last_name="Doe", email="test@example.com")
         assert user1.full_name == "John Doe"
-        
+
         # Test with only first name
         user2 = User(first_name="John", email="test@example.com")
         assert user2.full_name == "John"
-        
+
         # Test with only last name
         user3 = User(last_name="Doe", email="test@example.com")
         assert user3.full_name == "Doe"
-        
+
         # Test with no names
         user4 = User(email="test@example.com")
         assert user4.full_name == "test@example.com"
@@ -98,11 +110,11 @@ class TestUserModel:
             last_name="Doe",
             storage_used_bytes=1024,
             is_active=True,
-            email_verified=True
+            email_verified=True,
         )
-        
+
         user_dict = user.to_dict()
-        
+
         assert user_dict["id"] == "test-uuid"
         assert user_dict["email"] == "test@example.com"
         assert user_dict["first_name"] == "John"
@@ -119,11 +131,13 @@ class TestUserModel:
         # Test storage_used_bytes constraint
         user = User(email="test@example.com")
         user.storage_used_bytes = -1
-        
+
         # The constraint should be enforced by SQLAlchemy
         # This test verifies the constraint is defined
         constraints = User.__table_args__
-        assert any("storage_used_bytes" in str(constraint) for constraint in constraints)
+        assert any(
+            "storage_used_bytes" in str(constraint) for constraint in constraints
+        )
 
 
 class TestVoiceSampleModel:
@@ -139,9 +153,9 @@ class TestVoiceSampleModel:
             file_size=1024,
             format="WAV",
             duration=10.5,
-            sample_rate=22050
+            sample_rate=22050,
         )
-        
+
         assert sample.user_id == "user-uuid"
         assert sample.name == "Test Sample"
         assert sample.description == "Test description"
@@ -156,19 +170,19 @@ class TestVoiceSampleModel:
     def test_voice_sample_tags_property(self):
         """Test tags property getter and setter"""
         sample = VoiceSample(user_id="user-uuid", name="Test")
-        
+
         # Test setting tags
         sample.tags_list = ["tag1", "tag2", "tag3"]
         assert sample.tags == '["tag1", "tag2", "tag3"]'
-        
+
         # Test getting tags
         sample.tags = '["tag4", "tag5"]'
         assert sample.tags_list == ["tag4", "tag5"]
-        
+
         # Test empty tags
         sample.tags_list = []
         assert sample.tags == "[]"
-        
+
         # Test None tags
         sample.tags = None
         assert sample.tags_list == []
@@ -186,11 +200,11 @@ class TestVoiceSampleModel:
             duration=10.5,
             sample_rate=22050,
             quality_score=8.5,
-            language="en-US"
+            language="en-US",
         )
-        
+
         sample_dict = sample.to_dict()
-        
+
         assert sample_dict["id"] == "sample-uuid"
         assert sample_dict["user_id"] == "user-uuid"
         assert sample_dict["name"] == "Test Sample"
@@ -217,9 +231,9 @@ class TestVoiceModelModel:
             description="Test model description",
             model_path="/path/to/model.pth",
             model_type="tacotron2",
-            training_status="completed"
+            training_status="completed",
         )
-        
+
         assert model.voice_sample_id == "sample-uuid"
         assert model.name == "Test Model"
         assert model.description == "Test model description"
@@ -232,16 +246,19 @@ class TestVoiceModelModel:
     def test_voice_model_training_config_property(self):
         """Test training_config property getter and setter"""
         model = VoiceModel(voice_sample_id="sample-uuid", name="Test")
-        
+
         # Test setting training config
         config = {"epochs": 100, "learning_rate": 0.001, "batch_size": 32}
         model.training_config_dict = config
-        assert model.training_config == '{"epochs": 100, "learning_rate": 0.001, "batch_size": 32}'
-        
+        assert (
+            model.training_config
+            == '{"epochs": 100, "learning_rate": 0.001, "batch_size": 32}'
+        )
+
         # Test getting training config
         model.training_config = '{"epochs": 200, "learning_rate": 0.0001}'
         assert model.training_config_dict == {"epochs": 200, "learning_rate": 0.0001}
-        
+
         # Test None config
         model.training_config = None
         assert model.training_config_dict == {}
@@ -249,12 +266,15 @@ class TestVoiceModelModel:
     def test_voice_model_quality_metrics_property(self):
         """Test quality_metrics property getter and setter"""
         model = VoiceModel(voice_sample_id="sample-uuid", name="Test")
-        
+
         # Test setting quality metrics
         metrics = {"mos_score": 4.5, "similarity": 0.95, "clarity": 0.9}
         model.quality_metrics_dict = metrics
-        assert model.quality_metrics == '{"mos_score": 4.5, "similarity": 0.95, "clarity": 0.9}'
-        
+        assert (
+            model.quality_metrics
+            == '{"mos_score": 4.5, "similarity": 0.95, "clarity": 0.9}'
+        )
+
         # Test getting quality metrics
         model.quality_metrics = '{"mos_score": 4.8, "similarity": 0.98}'
         assert model.quality_metrics_dict == {"mos_score": 4.8, "similarity": 0.98}
@@ -270,11 +290,11 @@ class TestVoiceModelModel:
             model_type="tacotron2",
             model_size=1024000,
             training_status="completed",
-            mos_score=4.5  # Use mos_score instead of quality_score
+            mos_score=4.5,  # Use mos_score instead of quality_score
         )
-        
+
         model_dict = model.to_dict()
-        
+
         assert model_dict["id"] == "model-uuid"
         assert model_dict["voice_sample_id"] == "sample-uuid"
         assert model_dict["name"] == "Test Model"
@@ -298,9 +318,9 @@ class TestSynthesisJobModel:
             voice_model_id="model-uuid",
             text_content="Hello world",
             text_hash="hash123",
-            status="pending"
+            status="pending",
         )
-        
+
         assert job.user_id == "user-uuid"
         assert job.voice_model_id == "model-uuid"
         assert job.text_content == "Hello world"
@@ -311,29 +331,36 @@ class TestSynthesisJobModel:
 
     def test_synthesis_job_config_property(self):
         """Test config property getter and setter"""
-        job = SynthesisJob(user_id="user-uuid", voice_model_id="model-uuid", text_content="test")
-        
+        job = SynthesisJob(
+            user_id="user-uuid", voice_model_id="model-uuid", text_content="test"
+        )
+
         # Test setting config
         config = {"speed": 1.0, "pitch": 1.0, "volume": 1.0}
         job.config_dict = config
         assert job.config == '{"speed": 1.0, "pitch": 1.0, "volume": 1.0}'
-        
+
         # Test getting config
         job.config = '{"speed": 1.2, "pitch": 0.8}'
         assert job.config_dict == {"speed": 1.2, "pitch": 0.8}
 
     def test_synthesis_job_word_timestamps_property(self):
         """Test word_timestamps property getter and setter"""
-        job = SynthesisJob(user_id="user-uuid", voice_model_id="model-uuid", text_content="test")
-        
+        job = SynthesisJob(
+            user_id="user-uuid", voice_model_id="model-uuid", text_content="test"
+        )
+
         # Test setting timestamps
         timestamps = [
             {"word": "Hello", "start": 0.0, "end": 0.5},
-            {"word": "world", "start": 0.5, "end": 1.0}
+            {"word": "world", "start": 0.5, "end": 1.0},
         ]
         job.word_timestamps_list = timestamps
-        assert job.word_timestamps == '[{"word": "Hello", "start": 0.0, "end": 0.5}, {"word": "world", "start": 0.5, "end": 1.0}]'
-        
+        assert (
+            job.word_timestamps
+            == '[{"word": "Hello", "start": 0.0, "end": 0.5}, {"word": "world", "start": 0.5, "end": 1.0}]'
+        )
+
         # Test getting timestamps
         job.word_timestamps = '[{"word": "Test", "start": 0.0, "end": 0.3}]'
         assert job.word_timestamps_list == [{"word": "Test", "start": 0.0, "end": 0.3}]
@@ -349,11 +376,11 @@ class TestSynthesisJobModel:
             status="completed",
             progress=100.0,
             output_path="/path/to/output.wav",
-            duration=2.5
+            duration=2.5,
         )
-        
+
         job_dict = job.to_dict()
-        
+
         assert job_dict["id"] == "job-uuid"
         assert job_dict["user_id"] == "user-uuid"
         assert job_dict["voice_model_id"] == "model-uuid"
@@ -377,9 +404,9 @@ class TestSynthesisCacheModel:
             voice_model_id="model-uuid",
             config_hash="config_hash",
             output_path="/path/to/cached.wav",
-            duration=2.5
+            duration=2.5,
         )
-        
+
         assert cache.text_hash == "hash123"
         assert cache.voice_model_id == "model-uuid"
         assert cache.config_hash == "config_hash"
@@ -402,9 +429,9 @@ class TestPhonemeAlignmentModel:
             start_time=0.0,
             end_time=0.5,
             duration=0.5,
-            confidence=0.95
+            confidence=0.95,
         )
-        
+
         assert alignment.synthesis_job_id == "job-uuid"
         assert alignment.sequence_number == 1
         assert alignment.text_unit == "Hello"
@@ -425,9 +452,9 @@ class TestUsageStatModel:
             date="2024-01-01",
             voice_samples_uploaded=5,
             synthesis_requests=10,
-            synthesis_duration=30.5
+            synthesis_duration=30.5,
         )
-        
+
         assert stat.user_id == "user-uuid"
         assert stat.date == "2024-01-01"
         assert stat.voice_samples_uploaded == 5
@@ -444,9 +471,9 @@ class TestSystemSettingModel:
             key="max_file_size",
             value="10485760",
             data_type="integer",
-            description="Maximum file size in bytes"
+            description="Maximum file size in bytes",
         )
-        
+
         assert setting.key == "max_file_size"
         assert setting.value == "10485760"
         assert setting.data_type == "integer"
@@ -459,21 +486,27 @@ class TestSystemSettingModel:
         # Test integer
         setting_int = SystemSetting(key="test_int", value="123", data_type="integer")
         assert setting_int.get_typed_value() == 123
-        
+
         # Test float
-        setting_float = SystemSetting(key="test_float", value="123.45", data_type="float")
+        setting_float = SystemSetting(
+            key="test_float", value="123.45", data_type="float"
+        )
         assert setting_float.get_typed_value() == 123.45
-        
+
         # Test boolean
         setting_bool = SystemSetting(key="test_bool", value="true", data_type="boolean")
         assert setting_bool.get_typed_value() is True
-        
+
         # Test string
-        setting_string = SystemSetting(key="test_string", value="hello", data_type="string")
+        setting_string = SystemSetting(
+            key="test_string", value="hello", data_type="string"
+        )
         assert setting_string.get_typed_value() == "hello"
-        
+
         # Test unknown type
-        setting_unknown = SystemSetting(key="test_unknown", value="test", data_type="unknown")
+        setting_unknown = SystemSetting(
+            key="test_unknown", value="test", data_type="unknown"
+        )
         assert setting_unknown.get_typed_value() == "test"
 
 
@@ -482,11 +515,8 @@ class TestSchemaVersionModel:
 
     def test_schema_version_creation(self):
         """Test basic schema version creation"""
-        version = SchemaVersion(
-            version="1.0.0",
-            description="Initial schema version"
-        )
-        
+        version = SchemaVersion(version="1.0.0", description="Initial schema version")
+
         assert version.version == "1.0.0"
         assert version.description == "Initial schema version"
 
@@ -503,6 +533,7 @@ class TestDatabaseManager:
         # Close any open connections before cleanup
         try:
             import time
+
             time.sleep(0.1)  # Give time for connections to close
             shutil.rmtree(temp_dir)
         except PermissionError:
@@ -513,7 +544,7 @@ class TestDatabaseManager:
         """Test database manager creation"""
         db_url = f"sqlite:///{temp_db_path}"
         manager = DatabaseManager(db_url)
-        
+
         # DatabaseManager doesn't store database_url as an attribute
         assert manager.engine is not None
         assert manager.SessionLocal is not None
@@ -522,10 +553,10 @@ class TestDatabaseManager:
         """Test table creation"""
         db_url = f"sqlite:///{temp_db_path}"
         manager = DatabaseManager(db_url)
-        
+
         # Create tables
         manager.create_tables()
-        
+
         # Verify tables exist by checking if we can create a session
         session = manager.get_session()
         assert session is not None
@@ -535,13 +566,13 @@ class TestDatabaseManager:
         """Test table dropping"""
         db_url = f"sqlite:///{temp_db_path}"
         manager = DatabaseManager(db_url)
-        
+
         # Create tables first
         manager.create_tables()
-        
+
         # Drop tables
         manager.drop_tables()
-        
+
         # Verify tables are dropped by checking if we can still create a session
         # (this should work even with no tables)
         session = manager.get_session()
@@ -552,7 +583,7 @@ class TestDatabaseManager:
         """Test session creation"""
         db_url = f"sqlite:///{temp_db_path}"
         manager = DatabaseManager(db_url)
-        
+
         session = manager.get_session()
         assert session is not None
         session.close()
@@ -561,11 +592,11 @@ class TestDatabaseManager:
         """Test default data initialization"""
         db_url = f"sqlite:///{temp_db_path}"
         manager = DatabaseManager(db_url)
-        
+
         # Create tables and init default data
         manager.create_tables()
         manager.init_default_data()
-        
+
         # Verify default data was created by checking system settings
         session = manager.get_session()
         try:
@@ -579,7 +610,7 @@ class TestDatabaseManager:
         """Test get_database_manager function"""
         db_url = f"sqlite:///{temp_db_path}"
         manager = get_database_manager(db_url)
-        
+
         assert isinstance(manager, DatabaseManager)
         # DatabaseManager doesn't store database_url as an attribute
         assert manager.engine is not None
@@ -597,6 +628,7 @@ class TestDatabaseRelationships:
         # Close any open connections before cleanup
         try:
             import time
+
             time.sleep(0.1)  # Give time for connections to close
             shutil.rmtree(temp_dir)
         except PermissionError:
@@ -608,14 +640,14 @@ class TestDatabaseRelationships:
         db_url = f"sqlite:///{temp_db_path}"
         manager = DatabaseManager(db_url)
         manager.create_tables()
-        
+
         session = manager.get_session()
         try:
             # Create user
             user = User(email="test@example.com", password_hash="hash")
             session.add(user)
             session.commit()
-            
+
             # Create voice sample
             sample = VoiceSample(
                 user_id=user.id,
@@ -624,23 +656,23 @@ class TestDatabaseRelationships:
                 file_size=1024,
                 format="WAV",
                 duration=10.0,
-                sample_rate=22050
+                sample_rate=22050,
             )
             session.add(sample)
             session.commit()
-            
+
             # Test relationship
             assert len(user.voice_samples) == 1
             assert user.voice_samples[0].id == sample.id
-            
+
             # Test cascade delete
             session.delete(user)
             session.commit()
-            
+
             # Voice sample should be deleted
             remaining_samples = session.query(VoiceSample).all()
             assert len(remaining_samples) == 0
-            
+
         finally:
             session.close()
 
@@ -649,14 +681,14 @@ class TestDatabaseRelationships:
         db_url = f"sqlite:///{temp_db_path}"
         manager = DatabaseManager(db_url)
         manager.create_tables()
-        
+
         session = manager.get_session()
         try:
             # Create user and voice sample
             user = User(email="test@example.com", password_hash="hash")
             session.add(user)
             session.commit()
-            
+
             sample = VoiceSample(
                 user_id=user.id,
                 name="Test Sample",
@@ -664,33 +696,33 @@ class TestDatabaseRelationships:
                 file_size=1024,
                 format="WAV",
                 duration=10.0,
-                sample_rate=22050
+                sample_rate=22050,
             )
             session.add(sample)
             session.commit()
-            
+
             # Create voice model
             model = VoiceModel(
                 voice_sample_id=sample.id,
                 name="Test Model",
                 model_path="/path/to/model.pth",
-                training_status="completed"
+                training_status="completed",
             )
             session.add(model)
             session.commit()
-            
+
             # Test relationship
             assert len(sample.voice_models) == 1
             assert sample.voice_models[0].id == model.id
-            
+
             # Test cascade delete
             session.delete(sample)
             session.commit()
-            
+
             # Voice model should be deleted
             remaining_models = session.query(VoiceModel).all()
             assert len(remaining_models) == 0
-            
+
         finally:
             session.close()
 
@@ -699,14 +731,14 @@ class TestDatabaseRelationships:
         db_url = f"sqlite:///{temp_db_path}"
         manager = DatabaseManager(db_url)
         manager.create_tables()
-        
+
         session = manager.get_session()
         try:
             # Create user, voice sample, and voice model
             user = User(email="test@example.com", password_hash="hash")
             session.add(user)
             session.commit()
-            
+
             sample = VoiceSample(
                 user_id=user.id,
                 name="Test Sample",
@@ -714,44 +746,44 @@ class TestDatabaseRelationships:
                 file_size=1024,
                 format="WAV",
                 duration=10.0,
-                sample_rate=22050
+                sample_rate=22050,
             )
             session.add(sample)
             session.commit()
-            
+
             model = VoiceModel(
                 voice_sample_id=sample.id,
                 name="Test Model",
                 model_path="/path/to/model.pth",
-                training_status="completed"
+                training_status="completed",
             )
             session.add(model)
             session.commit()
-            
+
             # Create synthesis job
             job = SynthesisJob(
                 user_id=user.id,
                 voice_model_id=model.id,
                 text_content="Hello world",
-                text_hash="hash123"
+                text_hash="hash123",
             )
             session.add(job)
             session.commit()
-            
+
             # Test relationships
             assert len(user.synthesis_jobs) == 1
             assert user.synthesis_jobs[0].id == job.id
-            
+
             assert len(model.synthesis_jobs) == 1
             assert model.synthesis_jobs[0].id == job.id
-            
+
             # Test cascade delete
             session.delete(user)
             session.commit()
-            
+
             # Job should be deleted
             remaining_jobs = session.query(SynthesisJob).all()
             assert len(remaining_jobs) == 0
-            
+
         finally:
-            session.close() 
+            session.close()
