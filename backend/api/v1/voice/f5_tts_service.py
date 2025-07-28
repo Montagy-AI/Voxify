@@ -57,7 +57,9 @@ class F5TTSService:
             "F5_TTS_REMOTE_URL",
             "https://avltg--f5-tts-voxify-fastapi-app.modal.run/synthesize",
         )
-        self.request_timeout = int(os.getenv("F5_TTS_TIMEOUT", "120"))  # 2 minutes default
+        self.request_timeout = int(
+            os.getenv("F5_TTS_TIMEOUT", "120")
+        )  # 2 minutes default
 
         # Local model setup (only if not using remote)
         if not self.use_remote:
@@ -69,7 +71,9 @@ class F5TTSService:
             self.device = "remote"
             self.model = None
             self.initialized = True
-            logger.info(f"F5TTS Service initialized with REMOTE API: {self.remote_api_url}")
+            logger.info(
+                f"F5TTS Service initialized with REMOTE API: {self.remote_api_url}"
+            )
 
         # Storage paths
         self.base_path = Path("data/voice_clones")
@@ -125,23 +129,32 @@ class F5TTSService:
             payload = {
                 "text": config.text,
                 "reference_audio_b64": audio_b64,
-                "reference_text": config.ref_text or "",  # Use ref_text or empty for auto-transcription
+                "reference_text": config.ref_text
+                or "",  # Use ref_text or empty for auto-transcription
                 "language": config.language,  # Pass language parameter for multilingual support
                 "speed": config.speed,  # Pass speed parameter
             }
 
             logger.info("Sending request to remote F5-TTS API...")
             logger.info(f"Text length: {len(config.text)} characters")
-            logger.info(f"Reference text: {config.ref_text[:50]}..." if config.ref_text else "Auto-transcription")
+            logger.info(
+                f"Reference text: {config.ref_text[:50]}..."
+                if config.ref_text
+                else "Auto-transcription"
+            )
 
             # Make API request
-            response = requests.post(self.remote_api_url, json=payload, timeout=self.request_timeout)
+            response = requests.post(
+                self.remote_api_url, json=payload, timeout=self.request_timeout
+            )
 
             logger.info(f"API response status: {response.status_code}")
 
             # Parse response
             if response.status_code != 200:
-                raise Exception(f"API request failed with status {response.status_code}: {response.text}")
+                raise Exception(
+                    f"API request failed with status {response.status_code}: {response.text}"
+                )
 
             try:
                 result = response.json()
@@ -150,7 +163,9 @@ class F5TTSService:
 
             # Check if synthesis was successful
             if not result.get("success", False):
-                error_msg = result.get("error") or result.get("detail") or "Unknown error"
+                error_msg = (
+                    result.get("error") or result.get("detail") or "Unknown error"
+                )
                 raise Exception(f"Remote synthesis failed: {error_msg}")
 
             # Decode audio data
@@ -171,19 +186,25 @@ class F5TTSService:
                 f.write(audio_data)
 
             file_size = os.path.getsize(output_path)
-            logger.info(f"Remote synthesis completed: {output_path} ({file_size} bytes)")
+            logger.info(
+                f"Remote synthesis completed: {output_path} ({file_size} bytes)"
+            )
 
             return str(output_path)
 
         except requests.exceptions.Timeout:
-            raise Exception(f"Remote API request timed out after {self.request_timeout} seconds")
+            raise Exception(
+                f"Remote API request timed out after {self.request_timeout} seconds"
+            )
         except requests.exceptions.RequestException as e:
             raise Exception(f"Remote API request failed: {e}")
         except Exception as e:
             logger.error(f"Remote synthesis error: {e}")
             raise
 
-    def create_voice_clone(self, config: VoiceCloneConfig, sample_ids: List[str]) -> Dict:
+    def create_voice_clone(
+        self, config: VoiceCloneConfig, sample_ids: List[str]
+    ) -> Dict:
         """
         Create a voice clone from voice samples
 
@@ -233,7 +254,9 @@ class F5TTSService:
             logger.error(f"Failed to create voice clone: {e}")
             raise
 
-    def synthesize_speech(self, config: TTSConfig, clone_id: Optional[str] = None) -> str:
+    def synthesize_speech(
+        self, config: TTSConfig, clone_id: Optional[str] = None
+    ) -> str:
         """
         Synthesize speech using F5-TTS
 
@@ -339,7 +362,9 @@ class F5TTSService:
                         # If multiple dimensions, flatten to (channels, samples)
                         audio_data = audio_data.view(1, -1)
 
-                    torchaudio.save(str(output_path), audio_data.cpu().float(), sample_rate)
+                    torchaudio.save(
+                        str(output_path), audio_data.cpu().float(), sample_rate
+                    )
 
                     logger.info(f"Real F5-TTS synthesis completed: {output_path}")
 
