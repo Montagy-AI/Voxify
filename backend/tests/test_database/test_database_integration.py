@@ -79,9 +79,10 @@ class TestDatabaseInitialization:
 
     def test_initialize_database_defaults(self):
         """Test database initialization with default parameters"""
-        with patch("database.get_database_manager") as mock_get_db_manager, patch(
-            "database.create_vector_db"
-        ) as mock_create_vector_db:
+        with (
+            patch("database.get_database_manager") as mock_get_db_manager,
+            patch("database.create_vector_db") as mock_create_vector_db,
+        ):
             mock_db_manager = Mock()
             mock_vector_db = Mock()
             mock_get_db_manager.return_value = mock_db_manager

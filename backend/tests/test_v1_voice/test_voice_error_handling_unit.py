@@ -82,7 +82,7 @@ class TestVoiceCloneErrorHandling:
         # Test missing sample_ids
         clone_data = {
             "name": "Test Clone",
-            "ref_text": "Reference text"
+            "ref_text": "Reference text",
             # Missing sample_ids
         }
 
@@ -115,7 +115,7 @@ class TestVoiceCloneErrorHandling:
         """Test voice clone creation with missing name"""
         clone_data = {
             "sample_ids": ["sample1"],
-            "ref_text": "Reference text"
+            "ref_text": "Reference text",
             # Missing name
         }
 
@@ -126,7 +126,7 @@ class TestVoiceCloneErrorHandling:
         """Test voice clone creation with missing reference text"""
         clone_data = {
             "sample_ids": ["sample1"],
-            "name": "Test Clone"
+            "name": "Test Clone",
             # Missing ref_text
         }
 

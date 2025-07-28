@@ -1218,7 +1218,7 @@ class TestVoiceServiceAPI:
         # Test missing name
         clone_data = {
             "sample_ids": ["sample1"],
-            "ref_text": "Hello world"
+            "ref_text": "Hello world",
             # Missing name
         }
 
@@ -1245,7 +1245,7 @@ class TestVoiceServiceAPI:
         # Test missing ref_text
         clone_data = {
             "sample_ids": ["sample1"],
-            "name": "Test Clone"
+            "name": "Test Clone",
             # Missing ref_text
         }
 
