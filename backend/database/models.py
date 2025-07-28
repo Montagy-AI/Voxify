@@ -179,7 +179,7 @@ class VoiceSample(Base, TimestampMixin):
     @tags_list.setter
     def tags_list(self, value: List[str]):
         """Set tags from a list"""
-        self.tags = json.dumps(value) if value else None
+        self.tags = json.dumps(value) if value else "[]"
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for API responses"""
@@ -188,6 +188,7 @@ class VoiceSample(Base, TimestampMixin):
             "user_id": self.user_id,
             "name": self.name,
             "description": self.description,
+            "file_path": self.file_path,
             "file_size": self.file_size,
             "original_filename": self.original_filename,
             "format": self.format,
@@ -199,7 +200,7 @@ class VoiceSample(Base, TimestampMixin):
             "noise_level": self.noise_level,
             "clarity_score": self.clarity_score,
             "status": self.status,
-            "tags": self.tags_list,
+            "tags_list": self.tags_list,
             "is_public": self.is_public,
             "gender": self.gender,
             "age_group": self.age_group,

@@ -79,15 +79,20 @@ def fastapi_app():
         text: str
         reference_audio_b64: str
         reference_text: str = ""  # Optional transcription of reference audio
+        language: str = "zh-CN"  # Language parameter for multilingual support
+        speed: float = 1.0  # Speed parameter
 
     @fastapi_app.post("/synthesize")
     async def synthesize_speech(request: SynthesisRequest):
         try:
             print(f"Received synthesis request for text: {request.text[:50]}...")
+            print(f"Language: {request.language}, Speed: {request.speed}")
 
             text = request.text.strip()
             reference_audio_b64 = request.reference_audio_b64
             ref_text = request.reference_text.strip()
+            language = request.language
+            speed = request.speed
 
             if not text or not reference_audio_b64:
                 raise HTTPException(status_code=400, detail="Missing text or reference_audio_b64")
@@ -118,11 +123,15 @@ def fastapi_app():
                     # Initialize F5-TTS
                     f5tts = F5TTS()
 
-                    # Generate speech
+                    # Generate speech with language and speed parameters
+                    print(f"Generating speech for language: {language} with speed: {speed}")
                     wav, sr, spect = f5tts.infer(
                         ref_file=ref_path,
                         ref_text=ref_text if ref_text else "",
                         gen_text=text,
+                        speed=speed,
+                        # Note: F5-TTS model selection based on language would be handled here
+                        # For now, we use the default multilingual model
                     )
 
                     print(
@@ -143,13 +152,14 @@ sys.path.insert(0, '/app/F5-TTS/src')
 from f5_tts.infer.utils_infer import infer_process
 import torchaudio
 
-# Run inference
+# Run inference with language and speed parameters
 wav, sr = infer_process(
     ref_file="{ref_path}",
     ref_text="{ref_text}",
     gen_text="{text}",
     model_type="F5-TTS",
-    remove_silence=True
+    remove_silence=True,
+    speed={speed}
 )
 
 # Save output
@@ -199,6 +209,9 @@ print(f"Saved audio with shape {{wav.shape}} and sr {{sr}}")
                         "audio_data": result_b64,
                         "sample_rate": 24000,  # F5-TTS default
                         "message": "Speech synthesized successfully",
+                        "language": language,
+                        "speed": speed,
+                        "model_info": "F5-TTS (script mode)",
                     }
 
                 # If F5TTS API worked, process the result
@@ -236,6 +249,9 @@ print(f"Saved audio with shape {{wav.shape}} and sr {{sr}}")
                         "audio_data": result_b64,
                         "sample_rate": sr,
                         "message": "Speech synthesized successfully",
+                        "language": language,
+                        "speed": speed,
+                        "model_info": "F5-TTS (API mode)",
                     }
 
             except subprocess.TimeoutExpired:

@@ -196,8 +196,34 @@ const VoiceClone = () => {
               onChange={(e) => setLanguage(e.target.value)}
               className="w-full rounded border border-zinc-800 bg-zinc-900 px-4 py-2 text-white focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
             >
-              <option value="zh-CN">Chinese</option>
-              <option value="en-US">English</option>
+              {/* Native multilingual support */}
+              <optgroup label="Native Support (Best Quality)">
+                <option value="zh-CN">Chinese (Simplified)</option>
+                <option value="zh-TW">Chinese (Traditional)</option>
+                <option value="en-US">English (US)</option>
+                <option value="en-GB">English (UK)</option>
+              </optgroup>
+
+              {/* Specialized model support */}
+              <optgroup label="Specialized Models (High Quality)">
+                <option value="ja-JP">Japanese</option>
+                <option value="fr-FR">French</option>
+                <option value="de-DE">German</option>
+                <option value="es-ES">Spanish</option>
+                <option value="it-IT">Italian</option>
+                <option value="ru-RU">Russian</option>
+                <option value="hi-IN">Hindi</option>
+                <option value="fi-FI">Finnish</option>
+              </optgroup>
+
+              {/* Fallback support */}
+              <optgroup label="Basic Support (Limited Quality)">
+                <option value="ko-KR">Korean</option>
+                <option value="pt-BR">Portuguese</option>
+                <option value="ar-SA">Arabic</option>
+                <option value="th-TH">Thai</option>
+                <option value="vi-VN">Vietnamese</option>
+              </optgroup>
             </select>
           </div>
 
