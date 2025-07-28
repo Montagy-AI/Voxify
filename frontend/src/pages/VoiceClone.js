@@ -203,7 +203,7 @@ const VoiceClone = () => {
                 <option value="en-US">English (US)</option>
                 <option value="en-GB">English (UK)</option>
               </optgroup>
-              
+
               {/* Specialized model support */}
               <optgroup label="Specialized Models (High Quality)">
                 <option value="ja-JP">Japanese</option>
@@ -215,7 +215,7 @@ const VoiceClone = () => {
                 <option value="hi-IN">Hindi</option>
                 <option value="fi-FI">Finnish</option>
               </optgroup>
-              
+
               {/* Fallback support */}
               <optgroup label="Basic Support (Limited Quality)">
                 <option value="ko-KR">Korean</option>

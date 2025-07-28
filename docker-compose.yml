@@ -37,7 +37,7 @@ services:
     volumes:
       - data_volume:/data
     restart: unless-stopped
-    healthcheck:  # Add health check for the API
+    healthcheck: # Add health check for the API
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
@@ -73,7 +73,12 @@ services:
       - VECTOR_DB_PATH=data/chroma_db
       - DOCKER_ENV=true
       - FLASK_HOST=voxify_api
-    command: ["sh", "-c", "python -m pytest tests/ -v && python -m unittest discover -s tests -p 'test_*.py' -v"]
+    command:
+      [
+        "sh",
+        "-c",
+        "python -m pytest tests/ -v && python -m unittest discover -s tests -p 'test_*.py' -v",
+      ]
     restart: "no"
 
   snyk-security:
@@ -84,7 +89,12 @@ services:
     working_dir: /app/backend
     environment:
       - SNYK_TOKEN=${SNYK_TOKEN:-}
-    command: ["sh", "-c", "[ -z \"$$SNYK_TOKEN\" ] && { echo 'Error: SNYK_TOKEN is not set'; exit 1; }; snyk code test --severity-threshold=high"]
+    command:
+      [
+        "sh",
+        "-c",
+        '[ -z "$$SNYK_TOKEN" ] && { echo ''Error: SNYK_TOKEN is not set''; exit 1; }; snyk code test --severity-threshold=high',
+      ]
     restart: "no"
 
 volumes:

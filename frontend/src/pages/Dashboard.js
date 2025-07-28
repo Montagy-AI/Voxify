@@ -37,6 +37,9 @@ const Dashboard = () => {
       const jobs = jobsResponse || [];
 
       // Calculate statistics
+      console.log('Voice Clones:', voiceClonesResponse);
+      console.log('Jobs:', jobsResponse);
+
       const completedJobs = jobs.filter((job) => job.status === 'completed');
       const processingJobs = jobs.filter(
         (job) => job.status === 'processing' || job.status === 'pending'

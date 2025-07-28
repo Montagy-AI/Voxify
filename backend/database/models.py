@@ -137,7 +137,6 @@ class VoiceSample(Base, TimestampMixin):
 
     # Vector database associations
     voice_embedding_id = Column(String)  # Reference to Chroma
-    speaker_embedding_id = Column(String)  # Reference to speaker identity
 
     # Metadata and categorization
     tags = Column(TEXT)  # JSON array of user tags
@@ -184,7 +183,7 @@ class VoiceSample(Base, TimestampMixin):
     @tags_list.setter
     def tags_list(self, value: List[str]):
         """Set tags from a list"""
-        self.tags = json.dumps(value) if value else None
+        self.tags = json.dumps(value) if value else "[]"
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for API responses"""
@@ -193,6 +192,7 @@ class VoiceSample(Base, TimestampMixin):
             "user_id": self.user_id,
             "name": self.name,
             "description": self.description,
+            "file_path": self.file_path,
             "file_size": self.file_size,
             "original_filename": self.original_filename,
             "format": self.format,
@@ -204,7 +204,7 @@ class VoiceSample(Base, TimestampMixin):
             "noise_level": self.noise_level,
             "clarity_score": self.clarity_score,
             "status": self.status,
-            "tags": self.tags_list,
+            "tags_list": self.tags_list,
             "is_public": self.is_public,
             "gender": self.gender,
             "age_group": self.age_group,
@@ -231,27 +231,8 @@ class VoiceModel(Base, TimestampMixin):
     model_version = Column(String, default="1.0")
     model_hash = Column(String)
 
-    # Training configuration
-    training_config = Column(TEXT)  # JSON training parameters
-    training_epochs = Column(Integer)
-    learning_rate = Column(Float)
-    batch_size = Column(Integer)
-    dataset_size = Column(Integer)
-
-    # Training status and progress
-    training_status = Column(String, default="pending", nullable=False)
-    training_progress = Column(Float, default=0.0)
-    training_start_time = Column(DateTime)
-    training_end_time = Column(DateTime)
-    training_error = Column(Text)
-    training_logs_path = Column(String)
-
-    # Quality metrics and evaluation
-    quality_metrics = Column(TEXT)  # JSON quality metrics
-    mel_loss = Column(Float)
-    validation_score = Column(Float)
-    mos_score = Column(Float)  # Mean Opinion Score
-    similarity_score = Column(Float)
+    # Voice clone status (after uploading sample voice)
+    status = Column(String, default="pending", nullable=False)
 
     # Model status and management
     is_active = Column(Boolean, default=True)
@@ -265,52 +246,18 @@ class VoiceModel(Base, TimestampMixin):
     # Constraints
     __table_args__ = (
         CheckConstraint(
-            'training_status IN ("pending", "training", "completed", "failed")',
-            name="check_training_status",
-        ),
-        CheckConstraint(
-            "training_progress >= 0.0 AND training_progress <= 1.0",
-            name="check_training_progress",
+            'status IN ("pending", "training", "completed", "failed")',
+            name="check_status",
         ),
         CheckConstraint(
             'deployment_status IN ("offline", "online", "deploying")',
             name="check_deployment_status",
         ),
         Index("idx_voice_models_sample_id", "voice_sample_id"),
-        Index("idx_voice_models_status", "training_status"),
+        Index("idx_voice_models_status", "status"),
         Index("idx_voice_models_active", "is_active"),
         Index("idx_voice_models_deployment", "deployment_status"),
     )
-
-    @property
-    def training_config_dict(self) -> Dict[str, Any]:
-        """Get training config as dictionary"""
-        if self.training_config:
-            try:
-                return json.loads(self.training_config)
-            except (json.JSONDecodeError, TypeError):
-                return {}
-        return {}
-
-    @training_config_dict.setter
-    def training_config_dict(self, value: Dict[str, Any]):
-        """Set training config from dictionary"""
-        self.training_config = json.dumps(value) if value else None
-
-    @property
-    def quality_metrics_dict(self) -> Dict[str, Any]:
-        """Get quality metrics as dictionary"""
-        if self.quality_metrics:
-            try:
-                return json.loads(self.quality_metrics)
-            except (json.JSONDecodeError, TypeError):
-                return {}
-        return {}
-
-    @quality_metrics_dict.setter
-    def quality_metrics_dict(self, value: Dict[str, Any]):
-        """Set quality metrics from dictionary"""
-        self.quality_metrics = json.dumps(value) if value else None
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for API responses"""
@@ -322,14 +269,6 @@ class VoiceModel(Base, TimestampMixin):
             "model_type": self.model_type,
             "model_size": self.model_size,
             "model_version": self.model_version,
-            "training_config": self.training_config_dict,
-            "training_status": self.training_status,
-            "training_progress": self.training_progress,
-            "quality_metrics": self.quality_metrics_dict,
-            "mel_loss": self.mel_loss,
-            "validation_score": self.validation_score,
-            "mos_score": self.mos_score,
-            "similarity_score": self.similarity_score,
             "is_active": self.is_active,
             "is_default": self.is_default,
             "deployment_status": self.deployment_status,
@@ -367,11 +306,6 @@ class SynthesisJob(Base, TimestampMixin):
     output_size = Column(Integer)
     duration = Column(Float)
 
-    # Timing alignment data (project requirement)
-    word_timestamps = Column(TEXT)  # JSON array
-    syllable_timestamps = Column(TEXT)  # JSON array
-    phoneme_timestamps = Column(TEXT)  # JSON array
-
     # Job status and progress
     status = Column(String, default="pending", nullable=False)
     progress = Column(Float, default=0.0)
@@ -393,7 +327,6 @@ class SynthesisJob(Base, TimestampMixin):
     # Relationships
     user = relationship("User", back_populates="synthesis_jobs")
     voice_model = relationship("VoiceModel", back_populates="synthesis_jobs")
-    phoneme_alignments = relationship("PhonemeAlignment", back_populates="synthesis_job", cascade="all, delete-orphan")
 
     # Constraints
     __table_args__ = (
@@ -427,21 +360,6 @@ class SynthesisJob(Base, TimestampMixin):
         """Set configuration from dictionary"""
         self.config = json.dumps(value) if value else None
 
-    @property
-    def word_timestamps_list(self) -> List[Dict[str, Any]]:
-        """Get word timestamps as list"""
-        if self.word_timestamps:
-            try:
-                return json.loads(self.word_timestamps)
-            except (json.JSONDecodeError, TypeError):
-                return []
-        return []
-
-    @word_timestamps_list.setter
-    def word_timestamps_list(self, value: List[Dict[str, Any]]):
-        """Set word timestamps from list"""
-        self.word_timestamps = json.dumps(value) if value else None
-
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for API responses"""
         return {
@@ -462,7 +380,6 @@ class SynthesisJob(Base, TimestampMixin):
             "output_path": self.output_path,
             "output_size": self.output_size,
             "duration": self.duration,
-            "word_timestamps": self.word_timestamps_list,
             "status": self.status,
             "progress": self.progress,
             "error_message": self.error_message,
@@ -487,9 +404,6 @@ class SynthesisCache(Base, TimestampMixin):
     # Cached content
     output_path = Column(String, nullable=False)
     duration = Column(Float, nullable=False)
-    word_timestamps = Column(TEXT)
-    syllable_timestamps = Column(TEXT)
-    phoneme_timestamps = Column(TEXT)
 
     # Cache metadata
     hit_count = Column(Integer, default=0)
@@ -508,53 +422,6 @@ class SynthesisCache(Base, TimestampMixin):
         Index("idx_synthesis_cache_hash", "text_hash"),
         Index("idx_synthesis_cache_model", "voice_model_id"),
         Index("idx_synthesis_cache_expires", "expires_at"),
-    )
-
-
-class PhonemeAlignment(Base):
-    """Detailed phoneme alignments for synthesis jobs"""
-
-    __tablename__ = "phoneme_alignments"
-
-    id = Column(String, primary_key=True, default=generate_uuid)
-    synthesis_job_id = Column(String, ForeignKey("synthesis_jobs.id", ondelete="CASCADE"), nullable=False)
-    sequence_number = Column(Integer, nullable=False)
-
-    # Text unit information
-    text_unit = Column(String, nullable=False)
-    unit_type = Column(String, nullable=False)  # 'word', 'syllable', 'phoneme'
-    parent_unit_id = Column(String)
-
-    # Timing information
-    start_time = Column(Float, nullable=False)
-    end_time = Column(Float, nullable=False)
-    duration = Column(Float, nullable=False)
-
-    # Audio features
-    confidence = Column(Float)  # 0-1 alignment confidence
-    pitch_mean = Column(Float)
-    pitch_std = Column(Float)
-    energy_mean = Column(Float)
-    energy_std = Column(Float)
-
-    created_at = Column(DateTime, default=utc_now)
-
-    # Relationships
-    synthesis_job = relationship("SynthesisJob", back_populates="phoneme_alignments")
-
-    # Constraints
-    __table_args__ = (
-        CheckConstraint('unit_type IN ("word", "syllable", "phoneme")', name="check_unit_type"),
-        CheckConstraint("start_time >= 0", name="check_start_time_positive"),
-        CheckConstraint("end_time > start_time", name="check_end_time_after_start"),
-        CheckConstraint("duration > 0", name="check_alignment_duration_positive"),
-        CheckConstraint(
-            "confidence IS NULL OR (confidence >= 0 AND confidence <= 1)",
-            name="check_confidence_range",
-        ),
-        Index("idx_phoneme_alignments_job", "synthesis_job_id"),
-        Index("idx_phoneme_alignments_time", "start_time", "end_time"),
-        Index("idx_phoneme_alignments_type", "unit_type"),
     )
 
 

@@ -147,7 +147,7 @@ class TestFileServiceAPI:
                     voice_sample_id=voice_sample.id,
                     name="Test Voice Model",
                     model_path="/test/path/model.pth",
-                    training_status="completed",
+                    status="completed",
                     is_active=True,
                 )
                 session.add(voice_model)

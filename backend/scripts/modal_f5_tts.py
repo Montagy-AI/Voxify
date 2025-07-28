@@ -80,7 +80,7 @@ def fastapi_app():
         reference_audio_b64: str
         reference_text: str = ""  # Optional transcription of reference audio
         language: str = "zh-CN"  # Language parameter for multilingual support
-        speed: float = 1.0       # Speed parameter
+        speed: float = 1.0  # Speed parameter
 
     @fastapi_app.post("/synthesize")
     async def synthesize_speech(request: SynthesisRequest):
