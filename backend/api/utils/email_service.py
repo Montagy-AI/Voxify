@@ -293,7 +293,8 @@ class EmailService:
                 <a href="{reset_url}" class="button">Reset My Password</a>
             </p>
             
-            <p>Or copy and paste this link into your browser:</p>
+            <p><strong>⚠️ If the button doesn't work properly:</strong></p>
+            <p>Some email clients may redirect links through security services. If you're redirected to an unexpected page, please copy and paste this link directly into your browser address bar:</p>
             <div class="url-box">
                 {reset_url}
             </div>
@@ -302,6 +303,7 @@ class EmailService:
                 <strong>⚠️ Important:</strong>
                 <ul>
                     <li>This link will expire in <strong>15 minutes</strong></li>
+                    <li>If the button redirects to an unexpected page, <strong>copy the link above and paste it directly into your browser</strong></li>
                     <li>If you didn't request this password reset, please ignore this email</li>
                     <li>Your password will remain unchanged until you create a new one</li>
                 </ul>
@@ -323,15 +325,16 @@ class EmailService:
 
 We received a request to reset your password for your Voxify account.
 
-If you made this request, click the link below to reset your password:
+If you made this request, copy and paste the link below directly into your browser address bar:
 {reset_url}
 
 IMPORTANT:
 - This link will expire in 15 minutes
+- If you're redirected to an unexpected page, make sure to copy and paste the link directly into your browser
 - If you didn't request this password reset, please ignore this email
 - Your password will remain unchanged until you create a new one
 
-If you're having trouble with the link, copy and paste it into your web browser.
+For best results, copy the entire link and paste it directly into your browser address bar.
 
 This is an automated message from Voxify. Please do not reply to this email.
 """
