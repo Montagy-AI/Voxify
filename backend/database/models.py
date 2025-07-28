@@ -301,7 +301,6 @@ class SynthesisJob(Base, TimestampMixin):
     output_size = Column(Integer)
     duration = Column(Float)
 
-
     # Job status and progress
     status = Column(String, default="pending", nullable=False)
     progress = Column(Float, default=0.0)
