@@ -352,10 +352,6 @@ def create_job():
                 volume=data.get("volume", 1.0),
                 status="pending",
                 progress=0.0,  # Initialize progress to 0.0
-                # Initialize timestamp fields
-                word_timestamps=None,
-                syllable_timestamps=None,
-                phoneme_timestamps=None,
             )
 
             session.add(job)
