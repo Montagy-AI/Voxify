@@ -1,10 +1,4 @@
 module.exports = {
-  extends: [
-    'eslint:recommended',
-    'react-app',
-    'react-app/jest'
-  ],
-  rules: {
-    
-  }
+  extends: ['eslint:recommended', 'react-app', 'react-app/jest'],
+  rules: {},
 };
