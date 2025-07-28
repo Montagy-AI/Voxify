@@ -133,7 +133,6 @@ class VoiceSample(Base, TimestampMixin):
 
     # Vector database associations
     voice_embedding_id = Column(String)  # Reference to Chroma
-    speaker_embedding_id = Column(String)  # Reference to speaker identity
 
     # Metadata and categorization
     tags = Column(TEXT)  # JSON array of user tags

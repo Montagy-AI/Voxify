@@ -59,7 +59,6 @@ CREATE TABLE voice_samples (
     quality_score REAL,                    -- 0-10 scale
     status TEXT DEFAULT 'uploaded',        -- uploaded, processing, ready, failed
     voice_embedding_id TEXT,               -- Reference to Chroma
-    speaker_embedding_id TEXT,             -- Reference to speaker identity
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```

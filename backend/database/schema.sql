@@ -69,7 +69,6 @@ CREATE TABLE voice_samples (
 
     -- Vector database associations
     voice_embedding_id TEXT,               -- Reference to Chroma voice embedding
-    speaker_embedding_id TEXT,             -- Reference to speaker identity embedding
 
     -- Metadata and categorization
     tags TEXT,                             -- JSON array of user tags
@@ -323,23 +322,6 @@ LEFT JOIN voice_samples vs ON u.id = vs.user_id AND vs.status = 'ready'
 LEFT JOIN voice_models vm ON vs.id = vm.voice_sample_id AND vm.is_active = TRUE
 LEFT JOIN synthesis_jobs sj ON u.id = sj.user_id AND sj.status = 'completed'
 GROUP BY u.id;
-
--- View for model performance metrics
-CREATE VIEW model_performance AS
-SELECT
-    vm.id,
-    vm.name,
-    vm.voice_sample_id,
-    vm.status,
-    vm.quality_metrics,
-    vm.similarity_score,
-    COUNT(sj.id) as usage_count,
-    AVG(sj.processing_time_ms) as avg_processing_time,
-    vm.created_at
-FROM voice_models vm
-LEFT JOIN synthesis_jobs sj ON vm.id = sj.voice_model_id AND sj.status = 'completed'
-WHERE vm.is_active = TRUE
-GROUP BY vm.id;
 
 -- =============================================================================
 -- Database Triggers for Automatic Updates
