@@ -97,9 +97,6 @@ CREATE TABLE synthesis_jobs (
     voice_model_id TEXT NOT NULL REFERENCES voice_models(id),
     text_content TEXT NOT NULL,
     text_hash TEXT NOT NULL,               -- For caching
-    word_timestamps TEXT,                   -- JSON: [{"word": "hello", "start": 0.0, "end": 0.5}]
-    syllable_timestamps TEXT,               -- JSON: [{"syllable": "hel", "start": 0.0, "end": 0.25}]
-    phoneme_timestamps TEXT,                -- JSON: [{"phoneme": "h", "start": 0.0, "end": 0.1}]
     config_json TEXT,                       -- JSON: API configuration (include_timestamps, timestamp_granularity, etc.)
     output_format TEXT DEFAULT 'wav',       -- wav, mp3, flac
     sample_rate INTEGER DEFAULT 22050,      -- Hz
@@ -115,7 +112,6 @@ CREATE TABLE synthesis_jobs (
 **Special Features:**
 - **Syllable-to-time mapping**: Project requirement for accurate timing
 - **Word-to-time mapping**: Enhanced synthesis control
-- **Phoneme alignment**: Detailed linguistic timing data
 - **Smart caching**: Avoid reprocessing identical requests
 - **API configuration storage**: Store include_timestamps, timestamp_granularity settings
 - **Audio format flexibility**: Support wav, mp3, flac output formats

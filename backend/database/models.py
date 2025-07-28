@@ -363,10 +363,6 @@ class SynthesisJob(Base, TimestampMixin):
     output_size = Column(Integer)
     duration = Column(Float)
 
-    # Timing alignment data (project requirement)
-    word_timestamps = Column(TEXT)  # JSON array
-    syllable_timestamps = Column(TEXT)  # JSON array
-    phoneme_timestamps = Column(TEXT)  # JSON array
 
     # Job status and progress
     status = Column(String, default="pending", nullable=False)
@@ -389,7 +385,6 @@ class SynthesisJob(Base, TimestampMixin):
     # Relationships
     user = relationship("User", back_populates="synthesis_jobs")
     voice_model = relationship("VoiceModel", back_populates="synthesis_jobs")
-    phoneme_alignments = relationship("PhonemeAlignment", back_populates="synthesis_job", cascade="all, delete-orphan")
 
     # Constraints
     __table_args__ = (
@@ -423,21 +418,6 @@ class SynthesisJob(Base, TimestampMixin):
         """Set configuration from dictionary"""
         self.config = json.dumps(value) if value else None
 
-    @property
-    def word_timestamps_list(self) -> List[Dict[str, Any]]:
-        """Get word timestamps as list"""
-        if self.word_timestamps:
-            try:
-                return json.loads(self.word_timestamps)
-            except (json.JSONDecodeError, TypeError):
-                return []
-        return []
-
-    @word_timestamps_list.setter
-    def word_timestamps_list(self, value: List[Dict[str, Any]]):
-        """Set word timestamps from list"""
-        self.word_timestamps = json.dumps(value) if value else None
-
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for API responses"""
         return {
@@ -458,7 +438,6 @@ class SynthesisJob(Base, TimestampMixin):
             "output_path": self.output_path,
             "output_size": self.output_size,
             "duration": self.duration,
-            "word_timestamps": self.word_timestamps_list,
             "status": self.status,
             "progress": self.progress,
             "error_message": self.error_message,
@@ -483,9 +462,6 @@ class SynthesisCache(Base, TimestampMixin):
     # Cached content
     output_path = Column(String, nullable=False)
     duration = Column(Float, nullable=False)
-    word_timestamps = Column(TEXT)
-    syllable_timestamps = Column(TEXT)
-    phoneme_timestamps = Column(TEXT)
 
     # Cache metadata
     hit_count = Column(Integer, default=0)
@@ -504,53 +480,6 @@ class SynthesisCache(Base, TimestampMixin):
         Index("idx_synthesis_cache_hash", "text_hash"),
         Index("idx_synthesis_cache_model", "voice_model_id"),
         Index("idx_synthesis_cache_expires", "expires_at"),
-    )
-
-
-class PhonemeAlignment(Base):
-    """Detailed phoneme alignments for synthesis jobs"""
-
-    __tablename__ = "phoneme_alignments"
-
-    id = Column(String, primary_key=True, default=generate_uuid)
-    synthesis_job_id = Column(String, ForeignKey("synthesis_jobs.id", ondelete="CASCADE"), nullable=False)
-    sequence_number = Column(Integer, nullable=False)
-
-    # Text unit information
-    text_unit = Column(String, nullable=False)
-    unit_type = Column(String, nullable=False)  # 'word', 'syllable', 'phoneme'
-    parent_unit_id = Column(String)
-
-    # Timing information
-    start_time = Column(Float, nullable=False)
-    end_time = Column(Float, nullable=False)
-    duration = Column(Float, nullable=False)
-
-    # Audio features
-    confidence = Column(Float)  # 0-1 alignment confidence
-    pitch_mean = Column(Float)
-    pitch_std = Column(Float)
-    energy_mean = Column(Float)
-    energy_std = Column(Float)
-
-    created_at = Column(DateTime, default=utc_now)
-
-    # Relationships
-    synthesis_job = relationship("SynthesisJob", back_populates="phoneme_alignments")
-
-    # Constraints
-    __table_args__ = (
-        CheckConstraint('unit_type IN ("word", "syllable", "phoneme")', name="check_unit_type"),
-        CheckConstraint("start_time >= 0", name="check_start_time_positive"),
-        CheckConstraint("end_time > start_time", name="check_end_time_after_start"),
-        CheckConstraint("duration > 0", name="check_alignment_duration_positive"),
-        CheckConstraint(
-            "confidence IS NULL OR (confidence >= 0 AND confidence <= 1)",
-            name="check_confidence_range",
-        ),
-        Index("idx_phoneme_alignments_job", "synthesis_job_id"),
-        Index("idx_phoneme_alignments_time", "start_time", "end_time"),
-        Index("idx_phoneme_alignments_type", "unit_type"),
     )
 
 

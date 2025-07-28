@@ -12,9 +12,8 @@ from database.models import (
     VoiceSample,
     VoiceModel,
     SynthesisJob,
-    # PhonemeAlignment,
     UsageStat,
-    # SystemSetting,
+    SystemSetting,
 )
 from api.utils.password import hash_password
 
