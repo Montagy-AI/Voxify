@@ -136,7 +136,7 @@ class TestVoiceServicePerformance:
                 "-H",
                 f"Authorization: Bearer {auth_tokens['access_token']}",
                 "-F",
-                "name=Performance Test Sample {0}".format(i+1),
+                "name=Performance Test Sample {0}".format(i + 1),
                 "-F",
                 f"file=@{test_audio_file}",
             ]
