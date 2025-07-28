@@ -129,7 +129,8 @@ class F5TTSService:
             payload = {
                 "text": config.text,
                 "reference_audio_b64": audio_b64,
-                "reference_text": config.ref_text or "",  # Use ref_text or empty for auto-transcription
+                "reference_text": config.ref_text
+                or "",  # Use ref_text or empty for auto-transcription
                 "language": config.language,  # Pass language parameter for multilingual support
                 "speed": config.speed,  # Pass speed parameter
             }

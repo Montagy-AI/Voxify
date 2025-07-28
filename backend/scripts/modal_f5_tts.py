@@ -80,7 +80,7 @@ def fastapi_app():
         reference_audio_b64: str
         reference_text: str = ""  # Optional transcription of reference audio
         language: str = "zh-CN"  # Language parameter for multilingual support
-        speed: float = 1.0       # Speed parameter
+        speed: float = 1.0  # Speed parameter
 
     @fastapi_app.post("/synthesize")
     async def synthesize_speech(request: SynthesisRequest):
@@ -128,7 +128,9 @@ def fastapi_app():
                     f5tts = F5TTS()
 
                     # Generate speech with language and speed parameters
-                    print(f"Generating speech for language: {language} with speed: {speed}")
+                    print(
+                        f"Generating speech for language: {language} with speed: {speed}"
+                    )
                     wav, sr, spect = f5tts.infer(
                         ref_file=ref_path,
                         ref_text=ref_text if ref_text else "",
