@@ -79,9 +79,10 @@ class TestDatabaseInitialization:
 
     def test_initialize_database_defaults(self):
         """Test database initialization with default parameters"""
-        with patch("database.get_database_manager") as mock_get_db_manager, patch(
-            "database.create_vector_db"
-        ) as mock_create_vector_db:
+        with (
+            patch("database.get_database_manager") as mock_get_db_manager,
+            patch("database.create_vector_db") as mock_create_vector_db,
+        ):
             mock_db_manager = Mock()
             mock_vector_db = Mock()
             mock_get_db_manager.return_value = mock_db_manager
@@ -142,9 +143,7 @@ class TestDatabaseOperations:
             assert user.full_name == "John Doe"
 
             # Query user
-            queried_user = (
-                session.query(User).filter_by(email="test@example.com").first()
-            )
+            queried_user = session.query(User).filter_by(email="test@example.com").first()
             assert queried_user is not None
             assert queried_user.id == user.id
 
@@ -153,9 +152,7 @@ class TestDatabaseOperations:
             session.commit()
 
             # Verify update
-            updated_user = (
-                session.query(User).filter_by(email="test@example.com").first()
-            )
+            updated_user = session.query(User).filter_by(email="test@example.com").first()
             assert updated_user.last_login_at is not None
 
         finally:
@@ -509,9 +506,7 @@ class TestDatabaseOperations:
             assert alignments[1].text_unit == "world"
 
             # Query alignments for job
-            job_alignments = (
-                session.query(PhonemeAlignment).filter_by(synthesis_job_id=job.id).all()
-            )
+            job_alignments = session.query(PhonemeAlignment).filter_by(synthesis_job_id=job.id).all()
             assert len(job_alignments) == 2
 
         finally:
@@ -610,19 +605,13 @@ class TestDatabaseOperations:
             assert len(settings) == 3
 
             # Test typed value retrieval
-            max_file_size = (
-                session.query(SystemSetting).filter_by(key="max_file_size").first()
-            )
+            max_file_size = session.query(SystemSetting).filter_by(key="max_file_size").first()
             assert max_file_size.get_typed_value() == 10485760
 
-            default_language = (
-                session.query(SystemSetting).filter_by(key="default_language").first()
-            )
+            default_language = session.query(SystemSetting).filter_by(key="default_language").first()
             assert default_language.get_typed_value() == "en-US"
 
-            enable_cache = (
-                session.query(SystemSetting).filter_by(key="enable_cache").first()
-            )
+            enable_cache = session.query(SystemSetting).filter_by(key="enable_cache").first()
             assert enable_cache.get_typed_value() is True
 
             # Update setting
@@ -630,9 +619,7 @@ class TestDatabaseOperations:
             session.commit()
 
             # Verify update
-            updated_setting = (
-                session.query(SystemSetting).filter_by(key="max_file_size").first()
-            )
+            updated_setting = session.query(SystemSetting).filter_by(key="max_file_size").first()
             assert updated_setting.get_typed_value() == 20971520
 
         finally:
@@ -707,9 +694,7 @@ class TestDatabaseRelationships:
             session.commit()
 
             # Create usage stat
-            stat = UsageStat(
-                user_id=user.id, date="2024-01-01", voice_samples_uploaded=1
-            )
+            stat = UsageStat(user_id=user.id, date="2024-01-01", voice_samples_uploaded=1)
             session.add(stat)
             session.commit()
 
@@ -1077,12 +1062,7 @@ class TestDatabasePerformance:
             assert session.query(VoiceSample).count() == 50
 
             # Test bulk query
-            user_samples = (
-                session.query(VoiceSample)
-                .join(User)
-                .filter(User.email.like("user%"))
-                .all()
-            )
+            user_samples = session.query(VoiceSample).join(User).filter(User.email.like("user%")).all()
             assert len(user_samples) == 50
 
         finally:

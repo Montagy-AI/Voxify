@@ -12,9 +12,7 @@ import uuid
 from datetime import datetime, timedelta
 
 # Add the backend directory to Python path
-backend_dir = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, backend_dir)
 
 from flask import Flask
@@ -39,7 +37,7 @@ def app():
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
     app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 
-    jwt = JWTManager(app)
+    JWTManager(app)
 
     # Register blueprint
     app.register_blueprint(file_bp, url_prefix="/api/v1/file")
@@ -68,7 +66,8 @@ def temp_file_storage():
     test_file_path = os.path.join(output_dir, "test_output.wav")
     with open(test_file_path, "wb") as f:
         f.write(
-            b"RIFF\x24\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00D\xAC\x00\x00\x88X\x01\x00\x02\x00\x10\x00data\x00\x00\x00\x00"
+            b"RIFF\x24\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00"
+            b"D\xAC\x00\x00\x88X\x01\x00\x02\x00\x10\x00data\x00\x00\x00\x00"
         )
 
     yield {"temp_dir": temp_dir, "test_file_path": test_file_path}
@@ -104,15 +103,9 @@ def cleanup_test_data():
                     session.delete(job)
 
                 # Delete related voice models
-                voice_samples = (
-                    session.query(VoiceSample).filter_by(user_id=user.id).all()
-                )
+                voice_samples = session.query(VoiceSample).filter_by(user_id=user.id).all()
                 for sample in voice_samples:
-                    models = (
-                        session.query(VoiceModel)
-                        .filter_by(voice_sample_id=sample.id)
-                        .all()
-                    )
+                    models = session.query(VoiceModel).filter_by(voice_sample_id=sample.id).all()
                     for model in models:
                         session.delete(model)
                     session.delete(sample)
@@ -150,15 +143,9 @@ def cleanup_test_data():
                     session.delete(job)
 
                 # Delete related voice models
-                voice_samples = (
-                    session.query(VoiceSample).filter_by(user_id=user.id).all()
-                )
+                voice_samples = session.query(VoiceSample).filter_by(user_id=user.id).all()
                 for sample in voice_samples:
-                    models = (
-                        session.query(VoiceModel)
-                        .filter_by(voice_sample_id=sample.id)
-                        .all()
-                    )
+                    models = session.query(VoiceModel).filter_by(voice_sample_id=sample.id).all()
                     for model in models:
                         session.delete(model)
                     session.delete(sample)

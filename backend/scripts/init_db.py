@@ -25,9 +25,7 @@ try:
 except ImportError as e:
     print(f"❌ Error: Could not import the database module: {e}")
     print("   Please ensure this script is run from the project's 'backend' directory,")
-    print(
-        "   or that the Python path (PYTHONPATH) is set correctly to find the 'database' package."
-    )
+    print("   or that the Python path (PYTHONPATH) is set correctly to find the 'database' package.")
     print(f"   Current working directory: {os.getcwd()}")
     print(f"   Python search path: {sys.path}")
     sys.exit(1)
@@ -74,9 +72,7 @@ def main():
             for coll in active_collections:
                 print(f"     * {coll.name} (ID: {coll.id}, Count: {coll.count()})")
         else:
-            print(
-                "   - No active vector collections currently (this might be normal if just initialized)."
-            )
+            print("   - No active vector collections currently (this might be normal if just initialized).")
 
         print("🎉 Database initialization successful!")
 
@@ -98,9 +94,7 @@ if __name__ == "__main__":
             "or the 'database' subdirectory was not found."
         )
         print(f"   Script location: {SCRIPT_DIR}")
-        print(
-            "   Please run this script from the 'backend' directory, e.g.: python init_db.py"
-        )
+        print("   Please run this script from the 'backend' directory, e.g.: python init_db.py")
         # sys.exit(1) # Temporarily commented out to allow running from other locations, but import might fail
 
     main()

@@ -60,7 +60,7 @@ class TestAuthRegistrationErrorHandling:
         }
 
         with pytest.raises(KeyError):
-            email = request_data["email"]
+            _ = request_data["email"]
 
         # Test missing password
         request_data = {
@@ -69,7 +69,7 @@ class TestAuthRegistrationErrorHandling:
         }
 
         with pytest.raises(KeyError):
-            password = request_data["password"]
+            _ = request_data["password"]
 
     def test_register_invalid_email_format(self):
         """Test registration with invalid email format"""
@@ -106,9 +106,7 @@ class TestAuthRegistrationErrorHandling:
 
         for password in weak_passwords:
             # Mock password validation to return False
-            with patch(
-                "api.v1.auth.routes.validate_password_strength"
-            ) as mock_validate_password:
+            with patch("api.v1.auth.routes.validate_password_strength") as mock_validate_password:
                 mock_validate_password.return_value = (False, "Password too weak")
                 result, error = mock_validate_password(password)
                 assert result is False
@@ -205,7 +203,7 @@ class TestAuthLoginErrorHandling:
         }
 
         with pytest.raises(KeyError):
-            email = request_data["email"]
+            _ = request_data["email"]
 
         # Test missing password
         request_data = {
@@ -214,7 +212,7 @@ class TestAuthLoginErrorHandling:
         }
 
         with pytest.raises(KeyError):
-            password = request_data["password"]
+            _ = request_data["password"]
 
     def test_login_user_not_found(self):
         """Test login with non-existent user"""
@@ -224,9 +222,7 @@ class TestAuthLoginErrorHandling:
             mock_db_manager.return_value.get_session.return_value = mock_session
 
             # Mock user not found
-            mock_session.query.return_value.filter_by.return_value.first.return_value = (
-                None
-            )
+            mock_session.query.return_value.filter_by.return_value.first.return_value = None
 
             # Test user retrieval
             user = mock_session.query.return_value.filter_by.return_value.first()
@@ -256,9 +252,7 @@ class TestAuthLoginErrorHandling:
             mock_user = MagicMock()
             mock_user.is_active = False
 
-            mock_session.query.return_value.filter_by.return_value.first.return_value = (
-                mock_user
-            )
+            mock_session.query.return_value.filter_by.return_value.first.return_value = mock_user
 
             # Test user validation
             user = mock_session.query.return_value.filter_by.return_value.first()
@@ -352,17 +346,13 @@ class TestAuthProfileErrorHandling:
 
     def test_get_profile_user_not_found(self):
         """Test profile retrieval for non-existent user"""
-        user_id = 999
-
         # Mock user not found
         with patch("api.v1.auth.routes.get_database_manager") as mock_db_manager:
             mock_session = MagicMock()
             mock_db_manager.return_value.get_session.return_value = mock_session
 
             # Mock user not found
-            mock_session.query.return_value.filter_by.return_value.first.return_value = (
-                None
-            )
+            mock_session.query.return_value.filter_by.return_value.first.return_value = None
 
             # Test user retrieval
             user = mock_session.query.return_value.filter_by.return_value.first()
@@ -428,7 +418,6 @@ class TestAuthProfileErrorHandling:
 
     def test_update_profile_duplicate_email(self):
         """Test profile update with duplicate email"""
-        new_email = "existing@example.com"
         current_user_id = 1
 
         # Mock duplicate email check
@@ -445,9 +434,7 @@ class TestAuthProfileErrorHandling:
             )
 
             # Test duplicate check
-            existing = (
-                mock_session.query.return_value.filter_by.return_value.filter.return_value.first()
-            )
+            existing = mock_session.query.return_value.filter_by.return_value.filter.return_value.first()
             assert existing is not None
             assert existing.id != current_user_id
 

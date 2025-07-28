@@ -121,9 +121,7 @@ class TestF5TTSServiceValidation:
 
     @patch("api.v1.voice.f5_tts_service.os.path.exists")
     @patch("api.v1.voice.f5_tts_service.torchaudio.load")
-    def test_validate_audio_file_invalid_format(
-        self, mock_torchaudio_load, mock_exists
-    ):
+    def test_validate_audio_file_invalid_format(self, mock_torchaudio_load, mock_exists):
         """Test audio file validation with invalid format"""
         mock_exists.return_value = True
         mock_torchaudio_load.side_effect = Exception("Invalid audio format")
@@ -159,15 +157,11 @@ class TestF5TTSServiceRemoteOperations:
     @patch("builtins.open", create=True)
     @patch("api.v1.voice.f5_tts_service.Path.mkdir")
     @patch("api.v1.voice.f5_tts_service.os.path.getsize")
-    def test_synthesize_remote_success(
-        self, mock_getsize, mock_mkdir, mock_open, mock_post
-    ):
+    def test_synthesize_remote_success(self, mock_getsize, mock_mkdir, mock_open, mock_post):
         """Test successful remote synthesis"""
         # Mock file reading
         mock_audio_data = b"fake_audio_data"
-        mock_open.return_value.__enter__ = Mock(
-            return_value=Mock(read=lambda: mock_audio_data)
-        )
+        mock_open.return_value.__enter__ = Mock(return_value=Mock(read=lambda: mock_audio_data))
         mock_open.return_value.__exit__ = Mock(return_value=None)
 
         # Mock file size
@@ -202,9 +196,7 @@ class TestF5TTSServiceRemoteOperations:
         """Test remote synthesis with API error"""
         # Mock file reading
         mock_audio_data = b"fake_audio_data"
-        mock_open.return_value.__enter__ = Mock(
-            return_value=Mock(read=lambda: mock_audio_data)
-        )
+        mock_open.return_value.__enter__ = Mock(return_value=Mock(read=lambda: mock_audio_data))
         mock_open.return_value.__exit__ = Mock(return_value=None)
 
         # Mock API error response
@@ -230,9 +222,7 @@ class TestF5TTSServiceRemoteOperations:
         """Test remote synthesis with timeout"""
         # Mock file reading
         mock_audio_data = b"fake_audio_data"
-        mock_open.return_value.__enter__ = Mock(
-            return_value=Mock(read=lambda: mock_audio_data)
-        )
+        mock_open.return_value.__enter__ = Mock(return_value=Mock(read=lambda: mock_audio_data))
         mock_open.return_value.__exit__ = Mock(return_value=None)
 
         # Mock timeout
@@ -257,9 +247,7 @@ class TestF5TTSServiceVoiceCloning:
     @patch("api.v1.voice.f5_tts_service.shutil.copy2")
     @patch("api.v1.voice.f5_tts_service.Path.mkdir")
     @patch("builtins.open", create=True)
-    def test_create_voice_clone_success(
-        self, mock_open, mock_mkdir, mock_copy2, mock_synthesize, mock_validate
-    ):
+    def test_create_voice_clone_success(self, mock_open, mock_mkdir, mock_copy2, mock_synthesize, mock_validate):
         """Test successful voice clone creation"""
         # Mock validation
         mock_validate.return_value = (True, "Audio file is valid")
@@ -314,9 +302,7 @@ class TestF5TTSServiceVoiceCloning:
 
         # Mock file reading
         mock_info = {"id": "test-clone-id", "name": "Test Clone"}
-        mock_open.return_value.__enter__ = Mock(
-            return_value=Mock(read=lambda: json.dumps(mock_info))
-        )
+        mock_open.return_value.__enter__ = Mock(return_value=Mock(read=lambda: json.dumps(mock_info)))
         mock_open.return_value.__exit__ = Mock(return_value=None)
 
         service = F5TTSService(use_remote=True)
@@ -381,24 +367,18 @@ class TestF5TTSServiceErrorHandling:
 
     def test_invalid_audio_path_handling(self):
         """Test handling of invalid audio paths"""
-        service = F5TTSService()
-
         # Test empty path
-        is_valid, message = service.validate_audio_file("")
+        is_valid, message = F5TTSService().validate_audio_file("")
         assert is_valid is False
 
         # Test None path
-        is_valid, message = service.validate_audio_file(None)
+        is_valid, message = F5TTSService().validate_audio_file(None)
         assert is_valid is False
 
     def test_invalid_text_handling(self):
         """Test handling of invalid text input"""
-        service = F5TTSService()
-
         # Test empty text
-        config = TTSConfig(
-            text="", ref_audio_path="/path/to/audio.wav", ref_text="Reference text"
-        )
+        config = TTSConfig(text="", ref_audio_path="/path/to/audio.wav", ref_text="Reference text")
 
         # Should handle empty text gracefully
         assert config.text == ""
@@ -424,7 +404,7 @@ class TestF5TTSServicePerformance:
         import time
 
         start_time = time.time()
-        service = F5TTSService(use_remote=True)
+        F5TTSService(use_remote=True)
         end_time = time.time()
 
         initialization_time = end_time - start_time
@@ -438,7 +418,7 @@ class TestF5TTSServicePerformance:
 
         start_time = time.time()
         for _ in range(100):
-            config = VoiceCloneConfig(
+            VoiceCloneConfig(
                 name="Test Clone",
                 ref_audio_path="/path/to/audio.wav",
                 ref_text="Reference text",

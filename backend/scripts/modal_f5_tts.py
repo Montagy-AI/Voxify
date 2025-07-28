@@ -80,7 +80,7 @@ def fastapi_app():
         reference_audio_b64: str
         reference_text: str = ""  # Optional transcription of reference audio
         language: str = "zh-CN"  # Language parameter for multilingual support
-        speed: float = 1.0       # Speed parameter
+        speed: float = 1.0  # Speed parameter
 
     @fastapi_app.post("/synthesize")
     async def synthesize_speech(request: SynthesisRequest):
@@ -95,9 +95,7 @@ def fastapi_app():
             speed = request.speed
 
             if not text or not reference_audio_b64:
-                raise HTTPException(
-                    status_code=400, detail="Missing text or reference_audio_b64"
-                )
+                raise HTTPException(status_code=400, detail="Missing text or reference_audio_b64")
 
             print("Decoding reference audio...")
             # Create temporary file for reference audio
@@ -108,9 +106,7 @@ def fastapi_app():
                     ref_file.flush()
                     ref_path = ref_file.name
                 except Exception as e:
-                    raise HTTPException(
-                        status_code=400, detail=f"Invalid base64 audio data: {str(e)}"
-                    )
+                    raise HTTPException(status_code=400, detail=f"Invalid base64 audio data: {str(e)}")
 
             try:
                 print("Starting speech synthesis using high-level API...")
@@ -172,9 +168,7 @@ print(f"Saved audio with shape {{wav.shape}} and sr {{sr}}")
 """
 
                     # Write and execute the script
-                    with tempfile.NamedTemporaryFile(
-                        mode="w", suffix=".py", delete=False
-                    ) as script_file:
+                    with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as script_file:
                         script_file.write(script_content)
                         script_path = script_file.name
 
@@ -223,9 +217,7 @@ print(f"Saved audio with shape {{wav.shape}} and sr {{sr}}")
                 # If F5TTS API worked, process the result
                 if "wav" in locals():
                     # Save generated audio to temporary file
-                    with tempfile.NamedTemporaryFile(
-                        suffix=".wav", delete=False
-                    ) as output_file:
+                    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as output_file:
                         # Convert to proper format for saving
                         if torch.is_tensor(wav):
                             wav_np = wav.cpu().numpy()
@@ -263,17 +255,13 @@ print(f"Saved audio with shape {{wav.shape}} and sr {{sr}}")
                     }
 
             except subprocess.TimeoutExpired:
-                raise HTTPException(
-                    status_code=500, detail="Speech synthesis timed out"
-                )
+                raise HTTPException(status_code=500, detail="Speech synthesis timed out")
             except Exception as synthesis_error:
                 print(f"Synthesis error: {synthesis_error}")
                 import traceback
 
                 traceback.print_exc()
-                raise HTTPException(
-                    status_code=500, detail=f"Synthesis failed: {str(synthesis_error)}"
-                )
+                raise HTTPException(status_code=500, detail=f"Synthesis failed: {str(synthesis_error)}")
 
             finally:
                 # Cleanup temporary files
@@ -291,9 +279,7 @@ print(f"Saved audio with shape {{wav.shape}} and sr {{sr}}")
             import traceback
 
             traceback.print_exc()
-            raise HTTPException(
-                status_code=500, detail=f"Internal server error: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
     @fastapi_app.get("/health")
     async def health_check():
@@ -320,9 +306,7 @@ print(f"Saved audio with shape {{wav.shape}} and sr {{sr}}")
                 "cuda_available": torch.cuda.is_available(),
                 "cuda_device_count": torch.cuda.device_count(),
                 "f5_tts_cli_available": result.returncode == 0,
-                "f5_tts_help_output": result.stdout[:500]
-                if result.returncode == 0
-                else result.stderr[:500],
+                "f5_tts_help_output": result.stdout[:500] if result.returncode == 0 else result.stderr[:500],
             }
         except Exception as e:
             return {"error": str(e)}

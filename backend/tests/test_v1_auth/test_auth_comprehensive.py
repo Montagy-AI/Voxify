@@ -37,9 +37,7 @@ class TestAuthRegistration:
 
         # Mock validation functions
         with patch("api.v1.auth.routes.validate_email") as mock_validate_email:
-            with patch(
-                "api.v1.auth.routes.validate_password_strength"
-            ) as mock_validate_password:
+            with patch("api.v1.auth.routes.validate_password_strength") as mock_validate_password:
                 mock_validate_email.return_value = (True, None)
                 mock_validate_password.return_value = (True, None)
 
@@ -56,7 +54,7 @@ class TestAuthRegistration:
         }
 
         with pytest.raises(KeyError):
-            email = invalid_data["email"]
+            _ = invalid_data["email"]
 
         # Test missing password
         invalid_data = {
@@ -65,7 +63,7 @@ class TestAuthRegistration:
         }
 
         with pytest.raises(KeyError):
-            password = invalid_data["password"]
+            _ = invalid_data["password"]
 
     def test_register_invalid_email_validation(self):
         """Test registration with invalid email format"""
@@ -102,9 +100,7 @@ class TestAuthRegistration:
 
         for password in weak_passwords:
             # Mock password validation to return False
-            with patch(
-                "api.v1.auth.routes.validate_password_strength"
-            ) as mock_validate_password:
+            with patch("api.v1.auth.routes.validate_password_strength") as mock_validate_password:
                 mock_validate_password.return_value = (False, "Password too weak")
                 result, error = mock_validate_password(password)
                 assert result is False
@@ -251,9 +247,7 @@ class TestAuthLogin:
             mock_user.is_active = True
             mock_user.password_hash = "hashed_password_123"
 
-            mock_session.query.return_value.filter_by.return_value.first.return_value = (
-                mock_user
-            )
+            mock_session.query.return_value.filter_by.return_value.first.return_value = mock_user
 
             # Mock password verification
             with patch("api.v1.auth.routes.verify_password") as mock_verify:
@@ -268,17 +262,13 @@ class TestAuthLogin:
 
     def test_login_invalid_credentials(self):
         """Test login with invalid credentials"""
-        login_data = {"email": "test@example.com", "password": "WrongPassword123!"}
-
         # Mock user not found
         with patch("api.v1.auth.routes.get_database_manager") as mock_db_manager:
             mock_session = MagicMock()
             mock_db_manager.return_value.get_session.return_value = mock_session
 
             # Mock user not found
-            mock_session.query.return_value.filter_by.return_value.first.return_value = (
-                None
-            )
+            mock_session.query.return_value.filter_by.return_value.first.return_value = None
 
             # Test validation logic
             user = mock_session.query.return_value.filter_by.return_value.first()
@@ -299,9 +289,7 @@ class TestAuthLogin:
             mock_user.email = login_data["email"]
             mock_user.is_active = False
 
-            mock_session.query.return_value.filter_by.return_value.first.return_value = (
-                mock_user
-            )
+            mock_session.query.return_value.filter_by.return_value.first.return_value = mock_user
 
             # Test validation logic
             user = mock_session.query.return_value.filter_by.return_value.first()
@@ -384,8 +372,6 @@ class TestAuthTokenRefresh:
 
     def test_refresh_token_validation(self):
         """Test refresh token validation"""
-        refresh_token = "valid_refresh_token"
-
         # Mock JWT identity extraction
         with patch("api.v1.auth.routes.get_jwt_identity") as mock_identity:
             mock_identity.return_value = 1
@@ -427,9 +413,7 @@ class TestAuthTokenRefresh:
             }
             mock_jsonify.return_value = mock_response
 
-            response = success_response(
-                data=tokens, message="Token refreshed successfully"
-            )
+            response = success_response(data=tokens, message="Token refreshed successfully")
 
             data = response[0].get_json()
             assert data["success"] is True
@@ -461,9 +445,7 @@ class TestAuthProfile:
             mock_user.updated_at = None
             mock_user.last_login_at = None
 
-            mock_session.query.return_value.filter_by.return_value.first.return_value = (
-                mock_user
-            )
+            mock_session.query.return_value.filter_by.return_value.first.return_value = mock_user
 
             # Test user retrieval
             user = mock_session.query.return_value.filter_by.return_value.first()
@@ -473,17 +455,13 @@ class TestAuthProfile:
 
     def test_get_profile_user_not_found(self):
         """Test profile retrieval for non-existent user"""
-        user_id = 999
-
         # Mock user not found
         with patch("api.v1.auth.routes.get_database_manager") as mock_db_manager:
             mock_session = MagicMock()
             mock_db_manager.return_value.get_session.return_value = mock_session
 
             # Mock user not found
-            mock_session.query.return_value.filter_by.return_value.first.return_value = (
-                None
-            )
+            mock_session.query.return_value.filter_by.return_value.first.return_value = None
 
             # Test user retrieval
             user = mock_session.query.return_value.filter_by.return_value.first()
@@ -508,7 +486,6 @@ class TestAuthProfile:
 
     def test_update_profile_email_duplicate_check(self):
         """Test profile update email duplicate check"""
-        new_email = "existing@example.com"
         current_user_id = 1
 
         # Mock duplicate email check
@@ -525,9 +502,7 @@ class TestAuthProfile:
             )
 
             # Test duplicate check
-            existing = (
-                mock_session.query.return_value.filter_by.return_value.filter.return_value.first()
-            )
+            existing = mock_session.query.return_value.filter_by.return_value.filter.return_value.first()
             assert existing is not None
             assert existing.id != current_user_id
 
@@ -715,18 +690,14 @@ class TestAuthSecurity:
 
         for password in weak_passwords:
             # Mock weak password validation
-            with patch(
-                "api.v1.auth.routes.validate_password_strength"
-            ) as mock_validate:
+            with patch("api.v1.auth.routes.validate_password_strength") as mock_validate:
                 mock_validate.return_value = (False, "Password too weak")
                 result, error = mock_validate(password)
                 assert result is False
 
         for password in strong_passwords:
             # Mock strong password validation
-            with patch(
-                "api.v1.auth.routes.validate_password_strength"
-            ) as mock_validate:
+            with patch("api.v1.auth.routes.validate_password_strength") as mock_validate:
                 mock_validate.return_value = (True, None)
                 result, error = mock_validate(password)
                 assert result is True
