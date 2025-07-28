@@ -135,9 +135,7 @@ class TestUserModel:
         # The constraint should be enforced by SQLAlchemy
         # This test verifies the constraint is defined
         constraints = User.__table_args__
-        assert any(
-            "storage_used_bytes" in str(constraint) for constraint in constraints
-        )
+        assert any("storage_used_bytes" in str(constraint) for constraint in constraints)
 
 
 class TestVoiceSampleModel:
@@ -250,10 +248,7 @@ class TestVoiceModelModel:
         # Test setting training config
         config = {"epochs": 100, "learning_rate": 0.001, "batch_size": 32}
         model.training_config_dict = config
-        assert (
-            model.training_config
-            == '{"epochs": 100, "learning_rate": 0.001, "batch_size": 32}'
-        )
+        assert model.training_config == '{"epochs": 100, "learning_rate": 0.001, "batch_size": 32}'
 
         # Test getting training config
         model.training_config = '{"epochs": 200, "learning_rate": 0.0001}'
@@ -270,10 +265,7 @@ class TestVoiceModelModel:
         # Test setting quality metrics
         metrics = {"mos_score": 4.5, "similarity": 0.95, "clarity": 0.9}
         model.quality_metrics_dict = metrics
-        assert (
-            model.quality_metrics
-            == '{"mos_score": 4.5, "similarity": 0.95, "clarity": 0.9}'
-        )
+        assert model.quality_metrics == '{"mos_score": 4.5, "similarity": 0.95, "clarity": 0.9}'
 
         # Test getting quality metrics
         model.quality_metrics = '{"mos_score": 4.8, "similarity": 0.98}'
@@ -331,9 +323,7 @@ class TestSynthesisJobModel:
 
     def test_synthesis_job_config_property(self):
         """Test config property getter and setter"""
-        job = SynthesisJob(
-            user_id="user-uuid", voice_model_id="model-uuid", text_content="test"
-        )
+        job = SynthesisJob(user_id="user-uuid", voice_model_id="model-uuid", text_content="test")
 
         # Test setting config
         config = {"speed": 1.0, "pitch": 1.0, "volume": 1.0}
@@ -346,9 +336,7 @@ class TestSynthesisJobModel:
 
     def test_synthesis_job_word_timestamps_property(self):
         """Test word_timestamps property getter and setter"""
-        job = SynthesisJob(
-            user_id="user-uuid", voice_model_id="model-uuid", text_content="test"
-        )
+        job = SynthesisJob(user_id="user-uuid", voice_model_id="model-uuid", text_content="test")
 
         # Test setting timestamps
         timestamps = [
@@ -488,9 +476,7 @@ class TestSystemSettingModel:
         assert setting_int.get_typed_value() == 123
 
         # Test float
-        setting_float = SystemSetting(
-            key="test_float", value="123.45", data_type="float"
-        )
+        setting_float = SystemSetting(key="test_float", value="123.45", data_type="float")
         assert setting_float.get_typed_value() == 123.45
 
         # Test boolean
@@ -498,15 +484,11 @@ class TestSystemSettingModel:
         assert setting_bool.get_typed_value() is True
 
         # Test string
-        setting_string = SystemSetting(
-            key="test_string", value="hello", data_type="string"
-        )
+        setting_string = SystemSetting(key="test_string", value="hello", data_type="string")
         assert setting_string.get_typed_value() == "hello"
 
         # Test unknown type
-        setting_unknown = SystemSetting(
-            key="test_unknown", value="test", data_type="unknown"
-        )
+        setting_unknown = SystemSetting(key="test_unknown", value="test", data_type="unknown")
         assert setting_unknown.get_typed_value() == "test"
 
 

@@ -106,9 +106,7 @@ class TestAuthRegistrationErrorHandling:
 
         for password in weak_passwords:
             # Mock password validation to return False
-            with patch(
-                "api.v1.auth.routes.validate_password_strength"
-            ) as mock_validate_password:
+            with patch("api.v1.auth.routes.validate_password_strength") as mock_validate_password:
                 mock_validate_password.return_value = (False, "Password too weak")
                 result, error = mock_validate_password(password)
                 assert result is False
@@ -224,9 +222,7 @@ class TestAuthLoginErrorHandling:
             mock_db_manager.return_value.get_session.return_value = mock_session
 
             # Mock user not found
-            mock_session.query.return_value.filter_by.return_value.first.return_value = (
-                None
-            )
+            mock_session.query.return_value.filter_by.return_value.first.return_value = None
 
             # Test user retrieval
             user = mock_session.query.return_value.filter_by.return_value.first()
@@ -256,9 +252,7 @@ class TestAuthLoginErrorHandling:
             mock_user = MagicMock()
             mock_user.is_active = False
 
-            mock_session.query.return_value.filter_by.return_value.first.return_value = (
-                mock_user
-            )
+            mock_session.query.return_value.filter_by.return_value.first.return_value = mock_user
 
             # Test user validation
             user = mock_session.query.return_value.filter_by.return_value.first()
@@ -360,9 +354,7 @@ class TestAuthProfileErrorHandling:
             mock_db_manager.return_value.get_session.return_value = mock_session
 
             # Mock user not found
-            mock_session.query.return_value.filter_by.return_value.first.return_value = (
-                None
-            )
+            mock_session.query.return_value.filter_by.return_value.first.return_value = None
 
             # Test user retrieval
             user = mock_session.query.return_value.filter_by.return_value.first()
@@ -445,9 +437,7 @@ class TestAuthProfileErrorHandling:
             )
 
             # Test duplicate check
-            existing = (
-                mock_session.query.return_value.filter_by.return_value.filter.return_value.first()
-            )
+            existing = mock_session.query.return_value.filter_by.return_value.filter.return_value.first()
             assert existing is not None
             assert existing.id != current_user_id
 

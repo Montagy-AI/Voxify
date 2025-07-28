@@ -25,9 +25,7 @@ class TestVoiceServiceIntegration:
         """Check if server is running before tests"""
         try:
             response = requests.get(f"{server_url}/api/v1/auth/login", timeout=5)
-            assert (
-                response.status_code == 405
-            ), f"Unexpected status code: {response.status_code}"
+            assert response.status_code == 405, f"Unexpected status code: {response.status_code}"
         except Exception as e:
             pytest.skip(f"Server not available: {e}")
 
@@ -42,9 +40,7 @@ class TestVoiceServiceIntegration:
     def check_curl_available(self):
         """Check if curl is available on the system"""
         try:
-            result = subprocess.run(
-                ["curl", "--version"], capture_output=True, text=True
-            )
+            result = subprocess.run(["curl", "--version"], capture_output=True, text=True)
             if result.returncode != 0:
                 pytest.skip("curl is not available on this system")
         except FileNotFoundError:
@@ -85,9 +81,7 @@ class TestVoiceServiceIntegration:
             "-H",
             "Content-Type: application/json",
             "-d",
-            json.dumps(
-                {"email": test_user["email"], "password": test_user["password"]}
-            ),
+            json.dumps({"email": test_user["email"], "password": test_user["password"]}),
         ]
         result = subprocess.run(login_cmd, capture_output=True, text=True)
         response = json.loads(result.stdout)
@@ -123,9 +117,7 @@ class TestVoiceServiceIntegration:
         assert result.returncode == 0, f"Upload failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
-        assert (
-            upload_response.get("success") is True
-        ), f"Upload failed: {upload_response}"
+        assert upload_response.get("success") is True, f"Upload failed: {upload_response}"
 
         sample_id = upload_response["data"]["sample_id"]
         print(f"Uploaded sample ID: {sample_id}")
@@ -145,9 +137,7 @@ class TestVoiceServiceIntegration:
         assert result.returncode == 0, f"List samples failed: {result.stderr}"
 
         list_response = json.loads(result.stdout)
-        assert (
-            list_response.get("success") is True
-        ), f"List samples failed: {list_response}"
+        assert list_response.get("success") is True, f"List samples failed: {list_response}"
 
         samples = list_response["data"]["samples"]
         assert len(samples) > 0, "No samples found"
@@ -160,9 +150,7 @@ class TestVoiceServiceIntegration:
                 break
 
         assert uploaded_sample is not None, "Uploaded sample not found in list"
-        assert (
-            uploaded_sample["status"] == "ready"
-        ), f"Sample not ready: {uploaded_sample['status']}"
+        assert uploaded_sample["status"] == "ready", f"Sample not ready: {uploaded_sample['status']}"
 
         # Step 3: Create voice clone
         print("\n=== Step 3: Creating voice clone ===")
@@ -191,9 +179,7 @@ class TestVoiceServiceIntegration:
         assert result.returncode == 0, f"Clone creation failed: {result.stderr}"
 
         clone_response = json.loads(result.stdout)
-        assert (
-            clone_response.get("success") is True
-        ), f"Clone creation failed: {clone_response}"
+        assert clone_response.get("success") is True, f"Clone creation failed: {clone_response}"
 
         clone_id = clone_response["data"]["clone_id"]
         print(f"Created clone ID: {clone_id}")
@@ -213,9 +199,7 @@ class TestVoiceServiceIntegration:
         assert result.returncode == 0, f"Get clone failed: {result.stderr}"
 
         get_clone_response = json.loads(result.stdout)
-        assert (
-            get_clone_response.get("success") is True
-        ), f"Get clone failed: {get_clone_response}"
+        assert get_clone_response.get("success") is True, f"Get clone failed: {get_clone_response}"
 
         clone_info = get_clone_response["data"]
         assert clone_info["clone_id"] == clone_id, "Clone ID mismatch"
@@ -236,9 +220,7 @@ class TestVoiceServiceIntegration:
         assert result.returncode == 0, f"Select clone failed: {result.stderr}"
 
         select_response = json.loads(result.stdout)
-        assert (
-            select_response.get("success") is True
-        ), f"Select clone failed: {select_response}"
+        assert select_response.get("success") is True, f"Select clone failed: {select_response}"
 
         # Step 6: Synthesize speech
         print("\n=== Step 6: Synthesizing speech ===")
@@ -265,9 +247,7 @@ class TestVoiceServiceIntegration:
         assert result.returncode == 0, f"Synthesis failed: {result.stderr}"
 
         synthesis_response = json.loads(result.stdout)
-        assert (
-            synthesis_response.get("success") is True
-        ), f"Synthesis failed: {synthesis_response}"
+        assert synthesis_response.get("success") is True, f"Synthesis failed: {synthesis_response}"
 
         # Step 7: Clean up - Delete clone
         print("\n=== Step 7: Cleaning up - Deleting clone ===")
@@ -291,9 +271,7 @@ class TestVoiceServiceIntegration:
                 print("Attempting manual cleanup of synthesis jobs...")
                 # This is a fallback - in a real scenario, the API should handle this
                 pass
-        assert (
-            delete_response.get("success") is True
-        ), f"Delete clone failed: {delete_response}"
+        assert delete_response.get("success") is True, f"Delete clone failed: {delete_response}"
 
         # Step 8: Clean up - Delete sample
         print("\n=== Step 8: Cleaning up - Deleting sample ===")
@@ -310,9 +288,7 @@ class TestVoiceServiceIntegration:
         assert result.returncode == 0, f"Delete sample failed: {result.stderr}"
 
         delete_sample_response = json.loads(result.stdout)
-        assert (
-            delete_sample_response.get("success") is True
-        ), f"Delete sample failed: {delete_sample_response}"
+        assert delete_sample_response.get("success") is True, f"Delete sample failed: {delete_sample_response}"
 
         print("\n=== Integration test completed successfully ===")
 
@@ -340,9 +316,7 @@ class TestVoiceServiceIntegration:
             assert result.returncode == 0, f"Upload {i+1} failed: {result.stderr}"
 
             upload_response = json.loads(result.stdout)
-            assert (
-                upload_response.get("success") is True
-            ), f"Upload {i+1} failed: {upload_response}"
+            assert upload_response.get("success") is True, f"Upload {i+1} failed: {upload_response}"
 
             sample_ids.append(upload_response["data"]["sample_id"])
 
@@ -369,14 +343,10 @@ class TestVoiceServiceIntegration:
         ]
 
         result = subprocess.run(clone_cmd, capture_output=True, text=True)
-        assert (
-            result.returncode == 0
-        ), f"Multi-sample clone creation failed: {result.stderr}"
+        assert result.returncode == 0, f"Multi-sample clone creation failed: {result.stderr}"
 
         clone_response = json.loads(result.stdout)
-        assert (
-            clone_response.get("success") is True
-        ), f"Multi-sample clone creation failed: {clone_response}"
+        assert clone_response.get("success") is True, f"Multi-sample clone creation failed: {clone_response}"
 
         clone_id = clone_response["data"]["clone_id"]
 
@@ -429,9 +399,7 @@ class TestVoiceServiceIntegration:
         assert result.returncode == 0, f"Error test failed: {result.stderr}"
 
         clone_response = json.loads(result.stdout)
-        assert (
-            clone_response.get("success") is False
-        ), f"Expected failure but got: {clone_response}"
+        assert clone_response.get("success") is False, f"Expected failure but got: {clone_response}"
 
         # Test accessing non-existent clone
         get_cmd = [
@@ -447,9 +415,7 @@ class TestVoiceServiceIntegration:
         assert result.returncode == 0, f"Error test failed: {result.stderr}"
 
         get_response = json.loads(result.stdout)
-        assert (
-            get_response.get("success") is False
-        ), f"Expected failure but got: {get_response}"
+        assert get_response.get("success") is False, f"Expected failure but got: {get_response}"
 
     def test_concurrent_operations(self, server_url, auth_tokens, test_audio_file):
         """Test concurrent operations on voice service"""
@@ -472,9 +438,7 @@ class TestVoiceServiceIntegration:
         assert result.returncode == 0, f"Upload failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
-        assert (
-            upload_response.get("success") is True
-        ), f"Upload failed: {upload_response}"
+        assert upload_response.get("success") is True, f"Upload failed: {upload_response}"
 
         sample_id = upload_response["data"]["sample_id"]
 
@@ -502,9 +466,7 @@ class TestVoiceServiceIntegration:
         assert result.returncode == 0, f"Clone creation failed: {result.stderr}"
 
         clone_response = json.loads(result.stdout)
-        assert (
-            clone_response.get("success") is True
-        ), f"Clone creation failed: {clone_response}"
+        assert clone_response.get("success") is True, f"Clone creation failed: {clone_response}"
 
         clone_id = clone_response["data"]["clone_id"]
 
@@ -531,22 +493,14 @@ class TestVoiceServiceIntegration:
         result1 = subprocess.run(list_samples_cmd, capture_output=True, text=True)
         result2 = subprocess.run(list_clones_cmd, capture_output=True, text=True)
 
-        assert (
-            result1.returncode == 0
-        ), f"Concurrent list samples failed: {result1.stderr}"
-        assert (
-            result2.returncode == 0
-        ), f"Concurrent list clones failed: {result2.stderr}"
+        assert result1.returncode == 0, f"Concurrent list samples failed: {result1.stderr}"
+        assert result2.returncode == 0, f"Concurrent list clones failed: {result2.stderr}"
 
         samples_response = json.loads(result1.stdout)
         clones_response = json.loads(result2.stdout)
 
-        assert (
-            samples_response.get("success") is True
-        ), f"Concurrent list samples failed: {samples_response}"
-        assert (
-            clones_response.get("success") is True
-        ), f"Concurrent list clones failed: {clones_response}"
+        assert samples_response.get("success") is True, f"Concurrent list samples failed: {samples_response}"
+        assert clones_response.get("success") is True, f"Concurrent list clones failed: {clones_response}"
 
         # Clean up
         delete_sample_cmd = [
@@ -592,14 +546,10 @@ class TestVoiceServiceIntegration:
         result = subprocess.run(upload_cmd, capture_output=True, text=True)
         upload_time = time.time() - start_time
 
-        assert (
-            result.returncode == 0
-        ), f"Performance test upload failed: {result.stderr}"
+        assert result.returncode == 0, f"Performance test upload failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
-        assert (
-            upload_response.get("success") is True
-        ), f"Performance test upload failed: {upload_response}"
+        assert upload_response.get("success") is True, f"Performance test upload failed: {upload_response}"
 
         sample_id = upload_response["data"]["sample_id"]
 
@@ -631,9 +581,7 @@ class TestVoiceServiceIntegration:
         assert result.returncode == 0, f"Performance test clone failed: {result.stderr}"
 
         clone_response = json.loads(result.stdout)
-        assert (
-            clone_response.get("success") is True
-        ), f"Performance test clone failed: {clone_response}"
+        assert clone_response.get("success") is True, f"Performance test clone failed: {clone_response}"
 
         clone_id = clone_response["data"]["clone_id"]
 

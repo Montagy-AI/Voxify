@@ -12,9 +12,7 @@ import uuid
 from datetime import datetime, timedelta
 
 # Add the backend directory to Python path
-backend_dir = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, backend_dir)
 
 from flask import Flask
@@ -104,15 +102,9 @@ def cleanup_test_data():
                     session.delete(job)
 
                 # Delete related voice models
-                voice_samples = (
-                    session.query(VoiceSample).filter_by(user_id=user.id).all()
-                )
+                voice_samples = session.query(VoiceSample).filter_by(user_id=user.id).all()
                 for sample in voice_samples:
-                    models = (
-                        session.query(VoiceModel)
-                        .filter_by(voice_sample_id=sample.id)
-                        .all()
-                    )
+                    models = session.query(VoiceModel).filter_by(voice_sample_id=sample.id).all()
                     for model in models:
                         session.delete(model)
                     session.delete(sample)
@@ -150,15 +142,9 @@ def cleanup_test_data():
                     session.delete(job)
 
                 # Delete related voice models
-                voice_samples = (
-                    session.query(VoiceSample).filter_by(user_id=user.id).all()
-                )
+                voice_samples = session.query(VoiceSample).filter_by(user_id=user.id).all()
                 for sample in voice_samples:
-                    models = (
-                        session.query(VoiceModel)
-                        .filter_by(voice_sample_id=sample.id)
-                        .all()
-                    )
+                    models = session.query(VoiceModel).filter_by(voice_sample_id=sample.id).all()
                     for model in models:
                         session.delete(model)
                     session.delete(sample)

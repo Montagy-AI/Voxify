@@ -10,9 +10,7 @@ import json
 from datetime import datetime, timedelta
 
 # Add the backend directory to Python path
-backend_dir = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, backend_dir)
 
 from flask import Flask
@@ -138,9 +136,7 @@ class TestAuthIntegration:
         refresh_token = login_data["data"]["refresh_token"]
 
         # Step 3: Get user profile with access token
-        profile_response = client.get(
-            "/api/v1/auth/profile", headers={"Authorization": f"Bearer {access_token}"}
-        )
+        profile_response = client.get("/api/v1/auth/profile", headers={"Authorization": f"Bearer {access_token}"})
 
         assert profile_response.status_code == 200
         profile_data = profile_response.get_json()
@@ -163,9 +159,7 @@ class TestAuthIntegration:
         assert "updated_fields" in update_response_data["data"]
 
         # Step 5: Refresh access token
-        refresh_response = client.post(
-            "/api/v1/auth/refresh", headers={"Authorization": f"Bearer {refresh_token}"}
-        )
+        refresh_response = client.post("/api/v1/auth/refresh", headers={"Authorization": f"Bearer {refresh_token}"})
 
         assert refresh_response.status_code == 200
         refresh_data = refresh_response.get_json()
@@ -203,9 +197,7 @@ class TestAuthIntegration:
 
         weak_password_data = {"email": "weak_password@example.com", "password": "weak"}
 
-        register_response = client.post(
-            "/api/v1/auth/register", json=weak_password_data
-        )
+        register_response = client.post("/api/v1/auth/register", json=weak_password_data)
 
         assert register_response.status_code == 400
         register_data = register_response.get_json()
@@ -220,18 +212,14 @@ class TestAuthIntegration:
             "password": "SecurePassword123!",
         }
 
-        register_response = client.post(
-            "/api/v1/auth/register", json=invalid_email_data
-        )
+        register_response = client.post("/api/v1/auth/register", json=invalid_email_data)
 
         assert register_response.status_code == 400
         register_data = register_response.get_json()
         assert register_data["success"] is False
         assert register_data["error"]["code"] == "INVALID_EMAIL"
 
-    def test_auth_flow_with_duplicate_email(
-        self, client, test_user_data, cleanup_test_user
-    ):
+    def test_auth_flow_with_duplicate_email(self, client, test_user_data, cleanup_test_user):
         """Test registration with duplicate email"""
 
         # Register first user
@@ -250,9 +238,7 @@ class TestAuthIntegration:
         """Test registration and login with missing required fields"""
 
         # Test registration with missing email
-        register_response = client.post(
-            "/api/v1/auth/register", json={"password": "SecurePassword123!"}
-        )
+        register_response = client.post("/api/v1/auth/register", json={"password": "SecurePassword123!"})
 
         assert register_response.status_code == 400
         register_data = register_response.get_json()
@@ -260,9 +246,7 @@ class TestAuthIntegration:
         assert register_data["error"]["code"] == "MISSING_FIELDS"
 
         # Test login with missing password
-        login_response = client.post(
-            "/api/v1/auth/login", json={"email": "test@example.com"}
-        )
+        login_response = client.post("/api/v1/auth/login", json={"email": "test@example.com"})
 
         assert login_response.status_code == 400
         login_data = login_response.get_json()
@@ -278,15 +262,11 @@ class TestAuthIntegration:
         assert profile_response.status_code == 401
 
         # Try to access profile with invalid token
-        profile_response = client.get(
-            "/api/v1/auth/profile", headers={"Authorization": "Bearer invalid_token"}
-        )
+        profile_response = client.get("/api/v1/auth/profile", headers={"Authorization": "Bearer invalid_token"})
 
         assert profile_response.status_code == 422  # JWT decode error
 
-    def test_auth_flow_profile_update_validation(
-        self, client, test_user_data, cleanup_test_user
-    ):
+    def test_auth_flow_profile_update_validation(self, client, test_user_data, cleanup_test_user):
         """Test profile update with invalid data"""
 
         # First register and login a user
@@ -336,9 +316,7 @@ class TestAuthIntegration:
             data = response.get_json()
             assert data is not None
 
-    def test_auth_flow_database_persistence(
-        self, client, test_user_data, cleanup_test_user
-    ):
+    def test_auth_flow_database_persistence(self, client, test_user_data, cleanup_test_user):
         """Test that user data persists in database across requests"""
 
         # Register user
@@ -358,9 +336,7 @@ class TestAuthIntegration:
 
         session.close()
 
-    def test_auth_flow_token_expiration(
-        self, client, test_user_data, cleanup_test_user
-    ):
+    def test_auth_flow_token_expiration(self, client, test_user_data, cleanup_test_user):
         """Test token expiration and refresh functionality"""
 
         # Register and login user
@@ -378,25 +354,19 @@ class TestAuthIntegration:
         refresh_token = login_response.get_json()["data"]["refresh_token"]
 
         # Verify access token works
-        profile_response = client.get(
-            "/api/v1/auth/profile", headers={"Authorization": f"Bearer {access_token}"}
-        )
+        profile_response = client.get("/api/v1/auth/profile", headers={"Authorization": f"Bearer {access_token}"})
 
         assert profile_response.status_code == 200
 
         # Test refresh token functionality
-        refresh_response = client.post(
-            "/api/v1/auth/refresh", headers={"Authorization": f"Bearer {refresh_token}"}
-        )
+        refresh_response = client.post("/api/v1/auth/refresh", headers={"Authorization": f"Bearer {refresh_token}"})
 
         assert refresh_response.status_code == 200
         refresh_data = refresh_response.get_json()
         assert refresh_data["success"] is True
         assert "access_token" in refresh_data["data"]
 
-    def test_auth_flow_profile_update_success(
-        self, client, test_user_data, cleanup_test_user
-    ):
+    def test_auth_flow_profile_update_success(self, client, test_user_data, cleanup_test_user):
         """Test successful profile update scenarios"""
 
         # Register and login user

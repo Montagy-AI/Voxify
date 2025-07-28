@@ -12,9 +12,7 @@ import logging
 from pathlib import Path
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -22,9 +20,7 @@ def run_command(command, description=""):
     """Run a shell command and handle errors"""
     try:
         logger.info(f"Running: {description or command}")
-        result = subprocess.run(
-            command, shell=True, check=True, capture_output=True, text=True
-        )
+        result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
         if result.stdout:
             logger.info(result.stdout)
         return True
@@ -186,9 +182,7 @@ def main():
         sys.exit(1)
 
     logger.info("🎉 You can now use F5-TTS voice cloning features!")
-    logger.info(
-        "To test the installation, run: python -c 'import f5_tts; print(\"F5-TTS is ready!\")'"
-    )
+    logger.info("To test the installation, run: python -c 'import f5_tts; print(\"F5-TTS is ready!\")'")
 
 
 if __name__ == "__main__":

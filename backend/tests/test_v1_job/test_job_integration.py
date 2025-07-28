@@ -12,9 +12,7 @@ import shutil
 from datetime import datetime, timedelta
 
 # Add the backend directory to Python path
-backend_dir = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, backend_dir)
 
 from flask import Flask
@@ -106,15 +104,9 @@ def cleanup_test_data():
                     session.delete(job)
 
                 # Delete related voice models
-                voice_samples = (
-                    session.query(VoiceSample).filter_by(user_id=user.id).all()
-                )
+                voice_samples = session.query(VoiceSample).filter_by(user_id=user.id).all()
                 for sample in voice_samples:
-                    models = (
-                        session.query(VoiceModel)
-                        .filter_by(voice_sample_id=sample.id)
-                        .all()
-                    )
+                    models = session.query(VoiceModel).filter_by(voice_sample_id=sample.id).all()
                     for model in models:
                         session.delete(model)
                     session.delete(sample)
@@ -154,15 +146,9 @@ def cleanup_test_data():
                     session.delete(job)
 
                 # Delete related voice models
-                voice_samples = (
-                    session.query(VoiceSample).filter_by(user_id=user.id).all()
-                )
+                voice_samples = session.query(VoiceSample).filter_by(user_id=user.id).all()
                 for sample in voice_samples:
-                    models = (
-                        session.query(VoiceModel)
-                        .filter_by(voice_sample_id=sample.id)
-                        .all()
-                    )
+                    models = session.query(VoiceModel).filter_by(voice_sample_id=sample.id).all()
                     for model in models:
                         session.delete(model)
                     session.delete(sample)
@@ -256,9 +242,7 @@ class TestJobIntegration:
         job_id = create_data["data"]["id"]
 
         # Step 2: List jobs
-        list_response = client.get(
-            "/api/v1/job", headers={"Authorization": f"Bearer {access_token}"}
-        )
+        list_response = client.get("/api/v1/job", headers={"Authorization": f"Bearer {access_token}"})
 
         assert list_response.status_code == 200
         list_data = list_response.get_json()
@@ -267,9 +251,7 @@ class TestJobIntegration:
         assert len(list_data["data"]) >= 1
 
         # Step 3: Get specific job
-        get_response = client.get(
-            f"/api/v1/job/{job_id}", headers={"Authorization": f"Bearer {access_token}"}
-        )
+        get_response = client.get(f"/api/v1/job/{job_id}", headers={"Authorization": f"Bearer {access_token}"})
 
         assert get_response.status_code == 200
         get_data = get_response.get_json()
@@ -325,15 +307,11 @@ class TestJobIntegration:
         assert complete_response_data["success"] is True
 
         # Step 7: Delete job (only completed jobs can be deleted)
-        delete_response = client.delete(
-            f"/api/v1/job/{job_id}", headers={"Authorization": f"Bearer {access_token}"}
-        )
+        delete_response = client.delete(f"/api/v1/job/{job_id}", headers={"Authorization": f"Bearer {access_token}"})
 
         assert delete_response.status_code == 204
 
-    def test_job_creation_validation(
-        self, client, temp_file_storage, cleanup_test_data
-    ):
+    def test_job_creation_validation(self, client, temp_file_storage, cleanup_test_data):
         """Test job creation with various validation scenarios"""
 
         # Create test data
@@ -453,9 +431,7 @@ class TestJobIntegration:
         assert data["success"] is False
         assert "sample_rate" in data["error"]["details"]
 
-    def test_job_listing_with_filters(
-        self, client, temp_file_storage, cleanup_test_data
-    ):
+    def test_job_listing_with_filters(self, client, temp_file_storage, cleanup_test_data):
         """Test job listing with various filters and pagination"""
 
         # Create test data
@@ -538,9 +514,7 @@ class TestJobIntegration:
             access_token = create_access_token(identity=user_id)
 
         # Test listing all jobs
-        response = client.get(
-            "/api/v1/job", headers={"Authorization": f"Bearer {access_token}"}
-        )
+        response = client.get("/api/v1/job", headers={"Authorization": f"Bearer {access_token}"})
 
         assert response.status_code == 200
         data = response.get_json()
@@ -668,9 +642,7 @@ class TestJobIntegration:
             user2_token = create_access_token(identity=user2_id)
 
         # Test that user1 can access their own job
-        response = client.get(
-            f"/api/v1/job/{job_id}", headers={"Authorization": f"Bearer {user1_token}"}
-        )
+        response = client.get(f"/api/v1/job/{job_id}", headers={"Authorization": f"Bearer {user1_token}"})
 
         assert response.status_code == 200
         data = response.get_json()
@@ -678,9 +650,7 @@ class TestJobIntegration:
         assert data["data"]["id"] == job_id
 
         # Test that user2 cannot access user1's job
-        response = client.get(
-            f"/api/v1/job/{job_id}", headers={"Authorization": f"Bearer {user2_token}"}
-        )
+        response = client.get(f"/api/v1/job/{job_id}", headers={"Authorization": f"Bearer {user2_token}"})
 
         assert response.status_code == 403
         data = response.get_json()
@@ -1003,9 +973,7 @@ class TestJobIntegration:
         assert data["success"] is False
         assert data["error"]["code"] == "JOB_NOT_FOUND"
 
-    def test_job_duplicate_detection(
-        self, client, temp_file_storage, cleanup_test_data
-    ):
+    def test_job_duplicate_detection(self, client, temp_file_storage, cleanup_test_data):
         """Test job duplicate detection based on text hash and configuration"""
 
         # Create test data
@@ -1104,9 +1072,7 @@ class TestJobIntegration:
         assert different_data["success"] is True
         assert different_data["data"]["id"] != first_data["data"]["id"]
 
-    def test_job_legacy_cancel_endpoint(
-        self, client, temp_file_storage, cleanup_test_data
-    ):
+    def test_job_legacy_cancel_endpoint(self, client, temp_file_storage, cleanup_test_data):
         """Test legacy cancel endpoint functionality"""
 
         # Create test data

@@ -154,9 +154,7 @@ class TestVoiceEmbeddingErrorHandling:
         """Test embedding generation with invalid audio path"""
         mock_preprocess.side_effect = Exception("Invalid audio path")
 
-        with pytest.raises(
-            Exception, match="Error generating voice embedding: Invalid audio path"
-        ):
+        with pytest.raises(Exception, match="Error generating voice embedding: Invalid audio path"):
             generate_voice_embedding("")
 
     @patch("api.v1.voice.embeddings.preprocess_wav")
@@ -164,17 +162,13 @@ class TestVoiceEmbeddingErrorHandling:
         """Test embedding generation with non-existent file"""
         mock_preprocess.side_effect = FileNotFoundError("File not found")
 
-        with pytest.raises(
-            Exception, match="Error generating voice embedding: File not found"
-        ):
+        with pytest.raises(Exception, match="Error generating voice embedding: File not found"):
             generate_voice_embedding("/path/to/nonexistent.wav")
 
     @patch("api.v1.voice.embeddings.preprocess_wav")
     @patch("api.v1.voice.embeddings.voice_encoder")
     @patch("api.v1.voice.embeddings.voice_collection")
-    def test_generate_voice_embedding_encoder_failure(
-        self, mock_collection, mock_encoder, mock_preprocess
-    ):
+    def test_generate_voice_embedding_encoder_failure(self, mock_collection, mock_encoder, mock_preprocess):
         """Test embedding generation with encoder failure"""
         # Mock successful preprocessing
         mock_audio = Mock()
@@ -183,9 +177,7 @@ class TestVoiceEmbeddingErrorHandling:
         # Mock encoder failure - need to mock the actual voice_encoder instance
         mock_encoder.embed_utterance.side_effect = Exception("Encoder failed")
 
-        with pytest.raises(
-            Exception, match="Error generating voice embedding: Encoder failed"
-        ):
+        with pytest.raises(Exception, match="Error generating voice embedding: Encoder failed"):
             generate_voice_embedding("/path/to/audio.wav")
 
     @patch("api.v1.voice.embeddings.voice_collection")
@@ -205,9 +197,7 @@ class TestDatabaseErrorHandling:
     def test_voice_sample_creation_database_error(self, mock_db_manager):
         """Test voice sample creation with database error"""
         # Mock database error
-        mock_db_manager.return_value.get_session.side_effect = Exception(
-            "Database connection failed"
-        )
+        mock_db_manager.return_value.get_session.side_effect = Exception("Database connection failed")
 
         # This would be tested in the actual API endpoint
         with pytest.raises(Exception, match="Database connection failed"):
@@ -217,9 +207,7 @@ class TestDatabaseErrorHandling:
     def test_voice_clone_creation_database_error(self, mock_db_manager):
         """Test voice clone creation with database error"""
         # Mock database error
-        mock_db_manager.return_value.get_session.side_effect = Exception(
-            "Database connection failed"
-        )
+        mock_db_manager.return_value.get_session.side_effect = Exception("Database connection failed")
 
         # This would be tested in the actual API endpoint
         with pytest.raises(Exception, match="Database connection failed"):
@@ -358,12 +346,8 @@ class TestSecurityErrorHandling:
                 "and",
             ]
             # Fix: Check if any SQL keyword is present in the input
-            has_sql_keyword = any(
-                keyword in input_value.lower() for keyword in sql_keywords
-            )
-            assert (
-                has_sql_keyword
-            ), f"SQL injection pattern not detected in: {input_value}"
+            has_sql_keyword = any(keyword in input_value.lower() for keyword in sql_keywords)
+            assert has_sql_keyword, f"SQL injection pattern not detected in: {input_value}"
 
     def test_xss_prevention(self):
         """Test prevention of XSS attacks"""
@@ -375,10 +359,7 @@ class TestSecurityErrorHandling:
 
         for input_value in malicious_inputs:
             # Test that XSS patterns are detected
-            assert any(
-                pattern in input_value.lower()
-                for pattern in ["<script>", "javascript:", "onerror"]
-            )
+            assert any(pattern in input_value.lower() for pattern in ["<script>", "javascript:", "onerror"])
 
 
 class TestPerformanceErrorHandling:
