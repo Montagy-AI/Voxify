@@ -140,9 +140,6 @@ class TestVoiceServiceExtended:
 
     def test_upload_voice_sample_large_file(self, server_url, auth_tokens, test_audio_file):
         """Test uploading a large voice sample"""
-        # Create a large test file (simulate)
-        large_file_path = os.path.join(os.path.dirname(__file__), "large_test.wav")
-
         # For testing, we'll use the existing file but test the concept
         upload_cmd = [
             "curl",
@@ -152,7 +149,7 @@ class TestVoiceServiceExtended:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
             "-F",
-            f"name=Large Test Sample",
+            "name=Large Test Sample",
             "-F",
             f"file=@{test_audio_file}",
         ]
@@ -173,9 +170,9 @@ class TestVoiceServiceExtended:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
             "-F",
-            f"name=Sample with Description",
+            "name=Sample with Description",
             "-F",
-            f"description=This is a test sample with description",
+            "description=This is a test sample with description",
             "-F",
             f"file=@{test_audio_file}",
         ]
@@ -231,7 +228,7 @@ class TestVoiceServiceExtended:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
             "-F",
-            f"name=Advanced Clone Sample",
+            "name=Advanced Clone Sample",
             "-F",
             f"file=@{test_audio_file}",
         ]
@@ -283,7 +280,7 @@ class TestVoiceServiceExtended:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
             "-F",
-            f"name=Synthesis Test Sample",
+            "name=Synthesis Test Sample",
             "-F",
             f"file=@{test_audio_file}",
         ]
@@ -405,7 +402,7 @@ class TestVoiceServiceExtended:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
             "-F",
-            f"name=Metadata Test Sample",
+            "name=Metadata Test Sample",
             "-F",
             f"file=@{test_audio_file}",
         ]

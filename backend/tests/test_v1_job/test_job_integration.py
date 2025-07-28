@@ -37,7 +37,7 @@ def app():
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
     app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 
-    jwt = JWTManager(app)
+    JWTManager(app)
 
     # Register blueprint
     app.register_blueprint(job_bp, url_prefix="/api/v1/job")
@@ -66,7 +66,8 @@ def temp_file_storage():
     test_file_path = os.path.join(output_dir, "test_output.wav")
     with open(test_file_path, "wb") as f:
         f.write(
-            b"RIFF\x24\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00D\xAC\x00\x00\x88X\x01\x00\x02\x00\x10\x00data\x00\x00\x00\x00"
+            b"RIFF\x24\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00"
+            b"D\xAC\x00\x00\x88X\x01\x00\x02\x00\x10\x00data\x00\x00\x00\x00"
         )
 
     yield {"temp_dir": temp_dir, "test_file_path": test_file_path}

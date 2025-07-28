@@ -108,7 +108,7 @@ class TestVoiceServiceIntegration:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
             "-F",
-            f"name=Integration Test Sample",
+            "name=Integration Test Sample",
             "-F",
             f"file=@{test_audio_file}",
         ]
@@ -429,7 +429,7 @@ class TestVoiceServiceIntegration:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
             "-F",
-            f"name=Concurrent Test Sample",
+            "name=Concurrent Test Sample",
             "-F",
             f"file=@{test_audio_file}",
         ]
@@ -538,7 +538,7 @@ class TestVoiceServiceIntegration:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
             "-F",
-            f"name=Performance Test Sample",
+            "name=Performance Test Sample",
             "-F",
             f"file=@{test_audio_file}",
         ]
@@ -607,7 +607,7 @@ class TestVoiceServiceIntegration:
         assert clone_time < 60.0, f"Clone creation took too long: {clone_time:.2f}s"
         assert list_time < 5.0, f"List operation took too long: {list_time:.2f}s"
 
-        print(f"\nPerformance Metrics:")
+        print("\nPerformance Metrics:")
         print(f"Upload time: {upload_time:.2f}s")
         print(f"Clone creation time: {clone_time:.2f}s")
         print(f"List operation time: {list_time:.2f}s")

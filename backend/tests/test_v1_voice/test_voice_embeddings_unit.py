@@ -133,8 +133,8 @@ class TestVoiceEmbeddingGeneration:
         embedding2 = np.random.rand(256).astype(np.float32)
 
         # Normalize embeddings for cosine similarity
-        embedding1_norm = embedding1 / np.linalg.norm(embedding1)
-        embedding2_norm = embedding2 / np.linalg.norm(embedding2)
+        embedding1 / np.linalg.norm(embedding1)
+        embedding2 / np.linalg.norm(embedding2)
 
         similarity = compare_embeddings(embedding1, embedding2)
 
@@ -214,7 +214,7 @@ class TestVoiceEmbeddingPerformance:
         import time
 
         # Mock embedding generation
-        embedding = np.random.rand(256).astype(np.float32)
+        np.random.rand(256).astype(np.float32)
 
         start_time = time.time()
         # Simulate embedding generation
@@ -235,7 +235,7 @@ class TestVoiceEmbeddingPerformance:
         embedding2 = np.random.rand(256).astype(np.float32)
 
         start_time = time.time()
-        similarity = compare_embeddings(embedding1, embedding2)
+        compare_embeddings(embedding1, embedding2)
         end_time = time.time()
 
         processing_time = end_time - start_time

@@ -367,20 +367,16 @@ class TestF5TTSServiceErrorHandling:
 
     def test_invalid_audio_path_handling(self):
         """Test handling of invalid audio paths"""
-        service = F5TTSService()
-
         # Test empty path
-        is_valid, message = service.validate_audio_file("")
+        is_valid, message = F5TTSService().validate_audio_file("")
         assert is_valid is False
 
         # Test None path
-        is_valid, message = service.validate_audio_file(None)
+        is_valid, message = F5TTSService().validate_audio_file(None)
         assert is_valid is False
 
     def test_invalid_text_handling(self):
         """Test handling of invalid text input"""
-        service = F5TTSService()
-
         # Test empty text
         config = TTSConfig(text="", ref_audio_path="/path/to/audio.wav", ref_text="Reference text")
 
@@ -408,7 +404,7 @@ class TestF5TTSServicePerformance:
         import time
 
         start_time = time.time()
-        service = F5TTSService(use_remote=True)
+        F5TTSService(use_remote=True)
         end_time = time.time()
 
         initialization_time = end_time - start_time
@@ -422,7 +418,7 @@ class TestF5TTSServicePerformance:
 
         start_time = time.time()
         for _ in range(100):
-            config = VoiceCloneConfig(
+            VoiceCloneConfig(
                 name="Test Clone",
                 ref_audio_path="/path/to/audio.wav",
                 ref_text="Reference text",

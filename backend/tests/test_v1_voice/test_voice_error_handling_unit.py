@@ -87,7 +87,7 @@ class TestVoiceCloneErrorHandling:
         }
 
         with pytest.raises(KeyError):
-            sample_ids = clone_data["sample_ids"]
+            _ = clone_data["sample_ids"]
 
     def test_create_voice_clone_empty_sample_ids(self):
         """Test voice clone creation with empty sample IDs"""
@@ -120,7 +120,7 @@ class TestVoiceCloneErrorHandling:
         }
 
         with pytest.raises(KeyError):
-            name = clone_data["name"]
+            _ = clone_data["name"]
 
     def test_create_voice_clone_missing_ref_text(self):
         """Test voice clone creation with missing reference text"""
@@ -131,7 +131,7 @@ class TestVoiceCloneErrorHandling:
         }
 
         with pytest.raises(KeyError):
-            ref_text = clone_data["ref_text"]
+            _ = clone_data["ref_text"]
 
     def test_create_voice_clone_invalid_language(self):
         """Test voice clone creation with invalid language"""

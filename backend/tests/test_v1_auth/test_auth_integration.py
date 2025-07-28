@@ -30,7 +30,7 @@ def app():
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
     app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 
-    jwt = JWTManager(app)
+    JWTManager(app)
 
     # Register blueprint
     app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
@@ -107,13 +107,13 @@ class TestAuthIntegration:
         if register_response.status_code == 201:
             assert register_data["success"] is True
             assert "user" in register_data["data"]
-            user_id = register_data["data"]["user"]["id"]
+            # user_id = register_data["data"]["user"]["id"]
         else:
             # User already exists, get user ID from database
             db_manager = get_database_manager()
             session = db_manager.get_session()
-            user = session.query(User).filter_by(email=test_user_data["email"]).first()
-            user_id = user.id
+            # user = session.query(User).filter_by(email=test_user_data["email"]).first()
+            # user_id = user.id
             session.close()
 
         # Step 2: Login with registered user
@@ -223,7 +223,7 @@ class TestAuthIntegration:
         """Test registration with duplicate email"""
 
         # Register first user
-        first_register = client.post("/api/v1/auth/register", json=test_user_data)
+        client.post("/api/v1/auth/register", json=test_user_data)
 
         # Try to register with same email
         second_register = client.post("/api/v1/auth/register", json=test_user_data)

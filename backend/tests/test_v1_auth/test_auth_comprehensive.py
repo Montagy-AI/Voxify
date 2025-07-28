@@ -54,7 +54,7 @@ class TestAuthRegistration:
         }
 
         with pytest.raises(KeyError):
-            email = invalid_data["email"]
+            _ = invalid_data["email"]
 
         # Test missing password
         invalid_data = {
@@ -63,7 +63,7 @@ class TestAuthRegistration:
         }
 
         with pytest.raises(KeyError):
-            password = invalid_data["password"]
+            _ = invalid_data["password"]
 
     def test_register_invalid_email_validation(self):
         """Test registration with invalid email format"""
@@ -262,8 +262,6 @@ class TestAuthLogin:
 
     def test_login_invalid_credentials(self):
         """Test login with invalid credentials"""
-        login_data = {"email": "test@example.com", "password": "WrongPassword123!"}
-
         # Mock user not found
         with patch("api.v1.auth.routes.get_database_manager") as mock_db_manager:
             mock_session = MagicMock()
@@ -374,8 +372,6 @@ class TestAuthTokenRefresh:
 
     def test_refresh_token_validation(self):
         """Test refresh token validation"""
-        refresh_token = "valid_refresh_token"
-
         # Mock JWT identity extraction
         with patch("api.v1.auth.routes.get_jwt_identity") as mock_identity:
             mock_identity.return_value = 1
@@ -459,8 +455,6 @@ class TestAuthProfile:
 
     def test_get_profile_user_not_found(self):
         """Test profile retrieval for non-existent user"""
-        user_id = 999
-
         # Mock user not found
         with patch("api.v1.auth.routes.get_database_manager") as mock_db_manager:
             mock_session = MagicMock()
@@ -492,7 +486,6 @@ class TestAuthProfile:
 
     def test_update_profile_email_duplicate_check(self):
         """Test profile update email duplicate check"""
-        new_email = "existing@example.com"
         current_user_id = 1
 
         # Mock duplicate email check

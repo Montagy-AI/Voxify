@@ -60,7 +60,7 @@ class TestAuthRegistrationErrorHandling:
         }
 
         with pytest.raises(KeyError):
-            email = request_data["email"]
+            _ = request_data["email"]
 
         # Test missing password
         request_data = {
@@ -69,7 +69,7 @@ class TestAuthRegistrationErrorHandling:
         }
 
         with pytest.raises(KeyError):
-            password = request_data["password"]
+            _ = request_data["password"]
 
     def test_register_invalid_email_format(self):
         """Test registration with invalid email format"""
@@ -203,7 +203,7 @@ class TestAuthLoginErrorHandling:
         }
 
         with pytest.raises(KeyError):
-            email = request_data["email"]
+            _ = request_data["email"]
 
         # Test missing password
         request_data = {
@@ -212,7 +212,7 @@ class TestAuthLoginErrorHandling:
         }
 
         with pytest.raises(KeyError):
-            password = request_data["password"]
+            _ = request_data["password"]
 
     def test_login_user_not_found(self):
         """Test login with non-existent user"""
@@ -346,8 +346,6 @@ class TestAuthProfileErrorHandling:
 
     def test_get_profile_user_not_found(self):
         """Test profile retrieval for non-existent user"""
-        user_id = 999
-
         # Mock user not found
         with patch("api.v1.auth.routes.get_database_manager") as mock_db_manager:
             mock_session = MagicMock()
@@ -420,7 +418,6 @@ class TestAuthProfileErrorHandling:
 
     def test_update_profile_duplicate_email(self):
         """Test profile update with duplicate email"""
-        new_email = "existing@example.com"
         current_user_id = 1
 
         # Mock duplicate email check

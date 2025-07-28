@@ -98,7 +98,7 @@ class TestVoiceServicePerformance:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
             "-F",
-            f"name=Performance Test Sample",
+            "name=Performance Test Sample",
             "-F",
             f"file=@{test_audio_file}",
         ]
@@ -136,7 +136,7 @@ class TestVoiceServicePerformance:
                 "-H",
                 f"Authorization: Bearer {auth_tokens['access_token']}",
                 "-F",
-                f"name=Performance Test Sample {i+1}",
+                "name=Performance Test Sample {0}".format(i+1),
                 "-F",
                 f"file=@{test_audio_file}",
             ]
@@ -159,7 +159,7 @@ class TestVoiceServicePerformance:
         max_upload_time = max(upload_times)
         min_upload_time = min(upload_times)
 
-        print(f"Multiple file upload performance:")
+        print("Multiple file upload performance:")
         print(f"  Average time: {avg_upload_time:.2f}s")
         print(f"  Min time: {min_upload_time:.2f}s")
         print(f"  Max time: {max_upload_time:.2f}s")
@@ -215,7 +215,7 @@ class TestVoiceServicePerformance:
         successful_uploads = [r for r in results if r[1]]
         upload_times = [r[2] for r in results]
 
-        print(f"Concurrent upload performance:")
+        print("Concurrent upload performance:")
         print(f"  Successful uploads: {len(successful_uploads)}/{len(results)}")
         print(f"  Average time: {statistics.mean(upload_times):.2f}s")
         print(f"  Max time: {max(upload_times):.2f}s")
@@ -237,7 +237,7 @@ class TestVoiceServicePerformance:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
             "-F",
-            f"name=Clone Performance Test Sample",
+            "name=Clone Performance Test Sample",
             "-F",
             f"file=@{test_audio_file}",
         ]
@@ -300,7 +300,7 @@ class TestVoiceServicePerformance:
             "-H",
             f"Authorization: Bearer {auth_tokens['access_token']}",
             "-F",
-            f"name=Synthesis Performance Test Sample",
+            "name=Synthesis Performance Test Sample",
             "-F",
             f"file=@{test_audio_file}",
         ]
@@ -352,7 +352,10 @@ class TestVoiceServicePerformance:
             start_time = time.time()
 
             synthesis_data = {
-                "text": f"This is synthesis performance test {i+1}. Hello, this is a performance test for speech synthesis.",
+                "text": (
+                    f"This is synthesis performance test {i+1}. "
+                    "Hello, this is a performance test for speech synthesis."
+                ),
                 "speed": 1.0,
                 "language": "zh-CN",
             }
@@ -386,7 +389,7 @@ class TestVoiceServicePerformance:
         max_synthesis_time = max(synthesis_times)
         min_synthesis_time = min(synthesis_times)
 
-        print(f"Synthesis performance:")
+        print("Synthesis performance:")
         print(f"  Average time: {avg_synthesis_time:.2f}s")
         print(f"  Min time: {min_synthesis_time:.2f}s")
         print(f"  Max time: {max_synthesis_time:.2f}s")
@@ -427,7 +430,7 @@ class TestVoiceServicePerformance:
         max_list_time = max(list_times)
         min_list_time = min(list_times)
 
-        print(f"List operations performance:")
+        print("List operations performance:")
         print(f"  Average time: {avg_list_time:.2f}s")
         print(f"  Min time: {min_list_time:.2f}s")
         print(f"  Max time: {max_list_time:.2f}s")
@@ -495,7 +498,7 @@ class TestVoiceServicePerformance:
         std_response_time = statistics.stdev(response_times)
         cv_response_time = std_response_time / avg_response_time if avg_response_time > 0 else 0
 
-        print(f"Response time consistency:")
+        print("Response time consistency:")
         print(f"  Average time: {avg_response_time:.3f}s")
         print(f"  Standard deviation: {std_response_time:.3f}s")
         print(f"  Coefficient of variation: {cv_response_time:.3f}")
@@ -583,7 +586,7 @@ class TestVoiceServicePerformance:
         successful_operations = [op for op in all_operations if op[2]]
         operation_times = [op[1] for op in all_operations]
 
-        print(f"Concurrent user simulation results:")
+        print("Concurrent user simulation results:")
         print(f"  Total operations: {len(all_operations)}")
         print(f"  Successful operations: {len(successful_operations)}")
         print(f"  Success rate: {len(successful_operations)/len(all_operations)*100:.1f}%")
