@@ -79,9 +79,7 @@ CREATE TABLE voice_models (
     name TEXT NOT NULL,
     model_path TEXT NOT NULL,
     model_type TEXT DEFAULT 'tacotron2',
-    training_status TEXT DEFAULT 'pending',
-    training_progress REAL DEFAULT 0.0,
-    quality_metrics TEXT,                   -- JSON format
+    status TEXT DEFAULT 'pending',
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -169,8 +167,8 @@ graph TD
     C --> D[Extract Voice Features]
     D --> E[Store in SQLite]
     D --> F[Store Vector in Chroma]
-    E --> G[Model Training]
-    F --> H[Similarity Search Ready]
+    E --> G[TTS Synthesis Ready]
+    F --> G
 ```
 
 ### 2. TTS Synthesis Process

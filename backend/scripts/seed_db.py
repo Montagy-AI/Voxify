@@ -102,23 +102,6 @@ def create_voice_models(session, samples):
             model_type="tacotron2",
             model_size=256 * 1024 * 1024,  # 256MB
             model_version="1.0",
-            training_config_dict={
-                "epochs": 1000,
-                "batch_size": 32,
-                "learning_rate": 0.001,
-            },
-            training_epochs=1000,
-            learning_rate=0.001,
-            batch_size=32,
-            dataset_size=100,
-            training_status="completed",
-            training_progress=1.0,
-            training_start_time=utc_now() - timedelta(days=2),
-            training_end_time=utc_now() - timedelta(days=1),
-            mel_loss=0.1,
-            validation_score=0.95,
-            mos_score=4.5,
-            similarity_score=0.98,
             is_active=True,
             deployment_status="online",
         )
