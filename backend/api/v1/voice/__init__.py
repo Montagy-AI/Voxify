@@ -44,15 +44,18 @@ def get_voice_models():
 def voice_service_info():
     """Get voice service information"""
     return {
-        "service": "Voxify Voice Service",
-        "version": "1.0.0",
-        "features": [
-            "Voice sample upload and management",
-            "Voice cloning with F5-TTS",
-            "Speech synthesis",
-            "Voice embedding generation",
-        ],
-        "supported_formats": ["wav", "mp3"],
-        "max_sample_duration": 30,
-        "min_sample_duration": 3,
+        "success": True,
+        "data": {
+            "service": "Voxify Voice Service",
+            "version": "1.0.0",
+            "features": [
+                "Voice sample upload and management",
+                "Voice cloning with F5-TTS",
+                "Speech synthesis",
+                "Voice embedding generation",
+            ],
+            "supported_formats": ["wav", "mp3"],
+            "max_sample_duration": 30,
+            "min_sample_duration": 3,
+        },
     }
