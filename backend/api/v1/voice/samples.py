@@ -7,19 +7,24 @@ import os
 import uuid
 import tempfile
 import soundfile as sf
+import numpy as np
 from pathlib import Path
 from datetime import datetime, timezone
+from typing import Optional
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from database import get_database_manager
 from database.models import VoiceSample
-from .embeddings import generate_voice_embedding, delete_voice_embedding
+from .embeddings import generate_voice_embedding, delete_voice_embedding, get_voice_embedding, compare_embeddings
 
 # Import the blueprint from __init__.py
 from . import voice_bp
 
 # Allowed audio file extensions
 ALLOWED_EXTENSIONS = {'wav', 'mp3'}
+
+# Similarity threshold for duplicate detection (adjust as needed)
+DUPLICATE_THRESHOLD = 0.95
 
 def allowed_file(filename: str) -> bool:
     """Check if the file extension is allowed."""
@@ -34,6 +39,40 @@ def extract_audio_metadata(file_path: str) -> dict:
             'channels': audio_file.channels,
             'format': audio_file.format
         }
+
+def check_duplicate_sample(new_embedding: np.ndarray, user_id: str, session) -> Optional[VoiceSample]:
+    """
+    Check if a similar voice sample already exists for the user.
+    
+    Args:
+        new_embedding: Voice embedding of the new sample
+        user_id: Current user ID
+        session: Database session
+        
+    Returns:
+        Existing VoiceSample if duplicate found, None otherwise
+    """
+    # Get all existing samples for the user that have embeddings
+    existing_samples = session.query(VoiceSample).filter(
+        VoiceSample.user_id == user_id,
+        VoiceSample.voice_embedding_id.isnot(None),
+        VoiceSample.status == 'ready'
+    ).all()
+    
+    # Compare with each existing sample
+    for sample in existing_samples:
+        # Get existing embedding
+        existing_embedding = get_voice_embedding(sample.voice_embedding_id)
+        if existing_embedding is None:
+            continue
+            
+        # Compare embeddings
+        similarity = compare_embeddings(new_embedding, existing_embedding)
+        print(f'similarity : ************************{similarity}')
+        if similarity >= DUPLICATE_THRESHOLD:
+            return sample
+            
+    return None
 
 @voice_bp.route('/samples', methods=['POST'])
 @jwt_required()
@@ -108,6 +147,15 @@ def upload_voice_sample():
         
         # Store metadata in SQLite
         with db.get_session() as session:
+            # Check for duplicates
+            duplicate_sample = check_duplicate_sample(embedding, user_id, session)
+            if duplicate_sample:
+                return jsonify({
+                    'success': False,
+                    'error': 'Duplicate voice sample detected',
+                    'duplicate_sample_id': duplicate_sample.id
+                }), 400
+            
             voice_sample = VoiceSample(
                 id=sample_id,
                 name=name,
@@ -274,4 +322,4 @@ def delete_voice_sample(sample_id: str):
             'data': {
                 'message': 'Voice sample deleted successfully'
             }
-        }) 
+        })

@@ -115,4 +115,5 @@ def compare_embeddings(embedding1: np.ndarray, embedding2: np.ndarray) -> float:
     
     # Calculate cosine similarity
     similarity = np.dot(embedding1, embedding2)
+    print(float(similarity))
     return float(similarity) 
