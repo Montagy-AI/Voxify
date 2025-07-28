@@ -5,6 +5,8 @@ Functions for password hashing, validation, and security
 
 import bcrypt
 import re
+import uuid
+from datetime import datetime, timedelta
 
 
 def hash_password(password: str) -> str:
@@ -100,3 +102,62 @@ def validate_email(email: str) -> tuple:
         return False, "Invalid email format"
 
     return True, ""
+
+
+def generate_reset_token() -> str:
+    """
+    Generate a secure password reset token
+
+    Returns
+    -------
+    str
+        A secure UUID-based reset token
+    """
+    return str(uuid.uuid4())
+
+
+def is_reset_token_valid(token: str, stored_token: str, expires_at: datetime) -> tuple:
+    """
+    Validate a password reset token
+
+    Parameters
+    ----------
+    token : str
+        Token provided by user
+    stored_token : str
+        Token stored in database
+    expires_at : datetime
+        Token expiration time
+
+    Returns
+    -------
+    tuple
+        (is_valid, error_message)
+    """
+    if not token or not stored_token:
+        return False, "Invalid reset token"
+
+    if token != stored_token:
+        return False, "Invalid reset token"
+
+    if not expires_at:
+        return False, "Reset token has expired"
+
+    # Check if token has expired
+    current_time = datetime.utcnow()
+    if current_time > expires_at:
+        return False, "Reset token has expired"
+
+    return True, ""
+
+
+def get_reset_token_expiry() -> datetime:
+    """
+    Get expiration time for reset token (15 minutes from now)
+
+    Returns
+    -------
+    datetime
+        Token expiration timestamp
+    """
+    return datetime.utcnow() + timedelta(minutes=15)
