@@ -297,7 +297,7 @@ class TestScriptIntegrity:
         start_py_path = get_start_py_path_or_skip()
         # Test that the script can at least be parsed for imports
         result = subprocess.run(
-            [sys.executable, "-c", f"import ast; ast.parse(open('{start_py_path}').read())"],
+            [sys.executable, "-c", f"import ast; ast.parse(open(r'{start_py_path}', encoding='utf-8').read())"],
             capture_output=True,
             text=True,
             timeout=30,
