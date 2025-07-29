@@ -5,16 +5,16 @@
 This project implements a comprehensive automated testing strategy to ensure the reliability, security, and performance of the Voxify backend API. The testing framework covers all major components including authentication, voice processing, job management, file operations, and database operations.
 
 **Key Statistics:**
-- **Total Test Cases:** 512 tests (492 passed, 20 skipped)
-- **Overall Coverage:** 84% (7,602/9,022 lines covered)
-- **Execution Time:** 91.46 seconds
+- **Total Test Cases:** 512 tests (496 passed, 16 skipped)
+- **Overall Coverage:** 85% (8,985/10,326 lines covered)
+- **Execution Time:** 94.79 seconds
 - **Test Files:** 20+ comprehensive test files
 - **Framework:** pytest with comprehensive fixtures and mocking
 
 **Test Coverage Targets:**
 - **D2 Target Coverage:** 54%
 - **D3 Expected Coverage:** 75%
-- **Current Test Coverage:** 84%
+- **Current Test Coverage:** 85%
 
 ## 2. Test Framework and Tools
 
@@ -30,12 +30,12 @@ This project implements a comprehensive automated testing strategy to ensure the
 
 ### 3.1 Database Layer
 
-**Files:** `test_database_integration.py` (505 lines), `test_models.py` (361 lines), `test_vector_config.py` (333 lines)
+**Files:** `test_database_integration.py` (466 lines), `test_models.py` (326 lines), `test_vector_config.py` (333 lines)
 
 **Coverage:** Complete database layer including models, relationships, constraints, and vector operations
 
 **Key Features:**
-- **Database Initialization:** Complete setup and teardown testing (505 lines)
+- **Database Initialization:** Complete setup and teardown testing (466 lines)
 - **Model Operations:** User, VoiceSample, VoiceModel, SynthesisJob workflows
 - **Relationship Testing:** Cascade deletes, foreign key constraints
 - **Vector Database:** ChromaDB integration and embedding operations
@@ -47,21 +47,21 @@ This project implements a comprehensive automated testing strategy to ensure the
 
 ### 3.2 Authentication System
 
-**Files:** `test_auth_comprehensive.py` (323 lines), `test_auth_error_handling.py` (302 lines), `test_auth_integration.py` (201 lines), `test_curl_auth.py` (110 lines), `test_register.py` (54 lines), `test_log_in.py` (46 lines)
+**Files:** `test_auth_comprehensive.py` (319 lines), `test_auth_error_handling.py` (300 lines), `test_auth_integration.py` (198 lines), `test_curl_auth.py` (110 lines), `test_register.py` (54 lines), `test_log_in.py` (115 lines)
 
 **Coverage:** Complete authentication workflow including registration, login, token management, and profile operations
 
 **Key Features:**
-- **Registration:** Email validation, password strength, duplicate handling (323 lines)
+- **Registration:** Email validation, password strength, duplicate handling (319 lines)
 - **Login:** Credential verification, token generation, session management
 - **Token Management:** JWT refresh, expiration handling, security validation
 - **Profile Operations:** User profile retrieval and updates
 - **Security Testing:** SQL injection prevention, XSS protection, input sanitization
-- **Error Handling:** Comprehensive error scenarios and edge cases (302 lines)
-- **Integration:** Complete auth workflows with database persistence (201 lines)
+- **Error Handling:** Comprehensive error scenarios and edge cases (300 lines)
+- **Integration:** Complete auth workflows with database persistence (198 lines)
 
 **Test Count:** 80+ authentication tests
-**Coverage:** 82% for authentication routes
+**Coverage:** 59% for authentication routes
 
 ### 3.3 Voice Processing System
 
@@ -71,7 +71,7 @@ This project implements a comprehensive automated testing strategy to ensure the
 
 **Test Categories:**
 
-#### 3.3.1 Unit Tests (`test_voice_unit.py` - 696 lines)
+#### 3.3.1 Unit Tests (`test_voice_unit.py` - 695 lines)
 - **File Validation:** Audio file format and metadata extraction
 - **Embedding Operations:** Voice embedding generation and comparison
 - **Clone Validation:** Voice clone data validation and configuration
@@ -84,7 +84,7 @@ This project implements a comprehensive automated testing strategy to ensure the
 **Test Count:** 56 unit tests
 **Coverage:** 98% for voice unit operations
 
-#### 3.3.2 Service API Tests (`test_voice_service.py` - 452 lines)
+#### 3.3.2 Service API Tests (`test_voice_service.py` - 507 lines)
 - **Sample Management:** Upload, list, get, delete voice samples
 - **Clone Operations:** Create, list, get, delete, select voice clones
 - **Synthesis:** Text-to-speech with voice clones
@@ -93,9 +93,9 @@ This project implements a comprehensive automated testing strategy to ensure the
 - **Validation:** Input validation and business logic
 
 **Test Count:** 25+ API endpoint tests
-**Coverage:** 97% for voice service API
+**Coverage:** 86% for voice service API
 
-#### 3.3.3 Integration Tests (`test_voice_integration.py` - 217 lines)
+#### 3.3.3 Integration Tests (`test_voice_integration.py` - 222 lines)
 - **Complete Workflows:** End-to-end voice processing scenarios
 - **Multiple Samples:** Handling multiple voice samples
 - **Error Recovery:** System recovery from failures
@@ -103,9 +103,9 @@ This project implements a comprehensive automated testing strategy to ensure the
 - **Performance Metrics:** Processing time and resource usage
 
 **Test Count:** 5 integration workflow tests
-**Coverage:** 95% for integration scenarios
+**Coverage:** 75% for integration scenarios
 
-#### 3.3.4 Performance Tests (`test_voice_performance.py` - 253 lines)
+#### 3.3.4 Performance Tests (`test_voice_performance.py` - 265 lines)
 - **Upload Performance:** Single and multiple file upload timing
 - **Concurrent Operations:** Multiple simultaneous uploads
 - **Clone Creation:** Voice clone creation performance
@@ -116,9 +116,9 @@ This project implements a comprehensive automated testing strategy to ensure the
 - **Concurrent Users:** Multiple user simulation
 
 **Test Count:** 10+ performance tests
-**Coverage:** 97% for performance validation
+**Coverage:** 74% for performance validation
 
-#### 3.3.5 Extended Service Tests (`test_voice_service_extended.py` - 210 lines)
+#### 3.3.5 Extended Service Tests (`test_voice_service_extended.py` - 246 lines)
 - **Advanced Scenarios:** Complex voice processing workflows
 - **Large Files:** Handling large audio files
 - **Advanced Configuration:** Complex clone and synthesis settings
@@ -128,7 +128,7 @@ This project implements a comprehensive automated testing strategy to ensure the
 - **Error Responses:** Comprehensive error handling
 
 **Test Count:** 15+ advanced scenario tests
-**Coverage:** 97% for extended functionality
+**Coverage:** 69% for extended functionality
 
 #### 3.3.6 Error Handling Tests (`test_voice_error_handling_unit.py` - 174 lines)
 - **File Upload Errors:** Invalid files, corrupted audio, missing files
@@ -144,7 +144,7 @@ This project implements a comprehensive automated testing strategy to ensure the
 **Test Count:** 40+ error handling tests
 **Coverage:** 99% for error scenarios
 
-#### 3.3.7 Embedding Tests (`test_voice_embeddings_unit.py` - 158 lines)
+#### 3.3.7 Embedding Tests (`test_voice_embeddings_unit.py` - 159 lines)
 - **Embedding Generation:** Voice embedding creation and storage
 - **Embedding Retrieval:** Getting stored embeddings
 - **Embedding Comparison:** Similarity calculations
@@ -156,7 +156,7 @@ This project implements a comprehensive automated testing strategy to ensure the
 **Test Count:** 25+ embedding operation tests
 **Coverage:** 99% for embedding operations
 
-#### 3.3.8 F5-TTS Service Tests (`test_f5_tts_service_unit.py` - 243 lines)
+#### 3.3.8 F5-TTS Service Tests (`test_f5_tts_service_unit.py` - 241 lines)
 - **Service Initialization:** Local and remote service setup
 - **Configuration:** Voice clone and TTS configuration
 - **Audio Validation:** File format and quality validation
@@ -171,7 +171,7 @@ This project implements a comprehensive automated testing strategy to ensure the
 
 ### 3.4 Job Management System
 
-**Files:** `test_job_integration.py` (443 lines), `test_job_service.py` (234 lines), `test_job_unit.py` (170 lines)
+**Files:** `test_job_integration.py` (457 lines), `test_job_service.py` (262 lines), `test_job_unit.py` (170 lines)
 
 **Coverage:** Complete job management including creation, listing, updating, and deletion
 
@@ -187,11 +187,11 @@ This project implements a comprehensive automated testing strategy to ensure the
 - **Legacy Support:** Backward compatibility testing
 
 **Test Count:** 18+ job management tests
-**Coverage:** 83% for job routes
+**Coverage:** 84% for job routes
 
 ### 3.5 File Management System
 
-**Files:** `test_curl_file.py` (240 lines), `test_file_integration.py` (202 lines), `test_file_logic.py` (183 lines)
+**Files:** `test_curl_file.py` (240 lines), `test_file_integration.py` (208 lines), `test_file_logic.py` (183 lines)
 
 **Coverage:** File download, deletion, and management operations
 
@@ -223,73 +223,75 @@ This project implements a comprehensive automated testing strategy to ensure the
 
 ## 4. Test Coverage Analysis
 
-### 4.1 Overall Project Coverage: 84%
+### 4.1 Overall Project Coverage: 85%
 
 | Module | Statements | Covered | Missing | Coverage % |
 |--------|------------|---------|---------|------------|
-| `api.__init__.py` | 28 | 6 | 22 | **21%** |
+| `api.__init__.py` | 28 | 28 | 0 | **100%** |
 | `api.app.py` | 4 | 0 | 4 | **0%** |
-| `api.utils.password.py` | 23 | 19 | 4 | **83%** |
-| `api.v1.auth.routes.py` | 148 | 121 | 27 | **82%** |
+| `api.utils.email_service.py` | 93 | 68 | 25 | **73%** |
+| `api.utils.password.py` | 40 | 39 | 1 | **98%** |
+| `api.v1.auth.routes.py` | 215 | 126 | 89 | **59%** |
 | `api.v1.file.routes.py` | 134 | 86 | 48 | **64%** |
-| `api.v1.job.routes.py` | 366 | 302 | 64 | **83%** |
+| `api.v1.job.routes.py` | 366 | 306 | 60 | **84%** |
 | `api.v1.voice.__init__.py` | 10 | 8 | 2 | **80%** |
 | `api.v1.voice.clones.py` | 177 | 26 | 151 | **15%** |
-| `api.v1.voice.embeddings.py` | 38 | 36 | 2 | **95%** |
+| `api.v1.voice.embeddings.py` | 72 | 55 | 17 | **76%** |
 | `api.v1.voice.f5_tts_service.py` | 246 | 135 | 111 | **55%** |
-| `api.v1.voice.samples.py` | 103 | 29 | 74 | **28%** |
-| `database.models.py` | 317 | 300 | 17 | **95%** |
+| `api.v1.voice.samples.py` | 135 | 35 | 100 | **26%** |
+| `database.models.py` | 244 | 233 | 11 | **95%** |
 | `database.vector_config.py` | 74 | 70 | 4 | **95%** |
-| `start.py` | 176 | 0 | 176 | **0%** |
+| `start.py` | 176 | 95 | 81 | **54%** |
 
 ### 4.2 Coverage Breakdown by Module
 
 #### 4.2.1 High Coverage Modules (80%+)
+- **API Init (100%)**: Complete API initialization coverage
 - **Database Models (95%)**: Excellent coverage of core database operations
 - **Vector Configuration (95%)**: Comprehensive vector database testing
-- **Voice Embeddings (95%)**: Excellent embedding operation coverage
-- **Password Utils (83%)**: Good password hashing coverage
-- **Authentication Routes (82%)**: Good coverage of auth endpoints
-- **Job Routes (83%)**: Strong job management coverage
+- **Password Utils (98%)**: Excellent password hashing coverage
+- **Job Routes (84%)**: Strong job management coverage
 - **Voice Module Init (80%)**: Good blueprint and route registration
 
 #### 4.2.2 Medium Coverage Modules (50-80%)
+- **Email Service (73%)**: Good email functionality coverage
+- **Voice Embeddings (76%)**: Good embedding operation coverage
 - **File Routes (64%)**: Moderate file operation coverage
 - **F5-TTS Service (55%)**: Basic service coverage, needs improvement
-- **API Init (21%)**: Limited API initialization coverage
+- **Start Script (54%)**: Moderate application startup coverage
 
 #### 4.2.3 Low Coverage Modules (<50%)
+- **Authentication Routes (59%)**: Moderate auth endpoint coverage
 - **Voice Clones (15%)**: Minimal clone operation coverage
-- **Voice Samples (28%)**: Basic file upload coverage
+- **Voice Samples (26%)**: Basic file upload coverage
 - **Modal Integration (11%)**: Limited external service testing
 - **API App (0%)**: No coverage for app configuration
-- **Start Script (0%)**: No coverage for application startup
 
 ## 5. Test Execution Statistics
 
 ### 5.1 Latest Test Run Results
-- **Total Test Cases:** 512 (492 passed, 20 skipped)
-- **Test Pass Rate:** 96.1% (492/512)
-- **Execution Time:** 91.46s (1 minute 31 seconds)
-- **Average Test Time:** 0.18s per test
+- **Total Test Cases:** 512 (496 passed, 16 skipped)
+- **Test Pass Rate:** 96.9% (496/512)
+- **Execution Time:** 94.79s (1 minute 34 seconds)
+- **Average Test Time:** 0.19s per test
 - **Warnings:** 7 (mostly deprecation warnings)
 
 ### 5.2 Test File Statistics
 | Test File | Lines | Missing | Coverage % |
 |-----------|-------|---------|------------|
-| `test_database_integration.py` | 505 | 0 | **100%** |
-| `test_models.py` | 361 | 0 | **100%** |
+| `test_database_integration.py` | 466 | 0 | **100%** |
+| `test_models.py` | 326 | 0 | **100%** |
 | `test_vector_config.py` | 333 | 1 | **99%** |
-| `test_auth_comprehensive.py` | 323 | 0 | **100%** |
-| `test_auth_error_handling.py` | 302 | 0 | **100%** |
-| `test_auth_integration.py` | 201 | 11 | **95%** |
-| `test_voice_unit.py` | 696 | 17 | **98%** |
-| `test_voice_service.py` | 452 | 13 | **97%** |
-| `test_voice_service_extended.py` | 210 | 6 | **97%** |
-| `test_voice_performance.py` | 253 | 7 | **97%** |
-| `test_voice_integration.py` | 217 | 11 | **95%** |
-| `test_f5_tts_service_unit.py` | 243 | 1 | **99%** |
-| `test_voice_embeddings_unit.py` | 158 | 1 | **99%** |
+| `test_auth_comprehensive.py` | 319 | 0 | **100%** |
+| `test_auth_error_handling.py` | 300 | 0 | **100%** |
+| `test_auth_integration.py` | 198 | 7 | **96%** |
+| `test_voice_unit.py` | 695 | 17 | **98%** |
+| `test_voice_service.py` | 507 | 73 | **86%** |
+| `test_voice_service_extended.py` | 246 | 76 | **69%** |
+| `test_voice_performance.py` | 265 | 70 | **74%** |
+| `test_voice_integration.py` | 222 | 55 | **75%** |
+| `test_f5_tts_service_unit.py` | 241 | 1 | **99%** |
+| `test_voice_embeddings_unit.py` | 159 | 1 | **99%** |
 | `test_voice_error_handling_unit.py` | 174 | 1 | **99%** |
 
 ### 5.3 Test Categories Distribution
@@ -371,25 +373,25 @@ python -m pytest tests/test_v1_voice/ -v  # Voice tests
    - Test clone validation and error handling
    - Cover clone selection and management operations
 
-2. **Voice Samples Module (28%)**
+2. **Voice Samples Module (26%)**
    - Add tests for advanced file processing
    - Test metadata extraction scenarios
    - Cover error handling for corrupted files
 
-3. **F5-TTS Service (55%)**
+3. **Authentication Routes (59%)**
+   - Add tests for advanced auth scenarios
+   - Test token refresh mechanisms
+   - Cover password reset workflows
+
+4. **F5-TTS Service (55%)**
    - Add tests for remote API operations
    - Test advanced configuration scenarios
    - Cover error recovery mechanisms
 
-4. **API App Module (0%)**
+5. **API App Module (0%)**
    - Add tests for application configuration
    - Test Flask app initialization
    - Cover blueprint registration
-
-5. **Start Script (0%)**
-   - Add tests for application startup
-   - Test server initialization
-   - Cover command line arguments
 
 ### 8.2 Medium Priority
 1. **File Routes (64%)**
@@ -397,10 +399,10 @@ python -m pytest tests/test_v1_voice/ -v  # Voice tests
    - Test file permission handling
    - Cover error scenarios
 
-2. **API Init Module (21%)**
-   - Add tests for API initialization
-   - Test module imports and setup
-   - Cover configuration loading
+2. **Voice Embeddings (76%)**
+   - Add tests for advanced embedding operations
+   - Test embedding comparison edge cases
+   - Cover performance optimization scenarios
 
 3. **Modal Integration (11%)**
    - Expand external service testing
@@ -420,8 +422,8 @@ python -m pytest tests/test_v1_voice/ -v  # Voice tests
 ## 9. Performance Benchmarks
 
 ### 9.1 Current Performance Metrics
-- **Test Execution Time:** 91.46s for 512 tests
-- **Average Test Time:** 0.18s per test
+- **Test Execution Time:** 94.79s for 512 tests
+- **Average Test Time:** 0.19s per test
 - **Memory Usage:** Monitored during performance tests
 - **CPU Usage:** Tracked for system resource validation
 
@@ -482,10 +484,10 @@ python -m pytest tests/test_v1_voice/ -v  # Voice tests
 
 ---
 
-**Last Updated:** July 2024
+**Last Updated:** July 2025
 **Test Framework:** pytest
-**Coverage Target:** 90%+ (currently 84% overall)
+**Coverage Target:** 90%+ (currently 85% overall)
 **Total Test Files:** 20+
 **Total Test Cases:** 512
-**Latest Test Run:** 492 passed, 20 skipped, 7 warnings in 91.46s
+**Latest Test Run:** 496 passed, 16 skipped, 7 warnings in 94.79s
 **Test Execution Environment:** Windows 10, Python 3.11.4, pytest 7.4.0 

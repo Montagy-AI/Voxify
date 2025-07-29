@@ -29,7 +29,7 @@ def create_app(test_config=None):
     """
 
     # Load .env file from the backend directory (parent of api/)
-    load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+    load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
     # Create Flask app
     app = Flask(__name__, instance_relative_config=True)

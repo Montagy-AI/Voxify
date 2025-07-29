@@ -119,3 +119,6 @@ backend-logs:
 # Shell into backend container
 shell-api:
 	docker-compose exec api /bin/bash
+
+backend-prod:
+	docker buildx build --platform linux/amd64 -t madelahn/voxify-api:latest ./backend
