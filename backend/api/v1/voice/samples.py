@@ -5,6 +5,7 @@ Handles voice sample upload, processing, and management
 
 import os
 import uuid
+import logging
 import soundfile as sf
 import numpy as np
 from pathlib import Path
@@ -18,6 +19,9 @@ from .embeddings import generate_voice_embedding, delete_voice_embedding, get_vo
 
 # Import the blueprint from __init__.py
 from . import voice_bp
+
+# Initialize logger
+logger = logging.getLogger(__name__)
 
 # Allowed audio file extensions
 ALLOWED_EXTENSIONS = {"wav", "mp3"}
