@@ -43,7 +43,7 @@ def generate_voice_embedding(audio_path: str, user_id: str = None, **extra_metad
         # Generate embedding
         embedding = voice_encoder.embed_utterance(wav)
         print(f"[DEBUG] Generated embedding shape: {embedding.shape}")
-          # Store in ChromaDB using the existing vector_db
+        # Store in ChromaDB using the existing vector_db
         embedding_id = str(uuid.uuid4())
         print(f"[DEBUG] Storing embedding with ID: {embedding_id}")
         
