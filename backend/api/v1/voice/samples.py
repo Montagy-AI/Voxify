@@ -53,8 +53,8 @@ def check_duplicate_sample(new_embedding: np.ndarray, user_id: str, session) -> 
     Returns:
         Existing VoiceSample if duplicate found, None otherwise
     """
-    print(f"[DEBUG] Checking for duplicates for user {user_id}")
-    print(f"[DEBUG] New embedding shape: {new_embedding.shape if new_embedding is not None else 'None'}")
+    logger.debug(f"Checking for duplicates for user {user_id}")
+    logger.debug(f"New embedding shape: {new_embedding.shape if new_embedding is not None else 'None'}")
     
     # Debug ChromaDB status
     debug_chromadb_status()
