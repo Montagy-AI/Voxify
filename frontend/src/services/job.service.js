@@ -12,11 +12,11 @@ class JobService {
         params: {
           sort_by: 'created_at',
           sort_order: 'desc',
-          limit: 100
+          limit: 100,
         },
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
       return response.data.data;
     } catch (error) {
@@ -37,8 +37,8 @@ class JobService {
 
       const response = await api.get(`/job/${jobId}`, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
       return response.data.data;
     } catch (error) {
@@ -53,19 +53,23 @@ class JobService {
         throw new Error('No authentication token found');
       }
 
-      const response = await api.post('/job', {
-        voice_model_id: voiceModelId,
-        text_content: text,
-        output_format: config.outputFormat || 'wav',
-        sample_rate: config.sampleRate || 22050,
-        speed: config.speed || 1.0,
-        pitch: config.pitch || 1.0,
-        volume: config.volume || 1.0
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      const response = await api.post(
+        '/job',
+        {
+          voice_model_id: voiceModelId,
+          text_content: text,
+          output_format: config.outputFormat || 'wav',
+          sample_rate: config.sampleRate || 22050,
+          speed: config.speed || 1.0,
+          pitch: config.pitch || 1.0,
+          volume: config.volume || 1.0,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
       return response.data.data;
     } catch (error) {
       throw error.response?.data?.error || error;
@@ -79,11 +83,15 @@ class JobService {
         throw new Error('No authentication token found');
       }
 
-      const response = await api.post(`/job/${jobId}/cancel`, {}, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      const response = await api.post(
+        `/job/${jobId}/cancel`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
       return response.data.success;
     } catch (error) {
       throw error.response?.data?.error || error;
@@ -100,8 +108,8 @@ class JobService {
       const response = await api.get(`/job/${jobId}/download`, {
         responseType: 'blob',
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
       return response.data;
     } catch (error) {
@@ -111,4 +119,4 @@ class JobService {
 }
 
 const jobService = new JobService();
-export default jobService; 
+export default jobService;

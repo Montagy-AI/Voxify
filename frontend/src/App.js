@@ -1,8 +1,15 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import VoiceClone from './pages/VoiceClone';
 import TextToSpeech from './pages/TextToSpeech';
@@ -40,78 +47,133 @@ function App() {
         <Navbar />
         <Routes>
           {/* Public Routes */}
-          <Route path="/login" element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          } />
-          <Route path="/signup" element={
-            <PublicRoute>
-              <Register />
-            </PublicRoute>
-          } />
-          <Route path="/register" element={
-            <PublicRoute>
-              <Register />
-            </PublicRoute>
-          } />
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <PublicRoute>
+                <Register />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <PublicRoute>
+                <Register />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicRoute>
+                <ForgotPassword />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/reset-password"
+            element={
+              <PublicRoute>
+                <ResetPassword />
+              </PublicRoute>
+            }
+          />
 
           {/* Protected Routes */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/voice-clone" element={
-            <ProtectedRoute>
-              <VoiceClone />
-            </ProtectedRoute>
-          } />
-          <Route path="/text-to-speech" element={
-            <ProtectedRoute>
-              <TextToSpeech />
-            </ProtectedRoute>
-          } />
-          <Route path="/tasks" element={
-            <ProtectedRoute>
-              <Tasks />
-            </ProtectedRoute>
-          } />
-          <Route path="/tasks/voice-clone" element={
-            <ProtectedRoute>
-              <VoiceClone />
-            </ProtectedRoute>
-          } />
-          <Route path="/tasks/text-to-speech" element={
-            <ProtectedRoute>
-              <TextToSpeech />
-            </ProtectedRoute>
-          } />
-          <Route path="/tasks/list" element={
-            <ProtectedRoute>
-              <Tasks />
-            </ProtectedRoute>
-          } />
-          <Route path="/voices" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/settings" element={
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          } />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/voice-clone"
+            element={
+              <ProtectedRoute>
+                <VoiceClone />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/text-to-speech"
+            element={
+              <ProtectedRoute>
+                <TextToSpeech />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tasks"
+            element={
+              <ProtectedRoute>
+                <Tasks />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tasks/voice-clone"
+            element={
+              <ProtectedRoute>
+                <VoiceClone />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tasks/text-to-speech"
+            element={
+              <ProtectedRoute>
+                <TextToSpeech />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tasks/list"
+            element={
+              <ProtectedRoute>
+                <Tasks />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/voices"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
 
-          <Route path="/help" element={
-            <HelpPage />
-          } />
+          <Route path="/help" element={<HelpPage />} />
 
           {/* Redirect root to dashboard or login */}
-          <Route path="/" element={
-            <Navigate to={authService.isAuthenticated() ? "/dashboard" : "/login"} replace />
-          } />
-
+          <Route
+            path="/"
+            element={
+              <Navigate
+                to={authService.isAuthenticated() ? '/dashboard' : '/login'}
+                replace
+              />
+            }
+          />
         </Routes>
       </div>
     </Router>

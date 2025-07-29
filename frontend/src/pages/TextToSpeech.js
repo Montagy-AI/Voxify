@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import jobService from '../services/job.service';
 import voiceCloneService from '../services/voiceClone.service';
-import { createAudioUrl } from '../services/api';
+// import { createAudioUrl } from '../services/api';
 import apiConfig from '../config/api.config';
 
 const TextToSpeech = () => {
@@ -16,7 +16,7 @@ const TextToSpeech = () => {
     volume: 1.0,
     outputFormat: 'wav',
     sampleRate: 22050,
-    language: 'en-US'
+    language: 'en-US',
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -57,13 +57,16 @@ const TextToSpeech = () => {
       try {
         // If audio source is not set, fetch it first
         if (!audioRef.current?.src || audioRef.current.src === '') {
-          const audioBlob = await fetchAudioBlob(generatedAudio.jobId, generatedAudio.voiceType === 'clone');
+          const audioBlob = await fetchAudioBlob(
+            generatedAudio.jobId,
+            generatedAudio.voiceType === 'clone'
+          );
           if (audioBlob && audioRef.current) {
             const audioUrl = URL.createObjectURL(audioBlob);
             audioRef.current.src = audioUrl;
           }
         }
-        
+
         if (audioRef.current) {
           await audioRef.current.play();
           setIsPlaying(true);
@@ -77,13 +80,15 @@ const TextToSpeech = () => {
 
   const fetchAudioBlob = async (jobId, isVoiceClone) => {
     try {
-      const endpoint = isVoiceClone ? `/file/voice-clone/${jobId}` : `/file/synthesis/${jobId}`;
+      const endpoint = isVoiceClone
+        ? `/file/voice-clone/${jobId}`
+        : `/file/synthesis/${jobId}`;
       const token = localStorage.getItem('access_token');
-      
+
       const response = await fetch(`${apiConfig.apiBaseUrl}${endpoint}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -110,18 +115,21 @@ const TextToSpeech = () => {
 
   const handleDownload = async () => {
     if (!generatedAudio?.jobId) return;
-    
+
     try {
-      const audioBlob = await fetchAudioBlob(generatedAudio.jobId, generatedAudio.voiceType === 'clone');
+      const audioBlob = await fetchAudioBlob(
+        generatedAudio.jobId,
+        generatedAudio.voiceType === 'clone'
+      );
       const audioUrl = URL.createObjectURL(audioBlob);
-      
+
       const link = document.createElement('a');
       link.href = audioUrl;
       link.download = `speech_${generatedAudio.jobId}.wav`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       // Clean up the URL after download
       setTimeout(() => URL.revokeObjectURL(audioUrl), 1000);
     } catch (error) {
@@ -142,11 +150,11 @@ const TextToSpeech = () => {
     if (!text.trim() || !voice) return;
 
     setIsGenerating(true);
-    
+
     try {
       // Simulate progress while actually generating
       const progressInterval = setInterval(() => {
-        setProgress(prev => {
+        setProgress((prev) => {
           if (prev >= 90) {
             clearInterval(progressInterval);
             return 90;
@@ -161,15 +169,15 @@ const TextToSpeech = () => {
         result = await voiceCloneService.synthesizeWithClone(voice, text, {
           language: config.language,
           outputFormat: config.outputFormat,
-          sampleRate: config.sampleRate
+          sampleRate: config.sampleRate,
         });
       } else {
         // Use traditional synthesis job
         result = await jobService.createSynthesisJob(voice, text, config);
       }
-      
+
       setProgress(100);
-      
+
       if (result.success) {
         // Store generated audio information
         setGeneratedAudio({
@@ -178,12 +186,13 @@ const TextToSpeech = () => {
           jobId: result.data?.job_id,
           language: config.language,
           voiceType: voiceType,
-          voiceName: voiceType === 'clone' 
-            ? voiceClones.find(clone => clone.clone_id === voice)?.name 
-            : voice,
-          createdAt: new Date().toISOString()
+          voiceName:
+            voiceType === 'clone'
+              ? voiceClones.find((clone) => clone.clone_id === voice)?.name
+              : voice,
+          createdAt: new Date().toISOString(),
         });
-        
+
         // Don't reset form immediately, let user play the audio first
         // setText('');
         // setVoice('');
@@ -205,7 +214,10 @@ const TextToSpeech = () => {
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Text Input */}
           <div>
-            <label htmlFor="text" className="block text-sm font-medium text-gray-300 mb-2">
+            <label
+              htmlFor="text"
+              className="block text-sm font-medium text-gray-300 mb-2"
+            >
               Text
             </label>
             <textarea
@@ -257,8 +269,13 @@ const TextToSpeech = () => {
 
           {/* Voice Selection */}
           <div>
-            <label htmlFor="voice" className="block text-sm font-medium text-gray-300 mb-2">
-              {voiceType === 'clone' ? 'Select Voice Clone' : 'Select System Voice'}
+            <label
+              htmlFor="voice"
+              className="block text-sm font-medium text-gray-300 mb-2"
+            >
+              {voiceType === 'clone'
+                ? 'Select Voice Clone'
+                : 'Select System Voice'}
             </label>
             {voiceType === 'clone' ? (
               <select
@@ -269,7 +286,9 @@ const TextToSpeech = () => {
                 disabled={isGenerating || loadingClones}
               >
                 <option value="">
-                  {loadingClones ? 'Loading voice clones...' : 'Select a voice clone'}
+                  {loadingClones
+                    ? 'Loading voice clones...'
+                    : 'Select a voice clone'}
                 </option>
                 {voiceClones.map((clone) => (
                   <option key={clone.clone_id} value={clone.clone_id}>
@@ -300,16 +319,36 @@ const TextToSpeech = () => {
           {/* Selected Voice Clone Info */}
           {voiceType === 'clone' && voice && (
             <div className="bg-zinc-900 border border-zinc-800 rounded p-4">
-              <h3 className="text-lg font-semibold mb-2">Selected Voice Clone</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                Selected Voice Clone
+              </h3>
               {(() => {
-                const selectedClone = voiceClones.find(clone => clone.clone_id === voice);
+                const selectedClone = voiceClones.find(
+                  (clone) => clone.clone_id === voice
+                );
                 if (selectedClone) {
                   return (
                     <div className="space-y-2 text-sm text-gray-300">
-                      <div><strong>Name:</strong> {selectedClone.name}</div>
-                      <div><strong>Language:</strong> {selectedClone.language}</div>
-                      <div><strong>Status:</strong> <span className={`${selectedClone.status === 'ready' ? 'text-green-400' : 'text-yellow-400'}`}>{selectedClone.status}</span></div>
-                      <div><strong>Created:</strong> {new Date(selectedClone.created_at).toLocaleDateString()}</div>
+                      <div>
+                        <strong>Name:</strong> {selectedClone.name}
+                      </div>
+                      <div>
+                        <strong>Language:</strong> {selectedClone.language}
+                      </div>
+                      <div>
+                        <strong>Status:</strong>{' '}
+                        <span
+                          className={`${selectedClone.status === 'ready' ? 'text-green-400' : 'text-yellow-400'}`}
+                        >
+                          {selectedClone.status}
+                        </span>
+                      </div>
+                      <div>
+                        <strong>Created:</strong>{' '}
+                        {new Date(
+                          selectedClone.created_at
+                        ).toLocaleDateString()}
+                      </div>
                     </div>
                   );
                 }
@@ -324,31 +363,69 @@ const TextToSpeech = () => {
             <div className="space-y-4">
               {/* Language Selection */}
               <div>
-                <label htmlFor="language" className="block text-sm font-medium text-gray-300 mb-2">
+                <label
+                  htmlFor="language"
+                  className="block text-sm font-medium text-gray-300 mb-2"
+                >
                   Language
                 </label>
                 <select
                   id="language"
                   value={config.language}
-                  onChange={(e) => setConfig(prev => ({ ...prev, language: e.target.value }))}
+                  onChange={(e) =>
+                    setConfig((prev) => ({ ...prev, language: e.target.value }))
+                  }
                   className="w-full rounded border border-zinc-800 bg-zinc-900 px-4 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
                   disabled={isGenerating}
                 >
-                  <option value="en-US">English (US)</option>
-                  <option value="en-GB">English (UK)</option>
-                  <option value="zh-CN">Chinese (Simplified)</option>
+                  {/* Native multilingual support */}
+                  <optgroup label="Native Support (Best Quality)">
+                    <option value="zh-CN">Chinese (Simplified)</option>
+                    <option value="zh-TW">Chinese (Traditional)</option>
+                    <option value="en-US">English (US)</option>
+                    <option value="en-GB">English (UK)</option>
+                  </optgroup>
+
+                  {/* Specialized model support */}
+                  <optgroup label="Specialized Models (High Quality)">
+                    <option value="ja-JP">Japanese</option>
+                    <option value="fr-FR">French</option>
+                    <option value="de-DE">German</option>
+                    <option value="es-ES">Spanish</option>
+                    <option value="it-IT">Italian</option>
+                    <option value="ru-RU">Russian</option>
+                    <option value="hi-IN">Hindi</option>
+                    <option value="fi-FI">Finnish</option>
+                  </optgroup>
+
+                  {/* Fallback support */}
+                  <optgroup label="Basic Support (Limited Quality)">
+                    <option value="ko-KR">Korean</option>
+                    <option value="pt-BR">Portuguese</option>
+                    <option value="ar-SA">Arabic</option>
+                    <option value="th-TH">Thai</option>
+                    <option value="vi-VN">Vietnamese</option>
+                  </optgroup>
                 </select>
               </div>
 
               {/* Speed Control */}
               <div>
-                <label htmlFor="speed" className="block text-sm font-medium text-gray-300 mb-2">
+                <label
+                  htmlFor="speed"
+                  className="block text-sm font-medium text-gray-300 mb-2"
+                >
                   Speed
                 </label>
                 <select
                   id="speed"
                   value={config.speed}
-                  onChange={(e) => setConfig(prev => ({ ...prev, speed: parseFloat(e.target.value) }))}
+                  onChange={(e) =>
+                    setConfig((prev) => ({
+                      ...prev,
+                      speed: parseFloat(e.target.value),
+                    }))
+                  }
                   className="w-full rounded border border-zinc-800 bg-zinc-900 px-4 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
                   disabled={isGenerating}
                 >
@@ -360,13 +437,21 @@ const TextToSpeech = () => {
 
               {/* Pitch Control */}
               <div>
-                <label htmlFor="pitch" className="block text-sm font-medium text-gray-300 mb-2">
+                <label
+                  htmlFor="pitch"
+                  className="block text-sm font-medium text-gray-300 mb-2"
+                >
                   Pitch
                 </label>
                 <select
                   id="pitch"
                   value={config.pitch}
-                  onChange={(e) => setConfig(prev => ({ ...prev, pitch: parseFloat(e.target.value) }))}
+                  onChange={(e) =>
+                    setConfig((prev) => ({
+                      ...prev,
+                      pitch: parseFloat(e.target.value),
+                    }))
+                  }
                   className="w-full rounded border border-zinc-800 bg-zinc-900 px-4 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
                   disabled={isGenerating}
                 >
@@ -378,13 +463,21 @@ const TextToSpeech = () => {
 
               {/* Volume Control */}
               <div>
-                <label htmlFor="volume" className="block text-sm font-medium text-gray-300 mb-2">
+                <label
+                  htmlFor="volume"
+                  className="block text-sm font-medium text-gray-300 mb-2"
+                >
                   Volume
                 </label>
                 <select
                   id="volume"
                   value={config.volume}
-                  onChange={(e) => setConfig(prev => ({ ...prev, volume: parseFloat(e.target.value) }))}
+                  onChange={(e) =>
+                    setConfig((prev) => ({
+                      ...prev,
+                      volume: parseFloat(e.target.value),
+                    }))
+                  }
                   className="w-full rounded border border-zinc-800 bg-zinc-900 px-4 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
                   disabled={isGenerating}
                 >
@@ -418,15 +511,16 @@ const TextToSpeech = () => {
               type="submit"
               disabled={!text.trim() || !voice || isGenerating}
               className={`w-full px-6 py-3 rounded text-center font-semibold border-2 border-white hover:bg-white hover:text-black transition-colors ${
-                (!text.trim() || !voice || isGenerating) ? 'opacity-50 cursor-not-allowed' : ''
+                !text.trim() || !voice || isGenerating
+                  ? 'opacity-50 cursor-not-allowed'
+                  : ''
               }`}
             >
-              {isGenerating 
-                ? 'Generating...' 
-                : voiceType === 'clone' 
-                  ? 'Generate with Voice Clone' 
-                  : 'Generate speech'
-              }
+              {isGenerating
+                ? 'Generating...'
+                : voiceType === 'clone'
+                  ? 'Generate with Voice Clone'
+                  : 'Generate speech'}
             </button>
           </div>
         </form>
@@ -435,14 +529,31 @@ const TextToSpeech = () => {
         {generatedAudio && (
           <div className="mt-8 bg-zinc-900 border border-zinc-800 rounded-lg p-6">
             <h2 className="text-2xl font-semibold mb-4">Generated Audio</h2>
-            
+
             {/* Audio Information */}
             <div className="mb-4 space-y-2 text-sm text-gray-300">
-              <div><strong>Text:</strong> {generatedAudio.text.length > 100 ? `${generatedAudio.text.substring(0, 100)}...` : generatedAudio.text}</div>
-              <div><strong>Voice Type:</strong> {generatedAudio.voiceType === 'clone' ? 'Voice Clone' : 'System Voice'}</div>
-              <div><strong>Voice Name:</strong> {generatedAudio.voiceName}</div>
-              <div><strong>Language:</strong> {generatedAudio.language}</div>
-              <div><strong>Generated At:</strong> {new Date(generatedAudio.createdAt).toLocaleString('en-US')}</div>
+              <div>
+                <strong>Text:</strong>{' '}
+                {generatedAudio.text.length > 100
+                  ? `${generatedAudio.text.substring(0, 100)}...`
+                  : generatedAudio.text}
+              </div>
+              <div>
+                <strong>Voice Type:</strong>{' '}
+                {generatedAudio.voiceType === 'clone'
+                  ? 'Voice Clone'
+                  : 'System Voice'}
+              </div>
+              <div>
+                <strong>Voice Name:</strong> {generatedAudio.voiceName}
+              </div>
+              <div>
+                <strong>Language:</strong> {generatedAudio.language}
+              </div>
+              <div>
+                <strong>Generated At:</strong>{' '}
+                {new Date(generatedAudio.createdAt).toLocaleString('en-US')}
+              </div>
             </div>
 
             {/* Audio Player Controls */}
@@ -454,7 +565,7 @@ const TextToSpeech = () => {
                 <span>{isPlaying ? '⏸️' : '▶️'}</span>
                 <span>{isPlaying ? 'Pause' : 'Play'}</span>
               </button>
-              
+
               <button
                 onClick={handleDownload}
                 className="flex items-center space-x-2 px-4 py-2 border border-white text-white rounded hover:bg-white hover:text-black transition-colors"
@@ -462,7 +573,7 @@ const TextToSpeech = () => {
                 <span>⬇️</span>
                 <span>Download</span>
               </button>
-              
+
               <button
                 onClick={handleNewGeneration}
                 className="flex items-center space-x-2 px-4 py-2 border border-zinc-600 text-gray-300 rounded hover:bg-zinc-800 transition-colors"
@@ -483,7 +594,9 @@ const TextToSpeech = () => {
 
             {/* Audio Waveform Visualization (placeholder) */}
             <div className="h-16 bg-zinc-800 rounded flex items-center justify-center text-gray-400">
-              <span>🎵 Audio Waveform (Playing: {isPlaying ? 'Yes' : 'No'})</span>
+              <span>
+                🎵 Audio Waveform (Playing: {isPlaying ? 'Yes' : 'No'})
+              </span>
             </div>
           </div>
         )}
@@ -492,4 +605,4 @@ const TextToSpeech = () => {
   );
 };
 
-export default TextToSpeech; 
+export default TextToSpeech;
