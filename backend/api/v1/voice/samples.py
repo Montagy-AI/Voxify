@@ -15,7 +15,7 @@ from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from database import get_database_manager
 from database.models import VoiceSample
-from .embeddings import generate_voice_embedding, delete_voice_embedding, get_voice_embedding, compare_embeddings
+from .embeddings import generate_voice_embedding, delete_voice_embedding, get_voice_embedding, compare_embeddings, debug_chromadb_status
 
 # Import the blueprint from __init__.py
 from . import voice_bp
@@ -24,7 +24,7 @@ from . import voice_bp
 ALLOWED_EXTENSIONS = {'wav', 'mp3'}
 
 # Similarity threshold for duplicate detection (adjust as needed)
-DUPLICATE_THRESHOLD = 0.95
+DUPLICATE_THRESHOLD = 0.85
 
 def allowed_file(filename: str) -> bool:
     """Check if the file extension is allowed."""
@@ -52,6 +52,12 @@ def check_duplicate_sample(new_embedding: np.ndarray, user_id: str, session) -> 
     Returns:
         Existing VoiceSample if duplicate found, None otherwise
     """
+    print(f"[DEBUG] Checking for duplicates for user {user_id}")
+    print(f"[DEBUG] New embedding shape: {new_embedding.shape if new_embedding is not None else 'None'}")
+    
+    # Debug ChromaDB status
+    debug_chromadb_status()
+    
     # Get all existing samples for the user that have embeddings
     existing_samples = session.query(VoiceSample).filter(
         VoiceSample.user_id == user_id,
@@ -138,9 +144,15 @@ def upload_voice_sample():
         
         # Extract audio metadata
         metadata = extract_audio_metadata(str(permanent_path))
-        
-        # Generate voice embedding
-        embedding_id, embedding = generate_voice_embedding(str(permanent_path))
+          # Generate voice embedding
+        embedding_id, embedding = generate_voice_embedding(
+            str(permanent_path), 
+            user_id=user_id,
+            name=name,
+            duration=metadata['duration'],
+            sample_rate=metadata['sample_rate'],
+            channels=metadata['channels']
+        )
         
         # Get database session
         db = get_database_manager()
@@ -150,10 +162,25 @@ def upload_voice_sample():
             # Check for duplicates
             duplicate_sample = check_duplicate_sample(embedding, user_id, session)
             if duplicate_sample:
+                # Clean up the uploaded file since it's a duplicate
+                try:
+                    permanent_path.unlink()
+                    print(f"[DEBUG] Cleaned up duplicate file: {permanent_path}")
+                except Exception as cleanup_error:
+                    print(f"[DEBUG] Error cleaning up duplicate file: {cleanup_error}")
+                
+                # Clean up the embedding since we don't need it
+                try:
+                    delete_voice_embedding(embedding_id)
+                    print(f"[DEBUG] Cleaned up duplicate embedding: {embedding_id}")
+                except Exception as cleanup_error:
+                    print(f"[DEBUG] Error cleaning up duplicate embedding: {cleanup_error}")
+                
                 return jsonify({
                     'success': False,
                     'error': 'Duplicate voice sample detected',
-                    'duplicate_sample_id': duplicate_sample.id
+                    'duplicate_sample_id': duplicate_sample.id,
+                    'duplicate_sample_name': duplicate_sample.name
                 }), 400
             
             voice_sample = VoiceSample(

@@ -137,8 +137,7 @@ class ChromaVectorDB:
             "is_public": metadata.get("is_public", False),
             "created_at": metadata.get("created_at")
         }
-        
-        # Remove None values
+          # Remove None values
         enhanced_metadata = {k: v for k, v in enhanced_metadata.items() if v is not None}
         
         collection.add(
@@ -149,8 +148,6 @@ class ChromaVectorDB:
         )
         
         logger.debug(f"Added voice embedding for sample: {voice_sample_id}")
-
-
     def get_embedding(self, sample_id: str) -> Dict[str, List]:
         """
         Search for the voice embedding with the given sample_id
@@ -166,7 +163,7 @@ class ChromaVectorDB:
             A dictionary containing the embedding, metadata, and document for the given sample ID.
         """
 
-        return self.get_collection().get(ids=[sample_id])
+        return self.get_collection().get(ids=[sample_id], include=["embeddings", "metadatas", "documents"])
 
     
     def update_embedding_metadata(self,
