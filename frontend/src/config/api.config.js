@@ -4,8 +4,8 @@ const config = {
   apiBaseUrl:
     process.env.REACT_APP_API_BASE_URL ||
     (process.env.NODE_ENV === 'development'
-      ? 'http://localhost:8000/api/v1' // 开发环境默认
-      : process.env.REACT_APP_PROD_API_URL), // 生产环境必须提供URL
+      ? 'http://localhost:8000/api/v1' // Dev environment default
+      : process.env.REACT_APP_PROD_API_URL), // Production environment
 
   // Development environment detection
   isDevelopment: process.env.NODE_ENV === 'development',

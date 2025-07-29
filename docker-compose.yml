@@ -67,7 +67,9 @@ services:
       api:
         condition: service_healthy
     volumes:
+      - .:/app
       - data_volume:/data
+    working_dir: /app/backend
     environment:
       - DATABASE_URL=sqlite:////data/voxify.db
       - VECTOR_DB_PATH=data/chroma_db
@@ -79,6 +81,24 @@ services:
         "-c",
         "python -m pytest tests/ -v && python -m unittest discover -s tests -p 'test_*.py' -v",
       ]
+    restart: "no"
+
+  frontend-tests:
+    build:
+      context: ./frontend/
+      dockerfile: Dockerfile.test
+    container_name: voxify_frontend_tests
+    depends_on:
+      api:
+        condition: service_healthy
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    working_dir: /app
+    environment:
+      - REACT_APP_API_URL=http://voxify_api:8000
+      - CI=true
+    command: ["npm", "run", "test:ci"]
     restart: "no"
 
   snyk-security:
