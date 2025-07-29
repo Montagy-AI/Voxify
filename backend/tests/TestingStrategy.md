@@ -5,11 +5,16 @@
 This project implements a comprehensive automated testing strategy to ensure the reliability, security, and performance of the Voxify backend API. The testing framework covers all major components including authentication, voice processing, job management, file operations, and database operations.
 
 **Key Statistics:**
-- **Total Test Cases:** 464 tests
-- **Overall Coverage:** 89% (7,120/8,039 lines covered)
-- **Execution Time:** 156.42 seconds
+- **Total Test Cases:** 512 tests (492 passed, 20 skipped)
+- **Overall Coverage:** 84% (7,602/9,022 lines covered)
+- **Execution Time:** 91.46 seconds
 - **Test Files:** 20+ comprehensive test files
 - **Framework:** pytest with comprehensive fixtures and mocking
+
+**Test Coverage Targets:**
+- **D2 Target Coverage:** 54%
+- **D3 Expected Coverage:** 75%
+- **Current Test Coverage:** 84%
 
 ## 2. Test Framework and Tools
 
@@ -218,7 +223,7 @@ This project implements a comprehensive automated testing strategy to ensure the
 
 ## 4. Test Coverage Analysis
 
-### 4.1 Overall Project Coverage: 89%
+### 4.1 Overall Project Coverage: 84%
 
 | Module | Statements | Covered | Missing | Coverage % |
 |--------|------------|---------|---------|------------|
@@ -263,11 +268,11 @@ This project implements a comprehensive automated testing strategy to ensure the
 ## 5. Test Execution Statistics
 
 ### 5.1 Latest Test Run Results
-- **Total Test Cases:** 464
-- **Test Pass Rate:** 100%
-- **Execution Time:** 156.42s (2 minutes 36 seconds)
-- **Average Test Time:** 0.34s per test
-- **Warnings:** 10 (mostly deprecation warnings)
+- **Total Test Cases:** 512 (492 passed, 20 skipped)
+- **Test Pass Rate:** 96.1% (492/512)
+- **Execution Time:** 91.46s (1 minute 31 seconds)
+- **Average Test Time:** 0.18s per test
+- **Warnings:** 7 (mostly deprecation warnings)
 
 ### 5.2 Test File Statistics
 | Test File | Lines | Missing | Coverage % |
@@ -290,14 +295,14 @@ This project implements a comprehensive automated testing strategy to ensure the
 ### 5.3 Test Categories Distribution
 | Category | Test Count | Percentage |
 |----------|------------|------------|
-| Database Tests | 60+ | 13% |
-| Authentication Tests | 80+ | 17% |
-| Voice Unit Tests | 56 | 12% |
+| Database Tests | 60+ | 12% |
+| Authentication Tests | 80+ | 16% |
+| Voice Unit Tests | 56 | 11% |
 | Voice Service Tests | 25+ | 5% |
 | Voice Integration Tests | 5 | 1% |
 | Voice Performance Tests | 10+ | 2% |
 | Voice Extended Tests | 15+ | 3% |
-| Voice Error Handling Tests | 40+ | 9% |
+| Voice Error Handling Tests | 40+ | 8% |
 | Voice Embedding Tests | 25+ | 5% |
 | F5-TTS Service Tests | 30+ | 6% |
 | Job Management Tests | 18+ | 4% |
@@ -415,8 +420,8 @@ python -m pytest tests/test_v1_voice/ -v  # Voice tests
 ## 9. Performance Benchmarks
 
 ### 9.1 Current Performance Metrics
-- **Test Execution Time:** 156.42s for 464 tests
-- **Average Test Time:** 0.34s per test
+- **Test Execution Time:** 91.46s for 512 tests
+- **Average Test Time:** 0.18s per test
 - **Memory Usage:** Monitored during performance tests
 - **CPU Usage:** Tracked for system resource validation
 
@@ -477,10 +482,10 @@ python -m pytest tests/test_v1_voice/ -v  # Voice tests
 
 ---
 
-**Last Updated:** December 2024
+**Last Updated:** July 2024
 **Test Framework:** pytest
-**Coverage Target:** 90%+ (currently 89% overall)
+**Coverage Target:** 90%+ (currently 84% overall)
 **Total Test Files:** 20+
-**Total Test Cases:** 464
-**Latest Test Run:** 464 passed, 10 warnings in 156.42s
+**Total Test Cases:** 512
+**Latest Test Run:** 492 passed, 20 skipped, 7 warnings in 91.46s
 **Test Execution Environment:** Windows 10, Python 3.11.4, pytest 7.4.0 
