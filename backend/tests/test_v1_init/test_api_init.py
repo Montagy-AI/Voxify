@@ -16,9 +16,7 @@ def setup_import_path():
     Add backend directory to Python path and verify api/__init__.py exists.
     """
     current_dir = os.path.dirname(__file__)
-    api_init_path = os.path.abspath(
-        os.path.join(current_dir, "../../../backend", "api", "__init__.py")
-    )
+    api_init_path = os.path.abspath(os.path.join(current_dir, "../../../backend", "api", "__init__.py"))
 
     # Verify file exists and is readable
     if not os.path.exists(api_init_path):

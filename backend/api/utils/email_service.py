@@ -68,9 +68,7 @@ class EmailService:
         """
         try:
             # Generate email content
-            subject, html_content, text_content = self._get_reset_email_template(
-                reset_token, user_name
-            )
+            subject, html_content, text_content = self._get_reset_email_template(reset_token, user_name)
 
             # Send email
             return self._send_email(to_email, subject, html_content, text_content)
@@ -142,9 +140,7 @@ class EmailService:
             logger.error(error_msg)
             return False, error_msg
         except smtplib.SMTPRecipientsRefused:
-            error_msg = (
-                f"Recipient email address '{to_email}' was refused by the server."
-            )
+            error_msg = f"Recipient email address '{to_email}' was refused by the server."
             logger.error(error_msg)
             return False, error_msg
         except smtplib.SMTPException as e:
@@ -156,9 +152,7 @@ class EmailService:
             logger.error(error_msg)
             return False, error_msg
 
-    def _get_reset_email_template(
-        self, reset_token: str, user_name: Optional[str] = None
-    ) -> Tuple[str, str, str]:
+    def _get_reset_email_template(self, reset_token: str, user_name: Optional[str] = None) -> Tuple[str, str, str]:
         """
         Generate password reset email template
 

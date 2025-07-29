@@ -26,9 +26,7 @@ class TestVoiceServicePerformance:
             import requests
 
             response = requests.get(f"{server_url}/api/v1/auth/login", timeout=5)
-            assert (
-                response.status_code == 405
-            ), f"Unexpected status code: {response.status_code}"
+            assert response.status_code == 405, f"Unexpected status code: {response.status_code}"
         except Exception as e:
             pytest.skip(f"Server not available: {e}")
 
@@ -74,9 +72,7 @@ class TestVoiceServicePerformance:
             "-H",
             "Content-Type: application/json",
             "-d",
-            json.dumps(
-                {"email": test_user["email"], "password": test_user["password"]}
-            ),
+            json.dumps({"email": test_user["email"], "password": test_user["password"]}),
         ]
         result = subprocess.run(login_cmd, capture_output=True, text=True)
         response = json.loads(result.stdout)
@@ -90,9 +86,7 @@ class TestVoiceServicePerformance:
         """Use the local file_example_WAV_1MG.wav as the test audio file."""
         return os.path.join(os.path.dirname(__file__), "file_example_WAV_1MG.wav")
 
-    def test_upload_performance_single_file(
-        self, server_url, auth_tokens, test_audio_file
-    ):
+    def test_upload_performance_single_file(self, server_url, auth_tokens, test_audio_file):
         """Test performance of single file upload"""
         start_time = time.time()
 
@@ -126,9 +120,7 @@ class TestVoiceServicePerformance:
             else:
                 assert False, f"Upload failed: {upload_response}"
         else:
-            assert (
-                upload_response.get("success") is True
-            ), f"Upload failed: {upload_response}"
+            assert upload_response.get("success") is True, f"Upload failed: {upload_response}"
 
         # Performance assertions
         assert upload_time < 30.0, f"Upload took too long: {upload_time:.2f}s"
@@ -137,9 +129,7 @@ class TestVoiceServicePerformance:
 
         return upload_response["data"]["sample_id"]
 
-    def test_upload_performance_multiple_files(
-        self, server_url, auth_tokens, test_audio_file
-    ):
+    def test_upload_performance_multiple_files(self, server_url, auth_tokens, test_audio_file):
         """Test performance of multiple file uploads"""
         upload_times = []
         sample_ids = []
@@ -174,15 +164,11 @@ class TestVoiceServicePerformance:
             if upload_response.get("success") is False:
                 error_msg = upload_response.get("error", "")
                 if "Duplicate voice sample detected" in error_msg:
-                    pytest.skip(
-                        f"Upload {i+1} failed due to duplicate detection: {error_msg}"
-                    )
+                    pytest.skip(f"Upload {i+1} failed due to duplicate detection: {error_msg}")
                 else:
                     assert False, f"Upload {i+1} failed: {upload_response}"
             else:
-                assert (
-                    upload_response.get("success") is True
-                ), f"Upload {i+1} failed: {upload_response}"
+                assert upload_response.get("success") is True, f"Upload {i+1} failed: {upload_response}"
 
         # Performance analysis
         avg_upload_time = statistics.mean(upload_times)
@@ -195,18 +181,12 @@ class TestVoiceServicePerformance:
         print(f"  Max time: {max_upload_time:.2f}s")
 
         # Performance assertions
-        assert (
-            avg_upload_time < 30.0
-        ), f"Average upload time too long: {avg_upload_time:.2f}s"
-        assert (
-            max_upload_time < 60.0
-        ), f"Max upload time too long: {max_upload_time:.2f}s"
+        assert avg_upload_time < 30.0, f"Average upload time too long: {avg_upload_time:.2f}s"
+        assert max_upload_time < 60.0, f"Max upload time too long: {max_upload_time:.2f}s"
 
         return sample_ids
 
-    def test_concurrent_upload_performance(
-        self, server_url, auth_tokens, test_audio_file
-    ):
+    def test_concurrent_upload_performance(self, server_url, auth_tokens, test_audio_file):
         """Test performance of concurrent file uploads"""
         results = []
         upload_times = []
@@ -281,9 +261,7 @@ class TestVoiceServicePerformance:
         ]
 
         result = subprocess.run(upload_cmd, capture_output=True, text=True)
-        assert (
-            result.returncode == 0
-        ), f"Upload for clone performance test failed: {result.stderr}"
+        assert result.returncode == 0, f"Upload for clone performance test failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
 
@@ -293,9 +271,7 @@ class TestVoiceServicePerformance:
             if "Duplicate voice sample detected" in error_msg:
                 pytest.skip(f"Upload failed due to duplicate detection: {error_msg}")
             else:
-                assert (
-                    False
-                ), f"Upload for clone performance test failed: {upload_response}"
+                assert False, f"Upload for clone performance test failed: {upload_response}"
         else:
             assert (
                 upload_response.get("success") is True
@@ -333,16 +309,12 @@ class TestVoiceServicePerformance:
         assert result.returncode == 0, f"Clone creation failed: {result.stderr}"
 
         clone_response = json.loads(result.stdout)
-        assert (
-            clone_response.get("success") is True
-        ), f"Clone creation failed: {clone_response}"
+        assert clone_response.get("success") is True, f"Clone creation failed: {clone_response}"
 
         print(f"Clone creation time: {clone_creation_time:.2f}s")
 
         # Performance assertions
-        assert (
-            clone_creation_time < 120.0
-        ), f"Clone creation took too long: {clone_creation_time:.2f}s"
+        assert clone_creation_time < 120.0, f"Clone creation took too long: {clone_creation_time:.2f}s"
 
         return clone_response["data"]["clone_id"]
 
@@ -363,9 +335,7 @@ class TestVoiceServicePerformance:
         ]
 
         result = subprocess.run(upload_cmd, capture_output=True, text=True)
-        assert (
-            result.returncode == 0
-        ), f"Upload for synthesis performance test failed: {result.stderr}"
+        assert result.returncode == 0, f"Upload for synthesis performance test failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
 
@@ -375,9 +345,7 @@ class TestVoiceServicePerformance:
             if "Duplicate voice sample detected" in error_msg:
                 pytest.skip(f"Upload failed due to duplicate detection: {error_msg}")
             else:
-                assert (
-                    False
-                ), f"Upload for synthesis performance test failed: {upload_response}"
+                assert False, f"Upload for synthesis performance test failed: {upload_response}"
         else:
             assert (
                 upload_response.get("success") is True
@@ -406,9 +374,7 @@ class TestVoiceServicePerformance:
         ]
 
         result = subprocess.run(clone_cmd, capture_output=True, text=True)
-        assert (
-            result.returncode == 0
-        ), f"Clone creation for synthesis performance test failed: {result.stderr}"
+        assert result.returncode == 0, f"Clone creation for synthesis performance test failed: {result.stderr}"
 
         clone_response = json.loads(result.stdout)
         assert (
@@ -454,9 +420,7 @@ class TestVoiceServicePerformance:
             assert result.returncode == 0, f"Synthesis {i+1} failed: {result.stderr}"
 
             synthesis_response = json.loads(result.stdout)
-            assert (
-                synthesis_response.get("success") is True
-            ), f"Synthesis {i+1} failed: {synthesis_response}"
+            assert synthesis_response.get("success") is True, f"Synthesis {i+1} failed: {synthesis_response}"
 
         # Performance analysis
         avg_synthesis_time = statistics.mean(synthesis_times)
@@ -469,12 +433,8 @@ class TestVoiceServicePerformance:
         print(f"  Max time: {max_synthesis_time:.2f}s")
 
         # Performance assertions
-        assert (
-            avg_synthesis_time < 60.0
-        ), f"Average synthesis time too long: {avg_synthesis_time:.2f}s"
-        assert (
-            max_synthesis_time < 120.0
-        ), f"Max synthesis time too long: {max_synthesis_time:.2f}s"
+        assert avg_synthesis_time < 60.0, f"Average synthesis time too long: {avg_synthesis_time:.2f}s"
+        assert max_synthesis_time < 120.0, f"Max synthesis time too long: {max_synthesis_time:.2f}s"
 
     def test_list_operations_performance(self, server_url, auth_tokens):
         """Test performance of list operations"""
@@ -498,14 +458,10 @@ class TestVoiceServicePerformance:
             list_time = end_time - start_time
             list_times.append(list_time)
 
-            assert (
-                result.returncode == 0
-            ), f"List operation {i+1} failed: {result.stderr}"
+            assert result.returncode == 0, f"List operation {i+1} failed: {result.stderr}"
 
             list_response = json.loads(result.stdout)
-            assert (
-                list_response.get("success") is True
-            ), f"List operation {i+1} failed: {list_response}"
+            assert list_response.get("success") is True, f"List operation {i+1} failed: {list_response}"
 
         # Performance analysis
         avg_list_time = statistics.mean(list_times)
@@ -573,16 +529,12 @@ class TestVoiceServicePerformance:
             assert result.returncode == 0, f"Request {i+1} failed: {result.stderr}"
 
             list_response = json.loads(result.stdout)
-            assert (
-                list_response.get("success") is True
-            ), f"Request {i+1} failed: {list_response}"
+            assert list_response.get("success") is True, f"Request {i+1} failed: {list_response}"
 
         # Calculate consistency metrics
         avg_response_time = statistics.mean(response_times)
         std_response_time = statistics.stdev(response_times)
-        cv_response_time = (
-            std_response_time / avg_response_time if avg_response_time > 0 else 0
-        )
+        cv_response_time = std_response_time / avg_response_time if avg_response_time > 0 else 0
 
         print("Response time consistency:")
         print(f"  Average time: {avg_response_time:.3f}s")
@@ -590,12 +542,8 @@ class TestVoiceServicePerformance:
         print(f"  Coefficient of variation: {cv_response_time:.3f}")
 
         # Consistency assertions
-        assert (
-            cv_response_time < 0.5
-        ), f"Response time too inconsistent: CV = {cv_response_time:.3f}"
-        assert (
-            avg_response_time < 5.0
-        ), f"Average response time too long: {avg_response_time:.3f}s"
+        assert cv_response_time < 0.5, f"Response time too inconsistent: CV = {cv_response_time:.3f}"
+        assert avg_response_time < 5.0, f"Average response time too long: {avg_response_time:.3f}s"
 
     def test_concurrent_user_simulation(self, server_url, auth_tokens, test_audio_file):
         """Test concurrent user simulation"""

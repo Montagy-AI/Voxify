@@ -20,9 +20,7 @@ voice_encoder = VoiceEncoder()
 vector_db = create_vector_db()
 
 
-def generate_voice_embedding(
-    audio_path: str, user_id: str = None, **extra_metadata
-) -> Tuple[str, np.ndarray]:
+def generate_voice_embedding(audio_path: str, user_id: str = None, **extra_metadata) -> Tuple[str, np.ndarray]:
     """
     Generate voice embedding from audio file using Resemblyzer.
 
@@ -97,18 +95,14 @@ def get_voice_embedding(embedding_id: str) -> Optional[np.ndarray]:
             embedding_data = result["embeddings"][0]
             if embedding_data:
                 embedding_array = np.array(embedding_data)
-                print(
-                    f"[DEBUG] Successfully retrieved embedding, shape: {embedding_array.shape}"
-                )
+                print(f"[DEBUG] Successfully retrieved embedding, shape: {embedding_array.shape}")
                 return embedding_array
             else:
                 print(f"[DEBUG] Embedding data is empty for ID: {embedding_id}")
         else:
             print(f"[DEBUG] No embeddings found in result for ID: {embedding_id}")
             if result:
-                print(
-                    f"[DEBUG] Result structure: embeddings={result.get('embeddings')}, ids={result.get('ids')}"
-                )
+                print(f"[DEBUG] Result structure: embeddings={result.get('embeddings')}, ids={result.get('ids')}")
 
     except Exception as e:
         print(f"[DEBUG] Error retrieving embedding {embedding_id}: {e}")
@@ -165,9 +159,7 @@ def debug_chromadb_status():
         # Get all embeddings
         all_data = vector_db.get_collection().get()
         print(f"[DEBUG] All stored IDs: {all_data.get('ids', [])}")
-        print(
-            f"[DEBUG] Total embeddings in collection: {len(all_data.get('embeddings', []))}"
-        )
+        print(f"[DEBUG] Total embeddings in collection: {len(all_data.get('embeddings', []))}")
 
         return collection_info.get("item count", 0)
     except Exception as e:

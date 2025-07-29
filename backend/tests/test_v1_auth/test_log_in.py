@@ -20,9 +20,7 @@ class TestLoginAPI(unittest.TestCase):
     def post_login(self, payload):
         """Helper method to send a POST request"""
         try:
-            response = requests.post(
-                self.BASE_URL, json=payload, headers=self.HEADERS, timeout=30
-            )
+            response = requests.post(self.BASE_URL, json=payload, headers=self.HEADERS, timeout=30)
             return response
         except requests.exceptions.RequestException as e:
             self.fail(f"Request failed: {e}")
@@ -93,9 +91,7 @@ class TestLoginAPI(unittest.TestCase):
     def test_login_malformed_json(self):
         """Test case for malformed JSON payload."""
         try:
-            response = requests.post(
-                self.BASE_URL, data="invalid json", headers=self.HEADERS, timeout=30
-            )
+            response = requests.post(self.BASE_URL, data="invalid json", headers=self.HEADERS, timeout=30)
             self.assertEqual(response.status_code, 400)
         except requests.exceptions.RequestException as e:
             self.fail(f"Request failed: {e}")
@@ -105,9 +101,7 @@ class TestLoginAPI(unittest.TestCase):
         payload = {"email": "test@example.com", "password": "password123"}
         headers = {"Content-Type": "text/plain"}
         try:
-            response = requests.post(
-                self.BASE_URL, json=payload, headers=headers, timeout=30
-            )
+            response = requests.post(self.BASE_URL, json=payload, headers=headers, timeout=30)
             self.assertIn(response.status_code, [400, 401, 415])
         except requests.exceptions.RequestException as e:
             self.fail(f"Request failed: {e}")
@@ -150,9 +144,7 @@ class TestLoginAPIPytest:
 
     def post_login(self, payload):
         """Helper method for pytest"""
-        return requests.post(
-            self.base_url, json=payload, headers=self.headers, timeout=30
-        )
+        return requests.post(self.base_url, json=payload, headers=self.headers, timeout=30)
 
 
 def run_tests():
@@ -178,9 +170,7 @@ def test_configuration():
     # Test basic connectivity
     try:
         response = requests.get(f"http://{host}:{port}/health", timeout=5)
-        print(
-            f"  Health Check: {'✅ PASS' if response.status_code == 200 else '❌ FAIL'}"
-        )
+        print(f"  Health Check: {'✅ PASS' if response.status_code == 200 else '❌ FAIL'}")
     except Exception as e:
         print(f"  Health Check: ❌ FAIL - {e}")
 

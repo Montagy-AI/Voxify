@@ -31,9 +31,7 @@ from api.utils.email_service import get_email_service
 
 
 # Standard error response format
-def error_response(
-    message: str, code: str = None, details: dict = None, status_code: int = 400
-):
+def error_response(message: str, code: str = None, details: dict = None, status_code: int = 400):
     """Create standardized error response"""
     response = {
         "success": False,
@@ -122,9 +120,7 @@ def register():
             "email": new_user.email,
             "first_name": new_user.first_name,
             "last_name": new_user.last_name,
-            "created_at": (
-                new_user.created_at.isoformat() if new_user.created_at else None
-            ),
+            "created_at": (new_user.created_at.isoformat() if new_user.created_at else None),
         }
 
         return success_response(
@@ -138,9 +134,7 @@ def register():
         return error_response("Email already exists", "EMAIL_EXISTS", status_code=409)
     except Exception as e:
         session.rollback()
-        return error_response(
-            f"Registration failed: {str(e)}", "REGISTRATION_ERROR", status_code=500
-        )
+        return error_response(f"Registration failed: {str(e)}", "REGISTRATION_ERROR", status_code=500)
     finally:
         session.close()
 
@@ -180,15 +174,11 @@ def login():
 
         # Check if user exists and password is correct
         if not user or not verify_password(password, user.password_hash):
-            return error_response(
-                "Invalid email or password", "INVALID_CREDENTIALS", status_code=401
-            )
+            return error_response("Invalid email or password", "INVALID_CREDENTIALS", status_code=401)
 
         # Check if user is active
         if not user.is_active:
-            return error_response(
-                "Account is disabled", "ACCOUNT_DISABLED", status_code=403
-            )
+            return error_response("Account is disabled", "ACCOUNT_DISABLED", status_code=403)
 
         # Update last login timestamp
         user.last_login_at = datetime.utcnow()
@@ -248,14 +238,10 @@ def refresh():
             "refresh_token": new_refresh_token,
         }
 
-        return success_response(
-            data=response_data, message="Token refreshed successfully"
-        )
+        return success_response(data=response_data, message="Token refreshed successfully")
 
     except Exception as e:
-        return error_response(
-            f"Failed to refresh token: {str(e)}", "TOKEN_REFRESH_ERROR", status_code=500
-        )
+        return error_response(f"Failed to refresh token: {str(e)}", "TOKEN_REFRESH_ERROR", status_code=500)
 
 
 @auth_bp.route("/profile", methods=["GET"])
@@ -283,9 +269,7 @@ def get_profile():
             user = session.query(User).filter_by(id=current_user_id).first()
 
             if not user:
-                return error_response(
-                    "User not found", "USER_NOT_FOUND", status_code=404
-                )
+                return error_response("User not found", "USER_NOT_FOUND", status_code=404)
 
             # Return user profile data
             user_data = {
@@ -297,22 +281,16 @@ def get_profile():
                 "email_verified": user.email_verified,
                 "created_at": user.created_at.isoformat() if user.created_at else None,
                 "updated_at": user.updated_at.isoformat() if user.updated_at else None,
-                "last_login_at": (
-                    user.last_login_at.isoformat() if user.last_login_at else None
-                ),
+                "last_login_at": (user.last_login_at.isoformat() if user.last_login_at else None),
             }
 
-            return success_response(
-                data={"user": user_data}, message="Profile retrieved successfully"
-            )
+            return success_response(data={"user": user_data}, message="Profile retrieved successfully")
 
         finally:
             session.close()
 
     except Exception as e:
-        return error_response(
-            f"Failed to get profile: {str(e)}", "PROFILE_ERROR", status_code=500
-        )
+        return error_response(f"Failed to get profile: {str(e)}", "PROFILE_ERROR", status_code=500)
 
 
 @auth_bp.route("/profile", methods=["PUT", "PATCH"])
@@ -352,9 +330,7 @@ def update_profile():
             user = session.query(User).filter_by(id=current_user_id).first()
 
             if not user:
-                return error_response(
-                    "User not found", "USER_NOT_FOUND", status_code=404
-                )
+                return error_response("User not found", "USER_NOT_FOUND", status_code=404)
 
             # Update fields if provided
             updated_fields = []
@@ -376,26 +352,17 @@ def update_profile():
 
                 # Check if email is already taken by another user
                 existing_user = (
-                    session.query(User)
-                    .filter_by(email=new_email)
-                    .filter(User.id != current_user_id)
-                    .first()
+                    session.query(User).filter_by(email=new_email).filter(User.id != current_user_id).first()
                 )
                 if existing_user:
-                    return error_response(
-                        "Email already exists", "EMAIL_EXISTS", status_code=409
-                    )
+                    return error_response("Email already exists", "EMAIL_EXISTS", status_code=409)
 
                 user.email = new_email
-                user.email_verified = (
-                    False  # Reset email verification when email changes
-                )
+                user.email_verified = False  # Reset email verification when email changes
                 updated_fields.append("email")
 
             if not updated_fields:
-                return error_response(
-                    "No valid fields provided for update", "NO_FIELDS_TO_UPDATE"
-                )
+                return error_response("No valid fields provided for update", "NO_FIELDS_TO_UPDATE")
 
             # Update timestamp
             user.updated_at = datetime.utcnow()
@@ -411,9 +378,7 @@ def update_profile():
                 "email_verified": user.email_verified,
                 "created_at": user.created_at.isoformat() if user.created_at else None,
                 "updated_at": user.updated_at.isoformat() if user.updated_at else None,
-                "last_login_at": (
-                    user.last_login_at.isoformat() if user.last_login_at else None
-                ),
+                "last_login_at": (user.last_login_at.isoformat() if user.last_login_at else None),
             }
 
             return success_response(
@@ -423,9 +388,7 @@ def update_profile():
 
         except IntegrityError:
             session.rollback()
-            return error_response(
-                "Email already exists", "EMAIL_EXISTS", status_code=409
-            )
+            return error_response("Email already exists", "EMAIL_EXISTS", status_code=409)
         finally:
             session.close()
 
@@ -494,17 +457,13 @@ def forgot_password():
 
         # Always return success to prevent user enumeration
         # This prevents attackers from discovering valid email addresses
-        return success_response(
-            message="If an account with that email exists, a password reset link has been sent."
-        )
+        return success_response(message="If an account with that email exists, a password reset link has been sent.")
 
     except Exception as e:
         session.rollback()
         # Log the error but return generic message
         print(f"Password reset request failed: {str(e)}")
-        return success_response(
-            message="If an account with that email exists, a password reset link has been sent."
-        )
+        return success_response(message="If an account with that email exists, a password reset link has been sent.")
     finally:
         session.close()
 
@@ -549,9 +508,7 @@ def reset_password():
         user = session.query(User).filter_by(reset_token=token).first()
 
         if not user:
-            return error_response(
-                "Invalid or expired reset token", "INVALID_TOKEN", status_code=401
-            )
+            return error_response("Invalid or expired reset token", "INVALID_TOKEN", status_code=401)
 
         # Validate token and expiry
         is_valid, error_message = is_reset_token_valid(

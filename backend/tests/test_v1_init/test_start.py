@@ -14,9 +14,7 @@ from unittest.mock import patch
 def get_start_py_path():
     """Find the start.py file"""
     current_dir = os.path.dirname(__file__)
-    start_py_path = os.path.abspath(
-        os.path.join(current_dir, "../../../backend", "start.py")
-    )
+    start_py_path = os.path.abspath(os.path.join(current_dir, "../../../backend", "start.py"))
     if os.path.exists(start_py_path):
         return start_py_path
 
@@ -156,9 +154,7 @@ class TestFileStorageCreation:
 
             for expected_dir in expected_dirs:
                 if os.path.exists(expected_dir):
-                    assert os.path.isdir(
-                        expected_dir
-                    ), f"{expected_dir} exists but is not a directory"
+                    assert os.path.isdir(expected_dir), f"{expected_dir} exists but is not a directory"
 
     def test_file_storage_environment_variables_mentioned(self):
         """Test that file storage setup mentions environment variables"""
@@ -169,9 +165,7 @@ class TestFileStorageCreation:
             text=True,
             timeout=30,
         )
-        assert (
-            "file storage" in result.stdout.lower() or "files" in result.stdout.lower()
-        )
+        assert "file storage" in result.stdout.lower() or "files" in result.stdout.lower()
 
 
 class TestDatabaseInitialization:
@@ -288,9 +282,7 @@ class TestArgumentParsing:
 
         # Should exit with error for invalid arguments
         assert result.returncode != 0
-        assert (
-            "error" in result.stderr.lower() or "unrecognized" in result.stderr.lower()
-        )
+        assert "error" in result.stderr.lower() or "unrecognized" in result.stderr.lower()
 
     def test_multiple_valid_arguments(self):
         """Test start.py with multiple valid arguments"""

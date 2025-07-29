@@ -12,12 +12,8 @@ from . import file_bp
 from database.models import SynthesisJob, SynthesisCache, get_database_manager
 
 # Configure file storage paths
-SYNTHESIS_OUTPUT_DIR = os.path.join(
-    os.getenv("VOXIFY_SYNTHESIS_STORAGE", "data/files/synthesis"), "output"
-)
-SYNTHESIS_CACHE_DIR = os.path.join(
-    os.getenv("VOXIFY_SYNTHESIS_STORAGE", "data/files/synthesis"), "cache"
-)
+SYNTHESIS_OUTPUT_DIR = os.path.join(os.getenv("VOXIFY_SYNTHESIS_STORAGE", "data/files/synthesis"), "output")
+SYNTHESIS_CACHE_DIR = os.path.join(os.getenv("VOXIFY_SYNTHESIS_STORAGE", "data/files/synthesis"), "cache")
 
 # Ensure directories exist
 os.makedirs(SYNTHESIS_OUTPUT_DIR, exist_ok=True)
@@ -63,9 +59,7 @@ def get_synthesis_file(
 
         # Check cache first
         if job.cache_hit and job.cached_result_id:
-            cache = (
-                session.query(SynthesisCache).filter_by(id=job.cached_result_id).first()
-            )
+            cache = session.query(SynthesisCache).filter_by(id=job.cached_result_id).first()
             if cache and cache.output_path:
                 return cache.output_path, os.path.basename(cache.output_path), cache.id
 
@@ -122,9 +116,7 @@ def download_synthesis_file(job_id: str):
             mimetype=f"audio/{os.path.splitext(filename)[1][1:]}",
         )
     except Exception as e:
-        return error_response(
-            f"Error downloading file: {str(e)}", "DOWNLOAD_ERROR", 500
-        )
+        return error_response(f"Error downloading file: {str(e)}", "DOWNLOAD_ERROR", 500)
 
 
 @file_bp.route("/synthesis/<job_id>", methods=["DELETE"])
@@ -225,14 +217,10 @@ def download_voice_clone_synthesis(job_id: str):
                 elif os.path.exists(candidate2):
                     file_path = os.path.abspath(candidate2)
                 else:
-                    return error_response(
-                        "Audio file not found on server", "FILE_NOT_FOUND", 404
-                    )
+                    return error_response("Audio file not found on server", "FILE_NOT_FOUND", 404)
 
             if not os.path.exists(file_path):
-                return error_response(
-                    "Audio file not found on server", "FILE_NOT_FOUND", 404
-                )
+                return error_response("Audio file not found on server", "FILE_NOT_FOUND", 404)
 
             # Get filename for download
             filename = os.path.basename(file_path)
@@ -248,9 +236,7 @@ def download_voice_clone_synthesis(job_id: str):
             )
 
     except Exception as e:
-        return error_response(
-            f"Error downloading file: {str(e)}", "DOWNLOAD_ERROR", 500
-        )
+        return error_response(f"Error downloading file: {str(e)}", "DOWNLOAD_ERROR", 500)
 
 
 @file_bp.route("/voice-clone/<job_id>/info", methods=["GET"])
@@ -287,9 +273,7 @@ def get_voice_clone_synthesis_info(job_id: str):
                 "output_path": job.output_path,
                 "duration": job.duration,
                 "created_at": job.created_at.isoformat() if job.created_at else None,
-                "completed_at": (
-                    job.completed_at.isoformat() if job.completed_at else None
-                ),
+                "completed_at": (job.completed_at.isoformat() if job.completed_at else None),
             }
 
             # Check if file exists

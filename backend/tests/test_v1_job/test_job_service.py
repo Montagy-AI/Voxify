@@ -20,9 +20,7 @@ class TestJobServiceAPI:
         """Check if server is running before tests"""
         try:
             response = requests.get(f"{server_url}/api/v1/auth/login", timeout=5)
-            assert (
-                response.status_code == 405
-            ), f"Unexpected status code: {response.status_code}"
+            assert response.status_code == 405, f"Unexpected status code: {response.status_code}"
         except Exception as e:
             pytest.skip(f"Server not available: {e}")
 
@@ -31,18 +29,14 @@ class TestJobServiceAPI:
         """Get the Flask server URL based on start.py configuration"""
         # Get configuration from environment variables (same as start.py)
         host = os.getenv("FLASK_HOST", "127.0.0.1")  # Use 127.0.0.1 for local testing
-        port = int(
-            os.getenv("PORT", os.getenv("FLASK_PORT", 8000))
-        )  # Default port from start.py
+        port = int(os.getenv("PORT", os.getenv("FLASK_PORT", 8000)))  # Default port from start.py
         return f"http://{host}:{port}"
 
     @pytest.fixture(scope="class", autouse=True)
     def check_curl_available(self):
         """Check if curl is available on the system"""
         try:
-            result = subprocess.run(
-                ["curl", "--version"], capture_output=True, text=True
-            )
+            result = subprocess.run(["curl", "--version"], capture_output=True, text=True)
             if result.returncode != 0:
                 pytest.skip("curl is not available on this system")
         except FileNotFoundError:
@@ -83,9 +77,7 @@ class TestJobServiceAPI:
             "-H",
             "Content-Type: application/json",
             "-d",
-            json.dumps(
-                {"email": test_user["email"], "password": test_user["password"]}
-            ),
+            json.dumps({"email": test_user["email"], "password": test_user["password"]}),
         ]
         result = subprocess.run(login_cmd, capture_output=True, text=True)
         response = json.loads(result.stdout)
@@ -101,9 +93,7 @@ class TestJobServiceAPI:
         import os
 
         # Use the same database path as the server
-        db_path = os.path.join(
-            os.path.dirname(__file__), "..", "..", "data", "voxify.db"
-        )
+        db_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "voxify.db")
 
         # Ensure database exists with correct schema
         try:
@@ -138,14 +128,10 @@ class TestJobServiceAPI:
                 return row[0]
             else:
                 # Create a test voice model if none exists
-                print(
-                    "[TEST] No active voice model found, creating test voice model..."
-                )
+                print("[TEST] No active voice model found, creating test voice model...")
 
                 # First create a test user if needed
-                cursor.execute(
-                    "SELECT id FROM users WHERE email='jobtest@example.com' LIMIT 1;"
-                )
+                cursor.execute("SELECT id FROM users WHERE email='jobtest@example.com' LIMIT 1;")
                 user_row = cursor.fetchone()
                 if not user_row:
                     cursor.execute(
@@ -249,9 +235,7 @@ class TestJobServiceAPI:
         assert "error" in response
         assert "Validation failed" in response["error"]["message"]
 
-    def test_create_job_invalid_parameters(
-        self, server_url, auth_tokens, test_voice_model_id
-    ):
+    def test_create_job_invalid_parameters(self, server_url, auth_tokens, test_voice_model_id):
         """Test creating a job with invalid parameters"""
         test_cases = [
             {
@@ -415,9 +399,7 @@ class TestJobServiceAPI:
         assert result.returncode == 0
 
         create_response = json.loads(result.stdout)
-        assert (
-            create_response.get("success") is True
-        ), f"Job creation failed: {create_response}"
+        assert create_response.get("success") is True, f"Job creation failed: {create_response}"
         job_id = create_response["data"]["id"]
 
         # Now get job details
@@ -483,9 +465,7 @@ class TestJobServiceAPI:
         assert result.returncode == 0
 
         create_response = json.loads(result.stdout)
-        assert (
-            create_response.get("success") is True
-        ), f"Job creation failed: {create_response}"
+        assert create_response.get("success") is True, f"Job creation failed: {create_response}"
         job_id = create_response["data"]["id"]
 
         # Update the job
@@ -517,9 +497,7 @@ class TestJobServiceAPI:
         assert response["data"]["text_content"] == update_data["text_content"]
         assert response["data"]["speed"] == update_data["speed"]
 
-    def test_update_job_invalid_status(
-        self, server_url, auth_tokens, test_voice_model_id
-    ):
+    def test_update_job_invalid_status(self, server_url, auth_tokens, test_voice_model_id):
         """Test updating a job that cannot be updated due to status"""
         # This test would require mocking a job with non-pending status
         # For now, we'll test the API structure
@@ -571,9 +549,7 @@ class TestJobServiceAPI:
         assert result.returncode == 0
 
         create_response = json.loads(result.stdout)
-        assert (
-            create_response.get("success") is True
-        ), f"Job creation failed: {create_response}"
+        assert create_response.get("success") is True, f"Job creation failed: {create_response}"
         job_id = create_response["data"]["id"]
 
         # Patch the job status
@@ -630,9 +606,7 @@ class TestJobServiceAPI:
         assert result.returncode == 0
 
         create_response = json.loads(result.stdout)
-        assert (
-            create_response.get("success") is True
-        ), f"Job creation failed: {create_response}"
+        assert create_response.get("success") is True, f"Job creation failed: {create_response}"
         job_id = create_response["data"]["id"]
 
         # Delete the job
@@ -675,9 +649,7 @@ class TestJobServiceAPI:
         assert result.returncode == 0
 
         create_response = json.loads(result.stdout)
-        assert (
-            create_response.get("success") is True
-        ), f"Job creation failed: {create_response}"
+        assert create_response.get("success") is True, f"Job creation failed: {create_response}"
         job_id = create_response["data"]["id"]
 
         # Test progress streaming
@@ -752,9 +724,7 @@ class TestJobServiceAPI:
         assert result.returncode == 0
 
         first_response = json.loads(result.stdout)
-        assert (
-            first_response.get("success") is True
-        ), f"First job creation failed: {first_response}"
+        assert first_response.get("success") is True, f"First job creation failed: {first_response}"
 
         # Create duplicate job
         result = subprocess.run(create_cmd, capture_output=True, text=True)

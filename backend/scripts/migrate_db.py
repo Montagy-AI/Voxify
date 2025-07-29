@@ -44,9 +44,7 @@ def migrate_database():
 
         if "reset_token_expires_at" not in columns:
             print("➕ Adding reset_token_expires_at column...")
-            cursor.execute(
-                "ALTER TABLE users ADD COLUMN reset_token_expires_at TIMESTAMP"
-            )
+            cursor.execute("ALTER TABLE users ADD COLUMN reset_token_expires_at TIMESTAMP")
             print("✅ reset_token_expires_at column added")
 
         # Commit changes

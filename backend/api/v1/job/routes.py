@@ -15,9 +15,7 @@ from database.models import SynthesisJob, VoiceModel, get_database_manager
 
 
 # Standard error response format
-def error_response(
-    message: str, code: str = None, details: dict = None, status_code: int = 400
-):
+def error_response(message: str, code: str = None, details: dict = None, status_code: int = 400):
     """Create standardized error response"""
     response = {
         "success": False,
@@ -33,9 +31,7 @@ def error_response(
 
 
 # Standard success response format
-def success_response(
-    data=None, message: str = None, status_code: int = 200, meta: dict = None
-):
+def success_response(data=None, message: str = None, status_code: int = 200, meta: dict = None):
     """Create standardized success response"""
     response = {"success": True, "timestamp": datetime.utcnow().isoformat()}
     if data is not None:
@@ -62,9 +58,7 @@ def validate_synthesis_job_data(data: dict, is_update: bool = False) -> tuple:
     # Validate text content
     text_content = data.get("text_content", "")
     if text_content and len(text_content) > 1000000000000000000:
-        errors["text_content"] = (
-            "Text content cannot exceed 1000000000000000000 characters"
-        )
+        errors["text_content"] = "Text content cannot exceed 1000000000000000000 characters"
 
     # Validate synthesis parameters
     speed = data.get("speed")
@@ -105,9 +99,7 @@ def validate_synthesis_job_data(data: dict, is_update: bool = False) -> tuple:
         try:
             sample_rate = int(sample_rate)
             if sample_rate not in [8000, 16000, 22050, 44100, 48000]:
-                errors["sample_rate"] = (
-                    "Sample rate must be one of: 8000, 16000, 22050, 44100, 48000"
-                )
+                errors["sample_rate"] = "Sample rate must be one of: 8000, 16000, 22050, 44100, 48000"
         except (ValueError, TypeError):
             errors["sample_rate"] = "Sample rate must be a valid integer"
 
@@ -186,9 +178,7 @@ def list_jobs():
             )
 
         if sort_order not in ["asc", "desc"]:
-            return error_response(
-                "Sort order must be 'asc' or 'desc'", "INVALID_SORT_ORDER"
-            )
+            return error_response("Sort order must be 'asc' or 'desc'", "INVALID_SORT_ORDER")
 
         # Get database session
         db_manager = get_database_manager()
@@ -263,9 +253,7 @@ def list_jobs():
             session.close()
 
     except Exception as e:
-        return error_response(
-            f"Failed to retrieve jobs: {str(e)}", "RETRIEVAL_ERROR", status_code=500
-        )
+        return error_response(f"Failed to retrieve jobs: {str(e)}", "RETRIEVAL_ERROR", status_code=500)
 
 
 # Used to create a new synthesis job.
@@ -301,9 +289,7 @@ def create_job():
 
         is_valid, validation_errors = validate_synthesis_job_data(data)
         if not is_valid:
-            return error_response(
-                "Validation failed", "VALIDATION_ERROR", validation_errors
-            )
+            return error_response("Validation failed", "VALIDATION_ERROR", validation_errors)
 
         # Get database session
         db_manager = get_database_manager()
@@ -381,9 +367,7 @@ def create_job():
             session.close()
 
     except Exception as e:
-        return error_response(
-            f"Failed to create job: {str(e)}", "CREATION_ERROR", status_code=500
-        )
+        return error_response(f"Failed to create job: {str(e)}", "CREATION_ERROR", status_code=500)
 
 
 @job_bp.route("/<job_id>", methods=["GET"])
@@ -423,9 +407,7 @@ def get_job(job_id):
             session.close()
 
     except Exception as e:
-        return error_response(
-            f"Failed to retrieve job: {str(e)}", "RETRIEVAL_ERROR", status_code=500
-        )
+        return error_response(f"Failed to retrieve job: {str(e)}", "RETRIEVAL_ERROR", status_code=500)
 
 
 @job_bp.route("/<job_id>", methods=["PUT"])
@@ -461,9 +443,7 @@ def update_job(job_id):
 
         is_valid, validation_errors = validate_synthesis_job_data(data, is_update=True)
         if not is_valid:
-            return error_response(
-                "Validation failed", "VALIDATION_ERROR", validation_errors
-            )
+            return error_response("Validation failed", "VALIDATION_ERROR", validation_errors)
 
         db_manager = get_database_manager()
         session = db_manager.get_session()
@@ -493,9 +473,7 @@ def update_job(job_id):
                 job.text_content = data["text_content"]
                 job.text_length = len(data["text_content"])
                 job.word_count = len(data["text_content"].split())
-                job.text_hash = generate_text_hash(
-                    data["text_content"], job.config_dict
-                )
+                job.text_hash = generate_text_hash(data["text_content"], job.config_dict)
                 updated_fields.append("text_content")
 
             if "speed" in data:
@@ -534,9 +512,7 @@ def update_job(job_id):
             session.close()
 
     except Exception as e:
-        return error_response(
-            f"Failed to update job: {str(e)}", "UPDATE_ERROR", status_code=500
-        )
+        return error_response(f"Failed to update job: {str(e)}", "UPDATE_ERROR", status_code=500)
 
 
 @job_bp.route("/<job_id>", methods=["PATCH"])
@@ -611,10 +587,7 @@ def patch_job(job_id):
                     "cancelled": ["pending"],  # Allow restart
                 }
 
-                if (
-                    new_status != current_status
-                    and new_status not in valid_transitions.get(current_status, [])
-                ):
+                if new_status != current_status and new_status not in valid_transitions.get(current_status, []):
                     return error_response(
                         f"Invalid status transition from '{current_status}' to '{new_status}'",
                         "INVALID_STATUS_TRANSITION",
@@ -626,10 +599,7 @@ def patch_job(job_id):
                 # Set timestamps based on status
                 if new_status == "processing" and not job.started_at:
                     job.started_at = datetime.utcnow()
-                elif (
-                    new_status in ["completed", "failed", "cancelled"]
-                    and not job.completed_at
-                ):
+                elif new_status in ["completed", "failed", "cancelled"] and not job.completed_at:
                     job.completed_at = datetime.utcnow()
 
             # Update other fields
@@ -643,9 +613,7 @@ def patch_job(job_id):
                     job.progress = progress
                     updated_fields.append("progress")
                 else:
-                    return error_response(
-                        "Progress must be between 0.0 and 1.0", "INVALID_PROGRESS"
-                    )
+                    return error_response("Progress must be between 0.0 and 1.0", "INVALID_PROGRESS")
 
             if "output_path" in data:
                 job.output_path = data["output_path"]
@@ -671,9 +639,7 @@ def patch_job(job_id):
             session.close()
 
     except Exception as e:
-        return error_response(
-            f"Failed to update job: {str(e)}", "UPDATE_ERROR", status_code=500
-        )
+        return error_response(f"Failed to update job: {str(e)}", "UPDATE_ERROR", status_code=500)
 
 
 @job_bp.route("/<job_id>", methods=["DELETE"])
@@ -724,9 +690,7 @@ def delete_job(job_id):
             session.close()
 
     except Exception as e:
-        return error_response(
-            f"Failed to delete job: {str(e)}", "DELETION_ERROR", status_code=500
-        )
+        return error_response(f"Failed to delete job: {str(e)}", "DELETION_ERROR", status_code=500)
 
 
 # Legacy endpoint for backwards compatibility
@@ -779,9 +743,7 @@ def cancel_job_legacy(job_id):
             session.close()
 
     except Exception as e:
-        return error_response(
-            f"Failed to cancel job: {str(e)}", "CANCELLATION_ERROR", status_code=500
-        )
+        return error_response(f"Failed to cancel job: {str(e)}", "CANCELLATION_ERROR", status_code=500)
 
 
 def generate_job_progress_events(job_id):
@@ -795,11 +757,7 @@ def generate_job_progress_events(job_id):
             session = db_manager.get_session()
 
             try:
-                job = (
-                    session.query(SynthesisJob)
-                    .filter(SynthesisJob.id == job_id)
-                    .first()
-                )
+                job = session.query(SynthesisJob).filter(SynthesisJob.id == job_id).first()
 
                 if not job:
                     yield f"event: error\ndata: {json.dumps({'error': 'Job not found', 'code': 'JOB_NOT_FOUND'})}\n\n"
@@ -811,18 +769,10 @@ def generate_job_progress_events(job_id):
                     "status": job.status,
                     "progress": job.progress or 0.0,
                     "progress_percentage": round((job.progress or 0.0) * 100, 2),
-                    "message": (
-                        job.error_message if job.status == "failed" else "Processing..."
-                    ),
-                    "created_at": (
-                        job.created_at.isoformat() if job.created_at else None
-                    ),
-                    "started_at": (
-                        job.started_at.isoformat() if job.started_at else None
-                    ),
-                    "updated_at": (
-                        job.updated_at.isoformat() if job.updated_at else None
-                    ),
+                    "message": (job.error_message if job.status == "failed" else "Processing..."),
+                    "created_at": (job.created_at.isoformat() if job.created_at else None),
+                    "started_at": (job.started_at.isoformat() if job.started_at else None),
+                    "updated_at": (job.updated_at.isoformat() if job.updated_at else None),
                     "estimated_completion": None,
                 }
 
@@ -830,18 +780,10 @@ def generate_job_progress_events(job_id):
                 if job.status in ["completed", "failed", "cancelled"]:
                     progress_data.update(
                         {
-                            "completed_at": (
-                                job.completed_at.isoformat()
-                                if job.completed_at
-                                else None
-                            ),
+                            "completed_at": (job.completed_at.isoformat() if job.completed_at else None),
                             "processing_time_ms": job.processing_time_ms,
-                            "output_path": (
-                                job.output_path if job.status == "completed" else None
-                            ),
-                            "duration": (
-                                job.duration if job.status == "completed" else None
-                            ),
+                            "output_path": (job.output_path if job.status == "completed" else None),
+                            "duration": (job.duration if job.status == "completed" else None),
                         }
                     )
 

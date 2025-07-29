@@ -74,9 +74,7 @@ def init_database():
 
     try:
         print("Initializing SQLite database and ChromaDB...")
-        db_manager, vector_db = initialize_database(
-            database_url=sqlite_db_url, vector_db_path=vector_db_path
-        )
+        db_manager, vector_db = initialize_database(database_url=sqlite_db_url, vector_db_path=vector_db_path)
         print("SQLite database tables created and initial data populated")
         print(f"   - SQLite database engine: {db_manager.engine}")
 
@@ -199,12 +197,8 @@ def start_flask_app(skip_db_init=False, skip_file_init=False, seed_data=False):
     app = create_app()
 
     # Get configuration from environment (cloud platform compatible)
-    host = os.getenv(
-        "FLASK_HOST", "0.0.0.0"
-    )  # Bind to all interfaces for cloud deployment
-    port = int(
-        os.getenv("PORT", os.getenv("FLASK_PORT", 8000))
-    )  # Use PORT for cloud platforms
+    host = os.getenv("FLASK_HOST", "0.0.0.0")  # Bind to all interfaces for cloud deployment
+    port = int(os.getenv("PORT", os.getenv("FLASK_PORT", 8000)))  # Use PORT for cloud platforms
     debug = os.getenv("FLASK_DEBUG", "False").lower() == "true"
 
     print("Starting Voxify API Server...")
@@ -250,9 +244,7 @@ def main():
         action="store_true",
         help="Skip database initialization, start server directly",
     )
-    parser.add_argument(
-        "--skip-file-init", action="store_true", help="Skip file storage initialization"
-    )
+    parser.add_argument("--skip-file-init", action="store_true", help="Skip file storage initialization")
     parser.add_argument(
         "--init-only",
         action="store_true",

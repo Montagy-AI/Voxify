@@ -186,9 +186,7 @@ class TestEmailService(unittest.TestCase):
         token = "test-token-123"
         user_name = "John Doe"
 
-        subject, html_content, text_content = (
-            self.email_service._get_reset_email_template(token, user_name)
-        )
+        subject, html_content, text_content = self.email_service._get_reset_email_template(token, user_name)
 
         # Check subject
         self.assertEqual(subject, "Reset Your Voxify Password")
@@ -209,9 +207,7 @@ class TestEmailService(unittest.TestCase):
         """Test reset email template generation without user name"""
         token = "test-token-456"
 
-        subject, html_content, text_content = (
-            self.email_service._get_reset_email_template(token)
-        )
+        subject, html_content, text_content = self.email_service._get_reset_email_template(token)
 
         # Check generic greeting is used
         self.assertIn("Hello,", html_content)

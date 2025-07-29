@@ -51,35 +51,21 @@ class TestVoiceSampleValidation:
         ]
 
         for filename in invalid_files:
-            assert (
-                allowed_file(filename) is False
-            ), f"File {filename} should not be allowed"
+            assert allowed_file(filename) is False, f"File {filename} should not be allowed"
 
     def test_allowed_file_edge_cases(self):
         """Test file extension validation with edge cases"""
         # Test files starting with dot (hidden files) - these are actually allowed by the current implementation
-        assert (
-            allowed_file(".wav") is True
-        ), "Hidden .wav file is allowed by current implementation"
-        assert (
-            allowed_file(".mp3") is True
-        ), "Hidden .mp3 file is allowed by current implementation"
+        assert allowed_file(".wav") is True, "Hidden .wav file is allowed by current implementation"
+        assert allowed_file(".mp3") is True, "Hidden .mp3 file is allowed by current implementation"
 
         # Test files with multiple dots
-        assert (
-            allowed_file("file.backup.wav") is True
-        ), "File with multiple dots should be allowed"
-        assert (
-            allowed_file("file.backup.txt") is False
-        ), "File with multiple dots should not be allowed"
+        assert allowed_file("file.backup.wav") is True, "File with multiple dots should be allowed"
+        assert allowed_file("file.backup.txt") is False, "File with multiple dots should not be allowed"
 
         # Test files with only extension
-        assert (
-            allowed_file("wav") is False
-        ), "File with only extension should not be allowed"
-        assert (
-            allowed_file("mp3") is False
-        ), "File with only extension should not be allowed"
+        assert allowed_file("wav") is False, "File with only extension should not be allowed"
+        assert allowed_file("mp3") is False, "File with only extension should not be allowed"
 
     @patch("api.v1.voice.samples.sf.SoundFile")
     def test_extract_audio_metadata_success(self, mock_soundfile):
@@ -162,9 +148,7 @@ class TestVoiceEmbeddingOperations:
     @patch("api.v1.voice.embeddings.voice_encoder")
     @patch("api.v1.voice.embeddings.preprocess_wav")
     @patch("api.v1.voice.embeddings.vector_db")
-    def test_generate_voice_embedding_success(
-        self, mock_vector_db, mock_preprocess, mock_encoder
-    ):
+    def test_generate_voice_embedding_success(self, mock_vector_db, mock_preprocess, mock_encoder):
         """Test successful voice embedding generation"""
         # Mock preprocessing
         mock_wav = Mock()
@@ -370,9 +354,7 @@ class TestVoiceCloneValidation:
                 return False, errors
 
             # Test empty sample_ids
-            if "sample_ids" in data and (
-                not data["sample_ids"] or len(data["sample_ids"]) == 0
-            ):
+            if "sample_ids" in data and (not data["sample_ids"] or len(data["sample_ids"]) == 0):
                 errors["sample_ids"] = "At least one sample_id is required"
 
             # Test empty name
@@ -380,9 +362,7 @@ class TestVoiceCloneValidation:
                 errors["name"] = "Clone name cannot be empty"
 
             # Test empty ref_text
-            if "ref_text" in data and (
-                not data["ref_text"] or not data["ref_text"].strip()
-            ):
+            if "ref_text" in data and (not data["ref_text"] or not data["ref_text"].strip()):
                 errors["ref_text"] = "Reference text cannot be empty"
 
             return len(errors) == 0, errors
@@ -520,9 +500,7 @@ class TestVoiceFileOperations:
         # Test with real Path objects instead of mocks
         sample_id = "test-uuid-123"
         file_extension = ".wav"
-        expected_path = os.path.join(
-            "data", "files", "samples", "user123", f"{sample_id}{file_extension}"
-        )
+        expected_path = os.path.join("data", "files", "samples", "user123", f"{sample_id}{file_extension}")
 
         # Simulate the path generation logic from the actual code
         storage_dir = Path("data/files/samples/user123")
@@ -595,12 +573,8 @@ class TestVoiceDatabaseOperations:
     def test_voice_sample_creation(self, mock_db_manager):
         """Test voice sample database creation"""
         mock_session = Mock()
-        mock_db_manager.return_value.get_session.return_value.__enter__ = Mock(
-            return_value=mock_session
-        )
-        mock_db_manager.return_value.get_session.return_value.__exit__ = Mock(
-            return_value=None
-        )
+        mock_db_manager.return_value.get_session.return_value.__enter__ = Mock(return_value=mock_session)
+        mock_db_manager.return_value.get_session.return_value.__exit__ = Mock(return_value=None)
 
         # Mock VoiceSample model
         with patch("api.v1.voice.samples.VoiceSample") as mock_voice_sample:
@@ -635,12 +609,8 @@ class TestVoiceDatabaseOperations:
     def test_voice_sample_query(self, mock_db_manager):
         """Test voice sample database querying"""
         mock_session = Mock()
-        mock_db_manager.return_value.get_session.return_value.__enter__ = Mock(
-            return_value=mock_session
-        )
-        mock_db_manager.return_value.get_session.return_value.__exit__ = Mock(
-            return_value=None
-        )
+        mock_db_manager.return_value.get_session.return_value.__enter__ = Mock(return_value=mock_session)
+        mock_db_manager.return_value.get_session.return_value.__exit__ = Mock(return_value=None)
 
         # Mock query results
         mock_sample1 = Mock()
@@ -666,12 +636,7 @@ class TestVoiceDatabaseOperations:
         mock_session.query.return_value = mock_query
 
         # Simulate query execution
-        samples = (
-            mock_session.query.return_value.filter_by(user_id="user123")
-            .order_by()
-            .offset()
-            .limit()
-        )
+        samples = mock_session.query.return_value.filter_by(user_id="user123").order_by().offset().limit()
         total = mock_session.query.return_value.filter_by(user_id="user123").count()
 
         assert len(samples) == 2
@@ -772,9 +737,7 @@ class TestVoiceCloneOperations:
         # Verify required fields
         required_fields = ["id", "name", "ref_audio_path", "ref_text", "language"]
         for field in required_fields:
-            assert (
-                field in clone_info
-            ), f"Required field '{field}' missing from clone info"
+            assert field in clone_info, f"Required field '{field}' missing from clone info"
 
         # Verify data types
         assert isinstance(clone_info["id"], str)
@@ -948,17 +911,13 @@ class TestVoiceQualityMetrics:
             if audio_data.get("signal_power") and audio_data.get("noise_power"):
                 import math
 
-                snr = 10 * math.log10(
-                    audio_data["signal_power"] / audio_data["noise_power"]
-                )
+                snr = 10 * math.log10(audio_data["signal_power"] / audio_data["noise_power"])
                 metrics["snr"] = snr
                 metrics["quality_score"] = min(10.0, max(0.0, snr / 10.0))
 
             # Simulate clarity calculation
             if audio_data.get("frequency_response"):
-                clarity = sum(audio_data["frequency_response"]) / len(
-                    audio_data["frequency_response"]
-                )
+                clarity = sum(audio_data["frequency_response"]) / len(audio_data["frequency_response"])
                 metrics["clarity_score"] = clarity
 
             return metrics
@@ -974,9 +933,7 @@ class TestVoiceQualityMetrics:
         assert "snr" in metrics
         assert "quality_score" in metrics
         assert "clarity_score" in metrics
-        assert metrics["snr"] == pytest.approx(
-            10.0, abs=0.1
-        )  # 10 * log10(100/10) = 10 * log10(10) = 10 * 1 = 10
+        assert metrics["snr"] == pytest.approx(10.0, abs=0.1)  # 10 * log10(100/10) = 10 * log10(10) = 10 * 1 = 10
 
     def test_voice_similarity_calculation(self):
         """Test voice similarity calculation"""
@@ -1364,17 +1321,13 @@ class TestVoicePerformanceMetrics:
             return metrics
 
         # Test WAV file metrics
-        wav_metrics = mock_calculate_file_metrics(
-            "/path/to/audio.wav", 1024 * 1024
-        )  # 1MB
+        wav_metrics = mock_calculate_file_metrics("/path/to/audio.wav", 1024 * 1024)  # 1MB
         assert wav_metrics["file_size_bytes"] == 1024 * 1024
         assert wav_metrics["file_size_mb"] == 1.0
         assert wav_metrics["compression_ratio"] == 1.0
 
         # Test MP3 file metrics
-        mp3_metrics = mock_calculate_file_metrics(
-            "/path/to/audio.mp3", 1024 * 100
-        )  # 100KB
+        mp3_metrics = mock_calculate_file_metrics("/path/to/audio.mp3", 1024 * 100)  # 100KB
         assert mp3_metrics["file_size_bytes"] == 1024 * 100
         assert mp3_metrics["file_size_kb"] == 100
         assert mp3_metrics["compression_ratio"] == 0.1
@@ -1521,21 +1474,15 @@ class TestVoiceSecurityValidation:
                 return False, "Unknown resource type"
 
         # Test valid access
-        is_authorized, message = mock_validate_user_access(
-            "user123", "sample_user123_001", "sample"
-        )
+        is_authorized, message = mock_validate_user_access("user123", "sample_user123_001", "sample")
         assert is_authorized is True
 
         # Test invalid access
-        is_authorized, message = mock_validate_user_access(
-            "user123", "sample_user456_001", "sample"
-        )
+        is_authorized, message = mock_validate_user_access("user123", "sample_user456_001", "sample")
         assert is_authorized is False
 
         # Test invalid resource type
-        is_authorized, message = mock_validate_user_access(
-            "user123", "resource123", "unknown"
-        )
+        is_authorized, message = mock_validate_user_access("user123", "resource123", "unknown")
         assert is_authorized is False
 
     def test_input_sanitization(self):
@@ -1551,9 +1498,7 @@ class TestVoiceSecurityValidation:
                 return sanitized[:255]  # Limit length
             elif input_type == "text":
                 # Remove script tags and dangerous HTML
-                sanitized = re.sub(
-                    r"<script.*?</script>", "", input_data, flags=re.IGNORECASE
-                )
+                sanitized = re.sub(r"<script.*?</script>", "", input_data, flags=re.IGNORECASE)
                 sanitized = re.sub(r"<.*?>", "", sanitized)
                 return sanitized
             else:
@@ -1584,9 +1529,7 @@ class TestVoiceSecurityValidation:
             return {"allowed": True, "remaining": 10, "reset_time": 7200}
 
         # Test allowed operation
-        result = mock_check_rate_limit(
-            "user123", "voice_clone_creation", {"max_per_hour": 10}
-        )
+        result = mock_check_rate_limit("user123", "voice_clone_creation", {"max_per_hour": 10})
         assert result["allowed"] is True
         assert result["remaining"] == 5
 

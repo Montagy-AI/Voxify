@@ -13,9 +13,7 @@ from unittest.mock import patch
 from datetime import datetime, timedelta
 
 # Add the backend directory to Python path
-backend_dir = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
+backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, backend_dir)
 
 from flask import Flask
@@ -121,15 +119,9 @@ def cleanup_test_data(test_db):
                     session.delete(job)
 
                 # Delete related voice models
-                voice_samples = (
-                    session.query(VoiceSample).filter_by(user_id=user.id).all()
-                )
+                voice_samples = session.query(VoiceSample).filter_by(user_id=user.id).all()
                 for sample in voice_samples:
-                    models = (
-                        session.query(VoiceModel)
-                        .filter_by(voice_sample_id=sample.id)
-                        .all()
-                    )
+                    models = session.query(VoiceModel).filter_by(voice_sample_id=sample.id).all()
                     for model in models:
                         session.delete(model)
                     session.delete(sample)
@@ -166,15 +158,9 @@ def cleanup_test_data(test_db):
                     session.delete(job)
 
                 # Delete related voice models
-                voice_samples = (
-                    session.query(VoiceSample).filter_by(user_id=user.id).all()
-                )
+                voice_samples = session.query(VoiceSample).filter_by(user_id=user.id).all()
                 for sample in voice_samples:
-                    models = (
-                        session.query(VoiceModel)
-                        .filter_by(voice_sample_id=sample.id)
-                        .all()
-                    )
+                    models = session.query(VoiceModel).filter_by(voice_sample_id=sample.id).all()
                     for model in models:
                         session.delete(model)
                     session.delete(sample)
@@ -190,9 +176,7 @@ def cleanup_test_data(test_db):
 class TestFileIntegrationFinal:
     """Final integration tests for file management"""
 
-    def test_basic_file_download(
-        self, client, temp_file_storage, cleanup_test_data, test_db
-    ):
+    def test_basic_file_download(self, client, temp_file_storage, cleanup_test_data, test_db):
         """Test basic file download with JWT authentication"""
 
         # Mock the database manager to use test database
@@ -272,9 +256,7 @@ class TestFileIntegrationFinal:
 
         assert response.status_code == 401
 
-    def test_file_info_with_auth(
-        self, client, temp_file_storage, cleanup_test_data, test_db
-    ):
+    def test_file_info_with_auth(self, client, temp_file_storage, cleanup_test_data, test_db):
         """Test file info endpoint with JWT authentication"""
 
         # Mock the database manager to use test database
@@ -348,9 +330,7 @@ class TestFileIntegrationFinal:
             assert "data" in data
             assert data["data"]["job_id"] == "info-job-123"
 
-    def test_file_delete_with_auth(
-        self, client, temp_file_storage, cleanup_test_data, test_db
-    ):
+    def test_file_delete_with_auth(self, client, temp_file_storage, cleanup_test_data, test_db):
         """Test file delete with JWT authentication"""
 
         # Mock the database manager to use test database
@@ -423,9 +403,7 @@ class TestFileIntegrationFinal:
             assert data["success"] is True
             assert "File deleted successfully" in data["message"]
 
-    def test_access_control(
-        self, client, temp_file_storage, cleanup_test_data, test_db
-    ):
+    def test_access_control(self, client, temp_file_storage, cleanup_test_data, test_db):
         """Test file access control between different users"""
 
         # Mock the database manager to use test database
@@ -517,9 +495,7 @@ class TestFileIntegrationFinal:
             assert data["success"] is False
             assert data["error"]["code"] == "ACCESS_DENIED"
 
-    def test_file_not_found(
-        self, client, temp_file_storage, cleanup_test_data, test_db
-    ):
+    def test_file_not_found(self, client, temp_file_storage, cleanup_test_data, test_db):
         """Test file not found scenarios"""
 
         # Mock the database manager to use test database

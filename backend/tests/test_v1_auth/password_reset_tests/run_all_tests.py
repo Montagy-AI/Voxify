@@ -33,11 +33,7 @@ def run_all_password_reset_tests():
     print(f"   Errors: {len(result.errors)}")
 
     if result.testsRun > 0:
-        success_rate = (
-            (result.testsRun - len(result.failures) - len(result.errors))
-            / result.testsRun
-            * 100
-        )
+        success_rate = (result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100
         print(f"   Success rate: {success_rate:.1f}%")
 
         if success_rate == 100.0:

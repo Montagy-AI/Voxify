@@ -45,9 +45,7 @@ class TestPasswordResetWorkflow(unittest.TestCase):
         self.assertIsNotNone(reset_expires)
 
         # Step 4: Validate token (should be valid)
-        is_valid, error_msg = is_reset_token_valid(
-            reset_token, reset_token, reset_expires
-        )
+        is_valid, error_msg = is_reset_token_valid(reset_token, reset_token, reset_expires)
         self.assertTrue(is_valid)
         self.assertEqual(error_msg, "")
 
@@ -81,9 +79,7 @@ class TestPasswordResetWorkflow(unittest.TestCase):
         token = "test-token-123"
         user_name = "John Doe"
 
-        subject, html_content, text_content = email_service._get_reset_email_template(
-            token, user_name
-        )
+        subject, html_content, text_content = email_service._get_reset_email_template(token, user_name)
 
         # Verify template content
         self.assertEqual(subject, "Reset Your Voxify Password")

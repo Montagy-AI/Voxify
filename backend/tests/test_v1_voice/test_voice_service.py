@@ -18,9 +18,7 @@ class TestVoiceServiceAPI:
         """Check if server is running before tests"""
         try:
             response = requests.get(f"{server_url}/api/v1/auth/login", timeout=5)
-            assert (
-                response.status_code == 405
-            ), f"Unexpected status code: {response.status_code}"
+            assert response.status_code == 405, f"Unexpected status code: {response.status_code}"
         except Exception as e:
             pytest.skip(f"Server not available: {e}")
 
@@ -29,18 +27,14 @@ class TestVoiceServiceAPI:
         """Get the Flask server URL based on start.py configuration"""
         # Get configuration from environment variables (same as start.py)
         host = os.getenv("FLASK_HOST", "127.0.0.1")  # Use 127.0.0.1 for local testing
-        port = int(
-            os.getenv("PORT", os.getenv("FLASK_PORT", 8000))
-        )  # Default port from start.py
+        port = int(os.getenv("PORT", os.getenv("FLASK_PORT", 8000)))  # Default port from start.py
         return f"http://{host}:{port}"
 
     @pytest.fixture(scope="class", autouse=True)
     def check_curl_available(self):
         """Check if curl is available on the system"""
         try:
-            result = subprocess.run(
-                ["curl", "--version"], capture_output=True, text=True
-            )
+            result = subprocess.run(["curl", "--version"], capture_output=True, text=True)
             if result.returncode != 0:
                 pytest.skip("curl is not available on this system")
         except FileNotFoundError:
@@ -81,9 +75,7 @@ class TestVoiceServiceAPI:
             "-H",
             "Content-Type: application/json",
             "-d",
-            json.dumps(
-                {"email": test_user["email"], "password": test_user["password"]}
-            ),
+            json.dumps({"email": test_user["email"], "password": test_user["password"]}),
         ]
         result = subprocess.run(login_cmd, capture_output=True, text=True)
         response = json.loads(result.stdout)
@@ -154,9 +146,7 @@ class TestVoiceServiceAPI:
             assert response["data"]["name"] == f"Test Sample {timestamp}"
             assert response["data"]["status"] == "ready"
 
-    def test_upload_voice_sample_missing_name(
-        self, server_url, auth_tokens, test_audio_files
-    ):
+    def test_upload_voice_sample_missing_name(self, server_url, auth_tokens, test_audio_files):
         """Test uploading a voice sample without name"""
         # Use the second audio file
         test_audio_file = test_audio_files[1]
@@ -627,14 +617,9 @@ class TestVoiceServiceAPI:
         response = json.loads(result.stdout)
         # Flask-JWT-Extended returns {"msg": "Invalid token"} or {"msg": "Invalid header string ..."}
         assert "msg" in response
-        assert (
-            "Invalid token" in response["msg"]
-            or "Invalid header string" in response["msg"]
-        )
+        assert "Invalid token" in response["msg"] or "Invalid header string" in response["msg"]
 
-    def test_create_voice_clone_success(
-        self, server_url, auth_tokens, test_audio_files
-    ):
+    def test_create_voice_clone_success(self, server_url, auth_tokens, test_audio_files):
         """Test successful voice clone creation"""
         # Use the third audio file
         test_audio_file = test_audio_files[2]
@@ -708,9 +693,7 @@ class TestVoiceServiceAPI:
         assert result.returncode == 0, f"Clone creation failed: {result.stderr}"
 
         clone_response = json.loads(result.stdout)
-        assert (
-            clone_response.get("success") is True
-        ), f"Clone response: {clone_response}"
+        assert clone_response.get("success") is True, f"Clone response: {clone_response}"
 
         clone_id = clone_response.get("data", {}).get("clone_id")
         assert clone_id is not None, "No clone_id in response"
@@ -729,9 +712,7 @@ class TestVoiceServiceAPI:
         assert result.returncode == 0, f"Get clone failed: {result.stderr}"
 
         get_response = json.loads(result.stdout)
-        assert (
-            get_response.get("success") is True
-        ), f"Get clone response: {get_response}"
+        assert get_response.get("success") is True, f"Get clone response: {get_response}"
         assert get_response.get("data", {}).get("clone_id") == clone_id
 
     def test_create_voice_clone_invalid_sample(self, server_url, auth_tokens):
@@ -760,9 +741,7 @@ class TestVoiceServiceAPI:
         assert result.returncode == 0, f"Clone creation failed: {result.stderr}"
 
         clone_response = json.loads(result.stdout)
-        assert (
-            clone_response.get("success") is False
-        ), f"Expected failure but got: {clone_response}"
+        assert clone_response.get("success") is False, f"Expected failure but got: {clone_response}"
         assert "not found" in clone_response.get("error", "").lower()
 
     def test_get_voice_clone_success(self, server_url, auth_tokens, test_audio_files):
@@ -853,9 +832,7 @@ class TestVoiceServiceAPI:
         assert result.returncode == 0, f"Get clone failed: {result.stderr}"
 
         get_response = json.loads(result.stdout)
-        assert (
-            get_response.get("success") is True
-        ), f"Get clone response: {get_response}"
+        assert get_response.get("success") is True, f"Get clone response: {get_response}"
 
         data = get_response.get("data", {})
         assert data.get("clone_id") == clone_id
@@ -864,9 +841,7 @@ class TestVoiceServiceAPI:
         assert "quality_metrics" in data
         assert "samples" in data
 
-    def test_delete_voice_clone_success(
-        self, server_url, auth_tokens, test_audio_files
-    ):
+    def test_delete_voice_clone_success(self, server_url, auth_tokens, test_audio_files):
         """Test successful deletion of voice clone"""
         # Use the fifth audio file
         test_audio_file = test_audio_files[4]
@@ -954,9 +929,7 @@ class TestVoiceServiceAPI:
         assert result.returncode == 0, f"Delete clone failed: {result.stderr}"
 
         delete_response = json.loads(result.stdout)
-        assert (
-            delete_response.get("success") is True
-        ), f"Delete clone response: {delete_response}"
+        assert delete_response.get("success") is True, f"Delete clone response: {delete_response}"
 
         # Verify clone was deleted
         get_cmd = [
@@ -972,14 +945,10 @@ class TestVoiceServiceAPI:
         assert result.returncode == 0, f"Get deleted clone failed: {result.stderr}"
 
         get_response = json.loads(result.stdout)
-        assert (
-            get_response.get("success") is False
-        ), f"Expected failure but got: {get_response}"
+        assert get_response.get("success") is False, f"Expected failure but got: {get_response}"
         assert "not found" in get_response.get("error", "").lower()
 
-    def test_select_voice_clone_success(
-        self, server_url, auth_tokens, test_audio_files
-    ):
+    def test_select_voice_clone_success(self, server_url, auth_tokens, test_audio_files):
         """Test successful selection of voice clone"""
         # Use the sixth audio file
         test_audio_file = test_audio_files[5]
@@ -1067,14 +1036,10 @@ class TestVoiceServiceAPI:
         assert result.returncode == 0, f"Select clone failed: {result.stderr}"
 
         select_response = json.loads(result.stdout)
-        assert (
-            select_response.get("success") is True
-        ), f"Select clone response: {select_response}"
+        assert select_response.get("success") is True, f"Select clone response: {select_response}"
         assert select_response.get("data", {}).get("clone_id") == clone_id
 
-    def test_synthesize_with_clone_success(
-        self, server_url, auth_tokens, test_audio_files
-    ):
+    def test_synthesize_with_clone_success(self, server_url, auth_tokens, test_audio_files):
         """Test successful speech synthesis with voice clone"""
         # Use the seventh audio file
         test_audio_file = test_audio_files[6]
@@ -1172,9 +1137,7 @@ class TestVoiceServiceAPI:
         assert result.returncode == 0, f"Synthesis failed: {result.stderr}"
 
         synthesis_response = json.loads(result.stdout)
-        assert (
-            synthesis_response.get("success") is True
-        ), f"Synthesis response: {synthesis_response}"
+        assert synthesis_response.get("success") is True, f"Synthesis response: {synthesis_response}"
 
         data = synthesis_response.get("data", {})
         assert data.get("clone_id") == clone_id
@@ -1182,9 +1145,7 @@ class TestVoiceServiceAPI:
         assert "output_path" in data
         assert data.get("status") == "completed"
 
-    def test_synthesize_with_clone_missing_text(
-        self, server_url, auth_tokens, test_audio_files
-    ):
+    def test_synthesize_with_clone_missing_text(self, server_url, auth_tokens, test_audio_files):
         """Test speech synthesis with missing text"""
         # Use the eighth audio file
         test_audio_file = test_audio_files[7]
@@ -1267,14 +1228,10 @@ class TestVoiceServiceAPI:
         assert result.returncode == 0, f"Synthesis failed: {result.stderr}"
 
         synthesis_response = json.loads(result.stdout)
-        assert (
-            synthesis_response.get("success") is False
-        ), f"Expected failure but got: {synthesis_response}"
+        assert synthesis_response.get("success") is False, f"Expected failure but got: {synthesis_response}"
         assert "text" in synthesis_response.get("error", "").lower()
 
-    def test_list_voice_clones_with_multiple_clones(
-        self, server_url, auth_tokens, test_audio_files
-    ):
+    def test_list_voice_clones_with_multiple_clones(self, server_url, auth_tokens, test_audio_files):
         """Test listing voice clones with multiple clones created"""
         # Create multiple clones using different audio files
         clone_names = ["Clone 1", "Clone 2", "Clone 3"]
@@ -1334,9 +1291,7 @@ class TestVoiceServiceAPI:
             ]
 
             result = subprocess.run(clone_cmd, capture_output=True, text=True)
-            assert (
-                result.returncode == 0
-            ), f"Clone {i+1} creation failed: {result.stderr}"
+            assert result.returncode == 0, f"Clone {i+1} creation failed: {result.stderr}"
 
             clone_response = json.loads(result.stdout)
             clone_id = clone_response.get("data", {}).get("clone_id")
@@ -1356,9 +1311,7 @@ class TestVoiceServiceAPI:
         assert result.returncode == 0, f"List clones failed: {result.stderr}"
 
         list_response = json.loads(result.stdout)
-        assert (
-            list_response.get("success") is True
-        ), f"List clones response: {list_response}"
+        assert list_response.get("success") is True, f"List clones response: {list_response}"
 
         data = list_response.get("data", {})
         clones = data.get("clones", [])
@@ -1396,9 +1349,7 @@ class TestVoiceServiceAPI:
         assert result.returncode == 0, f"Clone creation failed: {result.stderr}"
 
         clone_response = json.loads(result.stdout)
-        assert (
-            clone_response.get("success") is False
-        ), f"Expected failure but got: {clone_response}"
+        assert clone_response.get("success") is False, f"Expected failure but got: {clone_response}"
         assert "name" in clone_response.get("error", "").lower()
 
         # Test missing ref_text
@@ -1425,9 +1376,7 @@ class TestVoiceServiceAPI:
         assert result.returncode == 0, f"Clone creation failed: {result.stderr}"
 
         clone_response = json.loads(result.stdout)
-        assert (
-            clone_response.get("success") is False
-        ), f"Expected failure but got: {clone_response}"
+        assert clone_response.get("success") is False, f"Expected failure but got: {clone_response}"
         assert "ref_text" in clone_response.get("error", "").lower()
 
     def test_voice_clone_authorization_errors(self, server_url, auth_tokens):

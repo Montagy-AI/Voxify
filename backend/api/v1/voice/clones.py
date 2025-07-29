@@ -37,12 +37,7 @@ def create_voice_clone():
     print(f"[DEBUG] Create voice clone request from user {user_id}")
     print(f"[DEBUG] Request data: {data}")
 
-    if (
-        not data
-        or "sample_ids" not in data
-        or "name" not in data
-        or "ref_text" not in data
-    ):
+    if not data or "sample_ids" not in data or "name" not in data or "ref_text" not in data:
         missing_fields = []
         if not data:
             missing_fields.append("no data")
@@ -96,9 +91,7 @@ def create_voice_clone():
             primary_sample = samples[0]
             if not os.path.exists(primary_sample.file_path):
                 return (
-                    jsonify(
-                        {"success": False, "error": "Primary sample file not found"}
-                    ),
+                    jsonify({"success": False, "error": "Primary sample file not found"}),
                     400,
                 )
 
@@ -106,9 +99,7 @@ def create_voice_clone():
         f5_service = get_f5_tts_service()
 
         # Validate primary audio file
-        is_valid, validation_message = f5_service.validate_audio_file(
-            primary_sample.file_path
-        )
+        is_valid, validation_message = f5_service.validate_audio_file(primary_sample.file_path)
         if not is_valid:
             return (
                 jsonify(
@@ -175,9 +166,7 @@ def create_voice_clone():
 
         print(f"[DEBUG] Traceback: {traceback.format_exc()}")
         return (
-            jsonify(
-                {"success": False, "error": f"Failed to create voice clone: {str(e)}"}
-            ),
+            jsonify({"success": False, "error": f"Failed to create voice clone: {str(e)}"}),
             500,
         )
 
@@ -208,17 +197,12 @@ def list_voice_clones():
             query = (
                 session.query(VoiceModel)
                 .join(VoiceSample)
-                .filter(
-                    VoiceSample.user_id == user_id, VoiceModel.model_type == "f5_tts"
-                )
+                .filter(VoiceSample.user_id == user_id, VoiceModel.model_type == "f5_tts")
             )
 
             total_count = query.count()
             voice_models = (
-                query.order_by(VoiceModel.created_at.desc())
-                .offset((page - 1) * page_size)
-                .limit(page_size)
-                .all()
+                query.order_by(VoiceModel.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
             )
 
             # Get F5-TTS service to get additional clone info
@@ -235,9 +219,7 @@ def list_voice_clones():
                         "description": model.description,
                         "status": model.status,
                         "language": clone_info.get("language", "zh-CN"),
-                        "created_at": (
-                            model.created_at.isoformat() if model.created_at else None
-                        ),
+                        "created_at": (model.created_at.isoformat() if model.created_at else None),
                         "is_active": model.is_active,
                         "model_type": model.model_type,
                     }
@@ -250,9 +232,7 @@ def list_voice_clones():
                         "description": model.description,
                         "status": model.status,
                         "language": "zh-CN",
-                        "created_at": (
-                            model.created_at.isoformat() if model.created_at else None
-                        ),
+                        "created_at": (model.created_at.isoformat() if model.created_at else None),
                         "is_active": model.is_active,
                         "model_type": model.model_type,
                     }
@@ -275,9 +255,7 @@ def list_voice_clones():
 
     except Exception as e:
         return (
-            jsonify(
-                {"success": False, "error": f"Failed to list voice clones: {str(e)}"}
-            ),
+            jsonify({"success": False, "error": f"Failed to list voice clones: {str(e)}"}),
             500,
         )
 
@@ -332,11 +310,7 @@ def get_voice_clone(clone_id: str):
                 # Get associated samples
                 samples = (
                     session.query(VoiceSample)
-                    .filter(
-                        VoiceSample.id.in_(
-                            clone_info.get("sample_ids", [voice_model.voice_sample_id])
-                        )
-                    )
+                    .filter(VoiceSample.id.in_(clone_info.get("sample_ids", [voice_model.voice_sample_id])))
                     .all()
                 )
 
@@ -368,11 +342,7 @@ def get_voice_clone(clone_id: str):
                                 "model_type": "f5_tts",
                             },
                             "samples": sample_data,
-                            "created_at": (
-                                voice_model.created_at.isoformat()
-                                if voice_model.created_at
-                                else None
-                            ),
+                            "created_at": (voice_model.created_at.isoformat() if voice_model.created_at else None),
                             "is_active": voice_model.is_active,
                         },
                     }
@@ -395,11 +365,7 @@ def get_voice_clone(clone_id: str):
                                 "model_type": "f5_tts",
                             },
                             "samples": [],
-                            "created_at": (
-                                voice_model.created_at.isoformat()
-                                if voice_model.created_at
-                                else None
-                            ),
+                            "created_at": (voice_model.created_at.isoformat() if voice_model.created_at else None),
                             "is_active": voice_model.is_active,
                             "error": f"Clone details partially unavailable: {str(e)}",
                         },
@@ -408,9 +374,7 @@ def get_voice_clone(clone_id: str):
 
     except Exception as e:
         return (
-            jsonify(
-                {"success": False, "error": f"Failed to get voice clone: {str(e)}"}
-            ),
+            jsonify({"success": False, "error": f"Failed to get voice clone: {str(e)}"}),
             500,
         )
 
@@ -463,11 +427,7 @@ def delete_voice_clone(clone_id: str):
             # Delete related synthesis jobs first
             from database.models import SynthesisJob
 
-            synthesis_jobs = (
-                session.query(SynthesisJob)
-                .filter(SynthesisJob.voice_model_id == clone_id)
-                .all()
-            )
+            synthesis_jobs = session.query(SynthesisJob).filter(SynthesisJob.voice_model_id == clone_id).all()
 
             for job in synthesis_jobs:
                 session.delete(job)
@@ -485,9 +445,7 @@ def delete_voice_clone(clone_id: str):
 
     except Exception as e:
         return (
-            jsonify(
-                {"success": False, "error": f"Failed to delete voice clone: {str(e)}"}
-            ),
+            jsonify({"success": False, "error": f"Failed to delete voice clone: {str(e)}"}),
             500,
         )
 
@@ -569,9 +527,7 @@ def select_voice_clone(clone_id: str):
 
     except Exception as e:
         return (
-            jsonify(
-                {"success": False, "error": f"Failed to select voice clone: {str(e)}"}
-            ),
+            jsonify({"success": False, "error": f"Failed to select voice clone: {str(e)}"}),
             500,
         )
 
@@ -688,8 +644,6 @@ def synthesize_with_clone(clone_id: str):
 
     except Exception as e:
         return (
-            jsonify(
-                {"success": False, "error": f"Failed to synthesize speech: {str(e)}"}
-            ),
+            jsonify({"success": False, "error": f"Failed to synthesize speech: {str(e)}"}),
             500,
         )
