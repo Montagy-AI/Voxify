@@ -265,6 +265,7 @@ class VoiceModel(Base, TimestampMixin):
             "model_type": self.model_type,
             "model_size": self.model_size,
             "model_version": self.model_version,
+            "status": self.status,
             "is_active": self.is_active,
             "is_default": self.is_default,
             "deployment_status": self.deployment_status,
