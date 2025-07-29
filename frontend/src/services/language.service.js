@@ -101,7 +101,10 @@ class LanguageService {
       try {
         localStorage.setItem('user_preferred_language', languageCode);
       } catch (error) {
-        console.warn('Failed to save language preference to localStorage:', error);
+        console.warn(
+          'Failed to save language preference to localStorage:',
+          error
+        );
       }
     }
   }

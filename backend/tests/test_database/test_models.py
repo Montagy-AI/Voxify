@@ -240,8 +240,6 @@ class TestVoiceModelModel:
         # Check column default values
         assert VoiceModel.is_active.default.arg is True
 
-
-
     def test_voice_model_to_dict(self):
         """Test voice model serialization"""
         model = VoiceModel(
@@ -303,8 +301,6 @@ class TestSynthesisJobModel:
         job.config = '{"speed": 1.2, "pitch": 0.8}'
         assert job.config_dict == {"speed": 1.2, "pitch": 0.8}
 
-
-
     def test_synthesis_job_to_dict(self):
         """Test synthesis job serialization"""
         job = SynthesisJob(
@@ -354,9 +350,6 @@ class TestSynthesisCacheModel:
         assert cache.duration == 2.5
         # Check column default values
         assert SynthesisCache.hit_count.default.arg == 0
-
-
-
 
 
 class TestUsageStatModel:

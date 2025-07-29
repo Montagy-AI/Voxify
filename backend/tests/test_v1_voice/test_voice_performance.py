@@ -111,7 +111,7 @@ class TestVoiceServicePerformance:
         assert result.returncode == 0, f"Upload failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
-        
+
         # Check if upload was successful or if there's a duplicate detection
         if upload_response.get("success") is False:
             error_msg = upload_response.get("error", "")
@@ -159,7 +159,7 @@ class TestVoiceServicePerformance:
             assert result.returncode == 0, f"Upload {i+1} failed: {result.stderr}"
 
             upload_response = json.loads(result.stdout)
-            
+
             # Check if upload was successful or if there's a duplicate detection
             if upload_response.get("success") is False:
                 error_msg = upload_response.get("error", "")
@@ -240,7 +240,7 @@ class TestVoiceServicePerformance:
         # If all uploads failed due to duplicate detection, skip the test
         if len(successful_uploads) == 0 and len(duplicate_detections) == len(results):
             pytest.skip("All concurrent uploads failed due to duplicate detection")
-        
+
         # Otherwise, check that at least some uploads succeeded
         assert len(successful_uploads) > 0, "No successful concurrent uploads"
 
@@ -264,7 +264,7 @@ class TestVoiceServicePerformance:
         assert result.returncode == 0, f"Upload for clone performance test failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
-        
+
         # Check if upload was successful or if there's a duplicate detection
         if upload_response.get("success") is False:
             error_msg = upload_response.get("error", "")
@@ -273,7 +273,9 @@ class TestVoiceServicePerformance:
             else:
                 assert False, f"Upload for clone performance test failed: {upload_response}"
         else:
-            assert upload_response.get("success") is True, f"Upload for clone performance test failed: {upload_response}"
+            assert (
+                upload_response.get("success") is True
+            ), f"Upload for clone performance test failed: {upload_response}"
 
         sample_id = upload_response["data"]["sample_id"]
 
@@ -336,7 +338,7 @@ class TestVoiceServicePerformance:
         assert result.returncode == 0, f"Upload for synthesis performance test failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
-        
+
         # Check if upload was successful or if there's a duplicate detection
         if upload_response.get("success") is False:
             error_msg = upload_response.get("error", "")
@@ -345,7 +347,9 @@ class TestVoiceServicePerformance:
             else:
                 assert False, f"Upload for synthesis performance test failed: {upload_response}"
         else:
-            assert upload_response.get("success") is True, f"Upload for synthesis performance test failed: {upload_response}"
+            assert (
+                upload_response.get("success") is True
+            ), f"Upload for synthesis performance test failed: {upload_response}"
 
         sample_id = upload_response["data"]["sample_id"]
 
@@ -548,7 +552,7 @@ class TestVoiceServicePerformance:
         def simulate_user(user_id):
             """Simulate a user performing operations"""
             start_time = time.time()
-            
+
             # Simulate upload operation
             upload_cmd = [
                 "curl",
@@ -565,7 +569,7 @@ class TestVoiceServicePerformance:
 
             result = subprocess.run(upload_cmd, capture_output=True, text=True)
             response = json.loads(result.stdout)
-            
+
             # Check if upload was successful or if there's a duplicate detection
             if response.get("success") is False:
                 error_msg = response.get("error", "")
@@ -588,7 +592,7 @@ class TestVoiceServicePerformance:
 
             result = subprocess.run(list_cmd, capture_output=True, text=True)
             response = json.loads(result.stdout)
-            
+
             if response.get("success") is True:
                 results.append(("list", time.time() - start_time, True))
             else:

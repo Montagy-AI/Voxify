@@ -105,7 +105,11 @@ describe('VoiceCloneService', () => {
     test('Throws error when no authentication token found', async () => {
       localStorageMock.getItem.mockReturnValue(null);
       await expect(
-        voiceCloneService.uploadVoiceSample(mockFile, 'Test Sample', mockOnProgress)
+        voiceCloneService.uploadVoiceSample(
+          mockFile,
+          'Test Sample',
+          mockOnProgress
+        )
       ).rejects.toThrow('No authentication token found');
       expect(api.post).not.toHaveBeenCalled();
     });
@@ -120,7 +124,11 @@ describe('VoiceCloneService', () => {
       };
       api.post.mockRejectedValue(mockError);
       await expect(
-        voiceCloneService.uploadVoiceSample(mockFile, 'Test Sample', mockOnProgress)
+        voiceCloneService.uploadVoiceSample(
+          mockFile,
+          'Test Sample',
+          mockOnProgress
+        )
       ).rejects.toBe('File upload failed');
     });
 
@@ -128,7 +136,11 @@ describe('VoiceCloneService', () => {
       const mockError = new Error('Network error');
       api.post.mockRejectedValue(mockError);
       await expect(
-        voiceCloneService.uploadVoiceSample(mockFile, 'Test Sample', mockOnProgress)
+        voiceCloneService.uploadVoiceSample(
+          mockFile,
+          'Test Sample',
+          mockOnProgress
+        )
       ).rejects.toBe(mockError);
     });
   });
@@ -285,9 +297,9 @@ describe('VoiceCloneService', () => {
 
     test('Throws error when no authentication token found', async () => {
       localStorageMock.getItem.mockReturnValue(null);
-      await expect(voiceCloneService.getVoiceClone(mockCloneId)).rejects.toThrow(
-        'No authentication token found'
-      );
+      await expect(
+        voiceCloneService.getVoiceClone(mockCloneId)
+      ).rejects.toThrow('No authentication token found');
       expect(api.get).not.toHaveBeenCalled();
     });
 
@@ -340,7 +352,7 @@ describe('VoiceCloneService', () => {
     test('Throws error when API request fails', async () => {
       const mockError = {
         response: {
-          data: { error: 'Failed to delete clone' }
+          data: { error: 'Failed to delete clone' },
         },
       };
       api.delete.mockRejectedValue(mockError);
@@ -578,11 +590,14 @@ describe('VoiceCloneService', () => {
     test('Successfully deletes voice sample', async () => {
       api.delete.mockResolvedValue(mockSuccessResponse);
       const result = await voiceCloneService.deleteVoiceSample(mockSampleId);
-      expect(api.delete).toHaveBeenCalledWith(`/voice/samples/${mockSampleId}`, {
-        headers: {
-          Authorization: 'Bearer mock_access_token',
-        },
-      });
+      expect(api.delete).toHaveBeenCalledWith(
+        `/voice/samples/${mockSampleId}`,
+        {
+          headers: {
+            Authorization: 'Bearer mock_access_token',
+          },
+        }
+      );
       expect(result).toEqual(mockSuccessResponse.data);
     });
 

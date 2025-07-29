@@ -99,7 +99,9 @@ describe('JobService', () => {
         },
       };
       api.get.mockRejectedValue(mockError);
-      await expect(jobService.getSynthesisJobs()).rejects.toBe('Internal server error');
+      await expect(jobService.getSynthesisJobs()).rejects.toBe(
+        'Internal server error'
+      );
     });
 
     test('Throws generic error when API request fails without response data', async () => {
@@ -157,13 +159,17 @@ describe('JobService', () => {
         },
       };
       api.get.mockRejectedValue(mockError);
-      await expect(jobService.getSynthesisJob(mockJobId)).rejects.toBe('Job not found');
+      await expect(jobService.getSynthesisJob(mockJobId)).rejects.toBe(
+        'Job not found'
+      );
     });
 
     test('Throws generic error when API request fails without response data', async () => {
       const mockError = new Error('Network error');
       api.get.mockRejectedValue(mockError);
-      await expect(jobService.getSynthesisJob(mockJobId)).rejects.toBe(mockError);
+      await expect(jobService.getSynthesisJob(mockJobId)).rejects.toBe(
+        mockError
+      );
     });
   });
 
@@ -188,7 +194,10 @@ describe('JobService', () => {
 
     test('Successfully creates synthesis job with default config', async () => {
       api.post.mockResolvedValue(mockSuccessResponse);
-      const result = await jobService.createSynthesisJob(mockVoiceModelId, mockText);
+      const result = await jobService.createSynthesisJob(
+        mockVoiceModelId,
+        mockText
+      );
       expect(api.post).toHaveBeenCalledWith(
         '/job',
         {
@@ -359,7 +368,9 @@ describe('JobService', () => {
     test('Throws generic error when API request fails without response data', async () => {
       const mockError = new Error('Network error');
       api.post.mockRejectedValue(mockError);
-      await expect(jobService.cancelSynthesisJob(mockJobId)).rejects.toBe(mockError);
+      await expect(jobService.cancelSynthesisJob(mockJobId)).rejects.toBe(
+        mockError
+      );
     });
   });
 
@@ -384,9 +395,9 @@ describe('JobService', () => {
 
     test('Throws error when no authentication token found', async () => {
       localStorageMock.getItem.mockReturnValue(null);
-      await expect(jobService.downloadSynthesisOutput(mockJobId)).rejects.toThrow(
-        'No authentication token found'
-      );
+      await expect(
+        jobService.downloadSynthesisOutput(mockJobId)
+      ).rejects.toThrow('No authentication token found');
       expect(api.get).not.toHaveBeenCalled();
     });
 
@@ -407,7 +418,9 @@ describe('JobService', () => {
     test('Throws generic error when API request fails without response data', async () => {
       const mockError = new Error('Network error');
       api.get.mockRejectedValue(mockError);
-      await expect(jobService.downloadSynthesisOutput(mockJobId)).rejects.toBe(mockError);
+      await expect(jobService.downloadSynthesisOutput(mockJobId)).rejects.toBe(
+        mockError
+      );
     });
   });
 });

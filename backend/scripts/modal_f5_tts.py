@@ -306,7 +306,7 @@ print(f"Saved audio with shape {{wav.shape}} and sr {{sr}}")
                 "cuda_available": torch.cuda.is_available(),
                 "cuda_device_count": torch.cuda.device_count(),
                 "f5_tts_cli_available": result.returncode == 0,
-                "f5_tts_help_output": result.stdout[:500] if result.returncode == 0 else result.stderr[:500],
+                "f5_tts_help_output": (result.stdout[:500] if result.returncode == 0 else result.stderr[:500]),
             }
         except Exception as e:
             return {"error": str(e)}

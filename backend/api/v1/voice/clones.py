@@ -219,7 +219,7 @@ def list_voice_clones():
                         "description": model.description,
                         "status": model.status,
                         "language": clone_info.get("language", "zh-CN"),
-                        "created_at": model.created_at.isoformat() if model.created_at else None,
+                        "created_at": (model.created_at.isoformat() if model.created_at else None),
                         "is_active": model.is_active,
                         "model_type": model.model_type,
                     }
@@ -232,7 +232,7 @@ def list_voice_clones():
                         "description": model.description,
                         "status": model.status,
                         "language": "zh-CN",
-                        "created_at": model.created_at.isoformat() if model.created_at else None,
+                        "created_at": (model.created_at.isoformat() if model.created_at else None),
                         "is_active": model.is_active,
                         "model_type": model.model_type,
                     }
@@ -342,7 +342,7 @@ def get_voice_clone(clone_id: str):
                                 "model_type": "f5_tts",
                             },
                             "samples": sample_data,
-                            "created_at": voice_model.created_at.isoformat() if voice_model.created_at else None,
+                            "created_at": (voice_model.created_at.isoformat() if voice_model.created_at else None),
                             "is_active": voice_model.is_active,
                         },
                     }
@@ -365,7 +365,7 @@ def get_voice_clone(clone_id: str):
                                 "model_type": "f5_tts",
                             },
                             "samples": [],
-                            "created_at": voice_model.created_at.isoformat() if voice_model.created_at else None,
+                            "created_at": (voice_model.created_at.isoformat() if voice_model.created_at else None),
                             "is_active": voice_model.is_active,
                             "error": f"Clone details partially unavailable: {str(e)}",
                         },

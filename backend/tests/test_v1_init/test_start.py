@@ -43,7 +43,12 @@ class TestStartScriptExecution:
     def test_start_help_option(self):
         """Test start.py --help option"""
         start_py_path = get_start_py_path_or_skip()
-        result = subprocess.run([sys.executable, start_py_path, "--help"], capture_output=True, text=True, timeout=30)
+        result = subprocess.run(
+            [sys.executable, start_py_path, "--help"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
 
         assert result.returncode == 0, f"Help command failed: {result.stderr}"
         assert "Voxify One-Click Startup Script" in result.stdout
@@ -69,7 +74,10 @@ class TestStartScriptExecution:
                 env=env,
             )
 
-            assert result.returncode in [0, None], f"Init failed: {result.stderr}\nStdout: {result.stdout}"
+            assert result.returncode in [
+                0,
+                None,
+            ], f"Init failed: {result.stderr}\nStdout: {result.stdout}"
             assert "Initializing file storage" in result.stdout
             assert "Welcome to Voxify!" in result.stdout
 
@@ -78,7 +86,10 @@ class TestStartScriptExecution:
         start_py_path = get_start_py_path_or_skip()
 
         result = subprocess.run(
-            [sys.executable, start_py_path, "--seed-only"], capture_output=True, text=True, timeout=30
+            [sys.executable, start_py_path, "--seed-only"],
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
 
         # This should fail because we don't have a proper database setup
@@ -91,7 +102,13 @@ class TestStartScriptExecution:
         start_py_path = get_start_py_path_or_skip()
 
         result = subprocess.run(
-            [sys.executable, start_py_path, "--skip-db-init", "--skip-file-init", "--init-only"],
+            [
+                sys.executable,
+                start_py_path,
+                "--skip-db-init",
+                "--skip-file-init",
+                "--init-only",
+            ],
             capture_output=True,
             text=True,
             timeout=30,
@@ -143,7 +160,10 @@ class TestFileStorageCreation:
         """Test that file storage setup mentions environment variables"""
         start_py_path = get_start_py_path_or_skip()
         result = subprocess.run(
-            [sys.executable, start_py_path, "--init-only"], capture_output=True, text=True, timeout=30
+            [sys.executable, start_py_path, "--init-only"],
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         assert "file storage" in result.stdout.lower() or "files" in result.stdout.lower()
 
@@ -181,7 +201,11 @@ class TestDatabaseInitialization:
         env["DATABASE_URL"] = f"sqlite:///{custom_db_path}"
 
         result = subprocess.run(
-            [sys.executable, start_py_path, "--init-only"], capture_output=True, text=True, timeout=30, env=env
+            [sys.executable, start_py_path, "--init-only"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            env=env,
         )
 
         # Should handle custom database URL (may fail, but should attempt it)
@@ -202,7 +226,11 @@ class TestStartupConfiguration:
         env["FLASK_DEBUG"] = "true"
 
         result = subprocess.run(
-            [sys.executable, start_py_path, "--init-only"], capture_output=True, text=True, timeout=30, env=env
+            [sys.executable, start_py_path, "--init-only"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            env=env,
         )
 
         assert result.returncode in [0, None] or "Welcome to Voxify!" in result.stdout
@@ -215,7 +243,11 @@ class TestStartupConfiguration:
         env["FLASK_ENV"] = "development"
 
         result = subprocess.run(
-            [sys.executable, start_py_path, "--init-only"], capture_output=True, text=True, timeout=30, env=env
+            [sys.executable, start_py_path, "--init-only"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            env=env,
         )
 
         assert "Welcome to Voxify!" in result.stdout
@@ -223,7 +255,11 @@ class TestStartupConfiguration:
         # Test production mode
         env["FLASK_ENV"] = "production"
         result = subprocess.run(
-            [sys.executable, start_py_path, "--init-only"], capture_output=True, text=True, timeout=30, env=env
+            [sys.executable, start_py_path, "--init-only"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            env=env,
         )
 
         assert "Welcome to Voxify!" in result.stdout
@@ -238,7 +274,10 @@ class TestArgumentParsing:
         """Test start.py with invalid arguments"""
         start_py_path = get_start_py_path_or_skip()
         result = subprocess.run(
-            [sys.executable, start_py_path, "--invalid-flag"], capture_output=True, text=True, timeout=30
+            [sys.executable, start_py_path, "--invalid-flag"],
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
 
         # Should exit with error for invalid arguments
@@ -249,7 +288,13 @@ class TestArgumentParsing:
         """Test start.py with multiple valid arguments"""
         start_py_path = get_start_py_path_or_skip()
         result = subprocess.run(
-            [sys.executable, start_py_path, "--skip-db-init", "--skip-file-init", "--init-only"],
+            [
+                sys.executable,
+                start_py_path,
+                "--skip-db-init",
+                "--skip-file-init",
+                "--init-only",
+            ],
             capture_output=True,
             text=True,
             timeout=30,
@@ -269,7 +314,11 @@ class TestErrorHandling:
         env["DATABASE_URL"] = "sqlite:///nonexistent/path/test.db"
 
         result = subprocess.run(
-            [sys.executable, start_py_path, "--init-only"], capture_output=True, text=True, timeout=30, env=env
+            [sys.executable, start_py_path, "--init-only"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            env=env,
         )
 
         # Should either succeed or fail gracefully (not crash)
@@ -287,7 +336,10 @@ class TestScriptIntegrity:
         """Test that start.py has valid Python syntax"""
         start_py_path = get_start_py_path_or_skip()
         result = subprocess.run(
-            [sys.executable, "-m", "py_compile", start_py_path], capture_output=True, text=True, timeout=30
+            [sys.executable, "-m", "py_compile", start_py_path],
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
 
         assert result.returncode == 0, f"Syntax error in start.py: {result.stderr}"
@@ -297,7 +349,11 @@ class TestScriptIntegrity:
         start_py_path = get_start_py_path_or_skip()
         # Test that the script can at least be parsed for imports
         result = subprocess.run(
-            [sys.executable, "-c", f"import ast; ast.parse(open(r'{start_py_path}', encoding='utf-8').read())"],
+            [
+                sys.executable,
+                "-c",
+                f"import ast; ast.parse(open(r'{start_py_path}', encoding='utf-8').read())",
+            ],
             capture_output=True,
             text=True,
             timeout=30,
