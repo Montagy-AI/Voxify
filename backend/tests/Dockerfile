@@ -1,4 +1,4 @@
-FROM backend-base:latest
+FROM voxify-api:latest
 
 WORKDIR /backend
 
