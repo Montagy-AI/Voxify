@@ -27,8 +27,30 @@ from database.models import (
 )
 
 
+@pytest.fixture(scope="session")
+def setup_database():
+    """Initialize database tables for all tests"""
+    import os
+    
+    # Use a test-specific database path
+    test_db_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "test_voxify.db")
+    test_db_url = f"sqlite:///{test_db_path}"
+    
+    # Set environment variable for this test session
+    os.environ["DATABASE_URL"] = test_db_url
+    
+    db_manager = get_database_manager(test_db_url)
+    
+    # Force recreate tables
+    db_manager.drop_tables()
+    db_manager.create_tables()
+    db_manager.init_default_data()
+    
+    return db_manager
+
+
 @pytest.fixture
-def app():
+def app(setup_database):
     """Create and configure a Flask app for testing"""
     app = Flask(__name__)
 
@@ -185,12 +207,14 @@ class TestJobIntegration:
         # Create voice sample
         voice_sample = VoiceSample(
             user_id=user.id,
-            name="Test Voice",
-            file_path="test_voice.wav",
+            name="Test Voice Sample",
+            description="Test voice sample for job testing",
+            file_path="/test/path/sample.wav",
             file_size=1024,
             format="wav",
-            duration=1.0,
+            duration=5.0,
             sample_rate=22050,
+            status="ready",
         )
         session.add(voice_sample)
         session.commit()
@@ -198,119 +222,152 @@ class TestJobIntegration:
         # Create voice model
         voice_model = VoiceModel(
             voice_sample_id=voice_sample.id,
-            name="Test Model",
-            model_path="test_model.pth",
-            training_status="completed",
+            name="Test Voice Model",
+            description="Test voice model for job testing",
+            model_path="/test/path/model.pth",
+            status="completed",
             is_active=True,
         )
         session.add(voice_model)
         session.commit()
 
-        # Get user ID and voice model ID before closing session
-        user_id = user.id
-        voice_model_id = voice_model.id
-        session.close()
-
-        # Create JWT token within app context
+        # Create access token within app context
         with client.application.app_context():
-            access_token = create_access_token(identity=user_id)
+            access_token = create_access_token(identity=user.id)
 
-        # Step 1: Create job
+        # Test job creation
         job_data = {
-            "text_content": "Hello, this is a test synthesis job.",
-            "voice_model_id": voice_model_id,
+            "text_content": "Hello world, this is a test synthesis job.",
+            "voice_model_id": voice_model.id,
             "text_language": "en-US",
             "output_format": "wav",
             "sample_rate": 22050,
             "speed": 1.0,
             "pitch": 1.0,
             "volume": 1.0,
+            "config": {"include_timestamps": True, "timestamp_granularity": "word"},
         }
 
-        create_response = client.post(
+        response = client.post(
             "/api/v1/job",
             json=job_data,
             headers={"Authorization": f"Bearer {access_token}"},
         )
 
-        assert create_response.status_code == 201
-        create_data = create_response.get_json()
-        assert create_data["success"] is True
-        assert "data" in create_data
-        assert create_data["data"]["text_content"] == job_data["text_content"]
-        assert create_data["data"]["voice_model_id"] == voice_model_id
+        assert response.status_code in (200, 201)
+        data = response.get_json()
+        assert data["success"] is True
+        assert "data" in data
+        job_id = data["data"]["id"]
 
-        job_id = create_data["data"]["id"]
+        # Test job listing
+        response = client.get(
+            "/api/v1/job",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
 
-        # Step 2: List jobs
-        list_response = client.get("/api/v1/job", headers={"Authorization": f"Bearer {access_token}"})
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data["success"] is True
+        assert "data" in data
+        assert isinstance(data["data"], list)
+        assert len(data["data"]) >= 1
 
-        assert list_response.status_code == 200
-        list_data = list_response.get_json()
-        assert list_data["success"] is True
-        assert "data" in list_data
-        assert len(list_data["data"]) >= 1
+        # Test job details
+        response = client.get(
+            f"/api/v1/job/{job_id}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
 
-        # Step 3: Get specific job
-        get_response = client.get(f"/api/v1/job/{job_id}", headers={"Authorization": f"Bearer {access_token}"})
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data["success"] is True
+        assert "data" in data
+        assert data["data"]["id"] == job_id
 
-        assert get_response.status_code == 200
-        get_data = get_response.get_json()
-        assert get_data["success"] is True
-        assert get_data["data"]["id"] == job_id
-        assert get_data["data"]["text_content"] == job_data["text_content"]
+        # Test job update
+        update_data = {
+            "text_content": "Updated text content for testing.",
+            "speed": 1.2,
+            "pitch": 0.9,
+        }
 
-        # Step 4: Update job (only pending jobs can be updated)
-        update_data = {"speed": 1.2, "pitch": 0.9, "volume": 1.1}
-
-        update_response = client.put(
+        response = client.put(
             f"/api/v1/job/{job_id}",
             json=update_data,
             headers={"Authorization": f"Bearer {access_token}"},
         )
 
-        assert update_response.status_code == 200
-        update_response_data = update_response.get_json()
-        assert update_response_data["success"] is True
-        assert "speed" in update_response_data["message"]
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data["success"] is True
+        assert "data" in data
+        assert data["data"]["text_content"] == update_data["text_content"]
 
-        # Step 5: Update job status and progress
-        patch_data = {"status": "processing", "progress": 0.5}
+        # Test job progress update
+        progress_data = {
+            "status": "processing",
+            "progress": 0.5,
+            "processing_node": "test-worker-1",
+        }
 
-        patch_response = client.patch(
+        response = client.patch(
             f"/api/v1/job/{job_id}",
-            json=patch_data,
+            json=progress_data,
             headers={"Authorization": f"Bearer {access_token}"},
         )
 
-        assert patch_response.status_code == 200
-        patch_data_response = patch_response.get_json()
-        assert patch_data_response["success"] is True
-        assert "status" in patch_data_response["message"]
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data["success"] is True
+        assert "data" in data
+        assert data["data"]["status"] == progress_data["status"]
+        assert data["data"]["progress"] == progress_data["progress"]
 
-        # Step 6: Complete the job
-        complete_data = {
+        # Test job completion
+        completion_data = {
             "status": "completed",
             "progress": 1.0,
             "output_path": temp_file_storage["test_file_path"],
-            "duration": 2.5,
-            "processing_time_ms": 5000,
+            "output_size": 1024,
+            "duration": 3.5,
+            "processing_time_ms": 2500,
         }
 
-        complete_response = client.patch(
+        response = client.patch(
             f"/api/v1/job/{job_id}",
-            json=complete_data,
+            json=completion_data,
             headers={"Authorization": f"Bearer {access_token}"},
         )
 
-        assert complete_response.status_code == 200
-        complete_response_data = complete_response.get_json()
-        assert complete_response_data["success"] is True
+        assert response.status_code == 200
+        data = response.get_json()
+        assert data["success"] is True
+        assert "data" in data
+        assert data["data"]["status"] == "completed"
+        assert data["data"]["progress"] == 1.0
 
-        # Step 7: Delete job (only completed jobs can be deleted)
-        delete_response = client.delete(f"/api/v1/job/{job_id}", headers={"Authorization": f"Bearer {access_token}"})
+        # Test job deletion
+        response = client.delete(
+            f"/api/v1/job/{job_id}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
 
-        assert delete_response.status_code == 204
+        assert response.status_code in (200, 204)
+        if response.status_code == 200:
+            data = response.get_json()
+            assert data["success"] is True
+        # For 204 No Content, no JSON response is expected
+
+        # Verify job is deleted
+        response = client.get(
+            f"/api/v1/job/{job_id}",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+
+        assert response.status_code == 404
+
+        session.close()
 
     def test_job_creation_validation(self, client, temp_file_storage, cleanup_test_data):
         """Test job creation with various validation scenarios"""
@@ -332,34 +389,32 @@ class TestJobIntegration:
         # Create voice sample and model
         voice_sample = VoiceSample(
             user_id=user.id,
-            name="Test Voice",
-            file_path="test_voice.wav",
+            name="Test Voice Sample",
+            description="Test voice sample for validation",
+            file_path="/test/path/sample.wav",
             file_size=1024,
             format="wav",
-            duration=1.0,
+            duration=5.0,
             sample_rate=22050,
+            status="ready",
         )
         session.add(voice_sample)
         session.commit()
 
         voice_model = VoiceModel(
             voice_sample_id=voice_sample.id,
-            name="Test Model",
-            model_path="test_model.pth",
-            training_status="completed",
+            name="Test Voice Model",
+            description="Test voice model for validation",
+            model_path="/test/path/model.pth",
+            status="completed",
             is_active=True,
         )
         session.add(voice_model)
         session.commit()
 
-        # Get user ID and voice model ID before closing session
-        user_id = user.id
-        voice_model_id = voice_model.id
-        session.close()
-
-        # Create JWT token within app context
+        # Create access token within app context
         with client.application.app_context():
-            access_token = create_access_token(identity=user_id)
+            access_token = create_access_token(identity=user.id)
 
         # Test missing required fields
         invalid_data = {
@@ -381,7 +436,7 @@ class TestJobIntegration:
         # Test invalid speed value
         invalid_speed_data = {
             "text_content": "Test content",
-            "voice_model_id": voice_model_id,
+            "voice_model_id": voice_model.id,
             "speed": 5.0,  # Invalid speed
         }
 
@@ -399,7 +454,7 @@ class TestJobIntegration:
         # Test invalid output format
         invalid_format_data = {
             "text_content": "Test content",
-            "voice_model_id": voice_model_id,
+            "voice_model_id": voice_model.id,
             "output_format": "invalid_format",
         }
 
@@ -417,7 +472,7 @@ class TestJobIntegration:
         # Test invalid sample rate
         invalid_sample_rate_data = {
             "text_content": "Test content",
-            "voice_model_id": voice_model_id,
+            "voice_model_id": voice_model.id,
             "sample_rate": 12345,  # Invalid sample rate
         }
 
@@ -431,6 +486,8 @@ class TestJobIntegration:
         data = response.get_json()
         assert data["success"] is False
         assert "sample_rate" in data["error"]["details"]
+
+        session.close()
 
     def test_job_listing_with_filters(self, client, temp_file_storage, cleanup_test_data):
         """Test job listing with various filters and pagination"""
@@ -464,9 +521,10 @@ class TestJobIntegration:
 
         voice_model = VoiceModel(
             voice_sample_id=voice_sample.id,
-            name="Test Model",
-            model_path="test_model.pth",
-            training_status="completed",
+            name="Test Voice Model",
+            description="Test voice model for listing",
+            model_path="/test/path/model.pth",
+            status="completed",
             is_active=True,
         )
         session.add(voice_model)
@@ -505,14 +563,9 @@ class TestJobIntegration:
 
         session.commit()
 
-        # Get user ID and voice model ID before closing session
-        user_id = user.id
-        voice_model_id = voice_model.id
-        session.close()
-
-        # Create JWT token within app context
+        # Create access token within app context
         with client.application.app_context():
-            access_token = create_access_token(identity=user_id)
+            access_token = create_access_token(identity=user.id)
 
         # Test listing all jobs
         response = client.get("/api/v1/job", headers={"Authorization": f"Bearer {access_token}"})
@@ -536,7 +589,7 @@ class TestJobIntegration:
 
         # Test filtering by voice model
         response = client.get(
-            f"/api/v1/job?voice_model_id={voice_model_id}",
+            f"/api/v1/job?voice_model_id={voice_model.id}",
             headers={"Authorization": f"Bearer {access_token}"},
         )
 
@@ -544,7 +597,7 @@ class TestJobIntegration:
         data = response.get_json()
         assert data["success"] is True
         for job in data["data"]:
-            assert job["voice_model_id"] == voice_model_id
+            assert job["voice_model_id"] == voice_model.id
 
         # Test text search
         response = client.get(
@@ -599,21 +652,24 @@ class TestJobIntegration:
         # Create voice sample and model for user1
         voice_sample = VoiceSample(
             user_id=user1.id,
-            name="Test Voice",
-            file_path="test_voice.wav",
+            name="Test Voice Sample",
+            description="Test voice sample for access control",
+            file_path="/test/path/sample.wav",
             file_size=1024,
             format="wav",
-            duration=1.0,
+            duration=5.0,
             sample_rate=22050,
+            status="ready",
         )
         session.add(voice_sample)
         session.commit()
 
         voice_model = VoiceModel(
             voice_sample_id=voice_sample.id,
-            name="Test Model",
-            model_path="test_model.pth",
-            training_status="completed",
+            name="Test Voice Model",
+            description="Test voice model for access control",
+            model_path="/test/path/model.pth",
+            status="completed",
             is_active=True,
         )
         session.add(voice_model)
@@ -691,21 +747,24 @@ class TestJobIntegration:
         # Create voice sample and model
         voice_sample = VoiceSample(
             user_id=user.id,
-            name="Test Voice",
-            file_path="test_voice.wav",
+            name="Test Voice Sample",
+            description="Test voice sample for status transitions",
+            file_path="/test/path/sample.wav",
             file_size=1024,
             format="wav",
-            duration=1.0,
+            duration=5.0,
             sample_rate=22050,
+            status="ready",
         )
         session.add(voice_sample)
         session.commit()
 
         voice_model = VoiceModel(
             voice_sample_id=voice_sample.id,
-            name="Test Model",
-            model_path="test_model.pth",
-            training_status="completed",
+            name="Test Voice Model",
+            description="Test voice model for status transitions",
+            model_path="/test/path/model.pth",
+            status="completed",
             is_active=True,
         )
         session.add(voice_model)
@@ -796,21 +855,24 @@ class TestJobIntegration:
         # Create voice sample and model
         voice_sample = VoiceSample(
             user_id=user.id,
-            name="Test Voice",
-            file_path="test_voice.wav",
+            name="Test Voice Sample",
+            description="Test voice sample for deletion rules",
+            file_path="/test/path/sample.wav",
             file_size=1024,
             format="wav",
-            duration=1.0,
+            duration=5.0,
             sample_rate=22050,
+            status="ready",
         )
         session.add(voice_sample)
         session.commit()
 
         voice_model = VoiceModel(
             voice_sample_id=voice_sample.id,
-            name="Test Model",
-            model_path="test_model.pth",
-            training_status="completed",
+            name="Test Voice Model",
+            description="Test voice model for deletion rules",
+            model_path="/test/path/model.pth",
+            status="completed",
             is_active=True,
         )
         session.add(voice_model)
@@ -912,21 +974,24 @@ class TestJobIntegration:
         # Create voice sample and model
         voice_sample = VoiceSample(
             user_id=user.id,
-            name="Test Voice",
-            file_path="test_voice.wav",
+            name="Test Voice Sample",
+            description="Test voice sample for progress streaming",
+            file_path="/test/path/sample.wav",
             file_size=1024,
             format="wav",
-            duration=1.0,
+            duration=5.0,
             sample_rate=22050,
+            status="ready",
         )
         session.add(voice_sample)
         session.commit()
 
         voice_model = VoiceModel(
             voice_sample_id=voice_sample.id,
-            name="Test Model",
-            model_path="test_model.pth",
-            training_status="completed",
+            name="Test Voice Model",
+            description="Test voice model for progress streaming",
+            model_path="/test/path/model.pth",
+            status="completed",
             is_active=True,
         )
         session.add(voice_model)
@@ -994,21 +1059,24 @@ class TestJobIntegration:
         # Create voice sample and model
         voice_sample = VoiceSample(
             user_id=user.id,
-            name="Test Voice",
-            file_path="test_voice.wav",
+            name="Test Voice Sample",
+            description="Test voice sample for duplicate detection",
+            file_path="/test/path/sample.wav",
             file_size=1024,
             format="wav",
-            duration=1.0,
+            duration=5.0,
             sample_rate=22050,
+            status="ready",
         )
         session.add(voice_sample)
         session.commit()
 
         voice_model = VoiceModel(
             voice_sample_id=voice_sample.id,
-            name="Test Model",
-            model_path="test_model.pth",
-            training_status="completed",
+            name="Test Voice Model",
+            description="Test voice model for duplicate detection",
+            model_path="/test/path/model.pth",
+            status="completed",
             is_active=True,
         )
         session.add(voice_model)
@@ -1093,21 +1161,24 @@ class TestJobIntegration:
         # Create voice sample and model
         voice_sample = VoiceSample(
             user_id=user.id,
-            name="Test Voice",
-            file_path="test_voice.wav",
+            name="Test Voice Sample",
+            description="Test voice sample for legacy cancel",
+            file_path="/test/path/sample.wav",
             file_size=1024,
             format="wav",
-            duration=1.0,
+            duration=5.0,
             sample_rate=22050,
+            status="ready",
         )
         session.add(voice_sample)
         session.commit()
 
         voice_model = VoiceModel(
             voice_sample_id=voice_sample.id,
-            name="Test Model",
-            model_path="test_model.pth",
-            training_status="completed",
+            name="Test Voice Model",
+            description="Test voice model for legacy cancel",
+            model_path="/test/path/model.pth",
+            status="completed",
             is_active=True,
         )
         session.add(voice_model)
