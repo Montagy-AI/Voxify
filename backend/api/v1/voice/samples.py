@@ -75,7 +75,7 @@ def check_duplicate_sample(new_embedding: np.ndarray, user_id: str, session) -> 
             
         # Compare embeddings
         similarity = compare_embeddings(new_embedding, existing_embedding)
-        print(f'similarity : ************************{similarity}')
+        logger.debug(f'Embedding similarity: {similarity}')
         if similarity >= DUPLICATE_THRESHOLD:
             return sample
             
