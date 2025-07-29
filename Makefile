@@ -93,3 +93,29 @@ clean:
 # Development workflow
 dev: install lint build up
 	@echo "✅ Development environment ready!"
+
+# Build only the backend and db-init services
+backend-build:
+	@echo "Building backend services..."
+	docker-compose build api db-init
+	@echo "✅ Backend services built"
+
+# Start only the backend and db-init services
+backend-up:
+	@echo "Starting backend services..."
+	docker-compose up -d db-init api
+	@echo "✅ Backend is running on port 8000"
+
+# Stop only the backend services
+backend-down:
+	@echo "Stopping backend services..."
+	docker-compose stop api db-init
+	@echo "✅ Backend services stopped"
+
+# View logs for the backend
+backend-logs:
+	docker-compose logs -f api db-init
+
+# Shell into backend container
+shell-api:
+	docker-compose exec api /bin/bash
