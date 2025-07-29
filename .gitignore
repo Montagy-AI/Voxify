@@ -57,12 +57,15 @@ yarn-error.log*
 frontend/build/
 frontend/dist/
 frontend/.next/
+frontend/coverage/
 
 # Logs
 logs
 *.log
+.coverage
 
 # Temporary files
 *.tmp
 *.temp
 .cache/
+backend/.coverage

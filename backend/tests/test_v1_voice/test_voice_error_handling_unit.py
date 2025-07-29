@@ -167,8 +167,8 @@ class TestVoiceEmbeddingErrorHandling:
 
     @patch("api.v1.voice.embeddings.preprocess_wav")
     @patch("api.v1.voice.embeddings.voice_encoder")
-    @patch("api.v1.voice.embeddings.voice_collection")
-    def test_generate_voice_embedding_encoder_failure(self, mock_collection, mock_encoder, mock_preprocess):
+    @patch("api.v1.voice.embeddings.vector_db")
+    def test_generate_voice_embedding_encoder_failure(self, mock_vector_db, mock_encoder, mock_preprocess):
         """Test embedding generation with encoder failure"""
         # Mock successful preprocessing
         mock_audio = Mock()
@@ -180,10 +180,10 @@ class TestVoiceEmbeddingErrorHandling:
         with pytest.raises(Exception, match="Error generating voice embedding: Encoder failed"):
             generate_voice_embedding("/path/to/audio.wav")
 
-    @patch("api.v1.voice.embeddings.voice_collection")
-    def test_delete_voice_embedding_invalid_id(self, mock_collection):
+    @patch("api.v1.voice.embeddings.vector_db")
+    def test_delete_voice_embedding_invalid_id(self, mock_vector_db):
         """Test embedding deletion with invalid ID"""
-        mock_collection.delete.side_effect = Exception("Invalid embedding ID")
+        mock_vector_db.delete_embedding.side_effect = Exception("Invalid embedding ID")
 
         # The function should return False when an exception occurs
         result = delete_voice_embedding("invalid-id")

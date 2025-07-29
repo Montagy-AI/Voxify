@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Voxify Startup Script
 Automatically initializes database and starts Flask application server
@@ -30,7 +31,7 @@ def init_file_storage():
     for path_name, path in storage_paths.items():
         try:
             os.makedirs(path, exist_ok=True)
-            print(f"✓ {path_name} directory: {path}")
+            print(f"[OK] {path_name} directory: {path}")
         except OSError as e:
             print(f"Error creating {path_name} directory ({path}): {e}")
             return False

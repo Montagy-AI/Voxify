@@ -134,7 +134,6 @@ export const LANGUAGE_GROUPS = {
   '基础支持 (有限效果)': ['ko-KR', 'pt-BR', 'ar-SA', 'th-TH', 'vi-VN'],
 };
 
-// 支持级别映射
 export const SUPPORT_LEVEL_INFO = {
   native: {
     label: '原生支持',
@@ -239,34 +238,31 @@ export const SAMPLE_TEXTS = {
     'Xin chào, đây là bài kiểm tra tổng hợp giọng nói tiếng Việt. Hôm nay thời tiết rất đẹp.',
 };
 
-// 获取语言支持级别
 export const getLanguageSupportLevel = (code) => {
   const lang = getLanguageInfo(code);
   return lang ? lang.supportLevel : 'unknown';
 };
 
-// 检查是否为原生支持的语言
+// Check if the language is natively supported
 export const isNativeSupported = (code) => {
   return getLanguageSupportLevel(code) === 'native';
 };
 
-// 检查是否为专用模型支持的语言
+// Check if it is a language supported by the dedicated model
 export const isSpecializedSupported = (code) => {
   return getLanguageSupportLevel(code) === 'specialized';
 };
 
-// 检查是否为fallback支持的语言
+// Check if it is a language supported by the fallback model
 export const isFallbackSupported = (code) => {
   return getLanguageSupportLevel(code) === 'fallback';
 };
 
-// 获取支持级别信息
 export const getSupportLevelInfo = (code) => {
   const level = getLanguageSupportLevel(code);
   return SUPPORT_LEVEL_INFO[level] || null;
 };
 
-// 按支持级别分组语言
 export const getLanguagesByLevel = () => {
   const grouped = {
     native: [],

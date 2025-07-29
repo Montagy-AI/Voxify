@@ -212,7 +212,7 @@ class TestChromaVectorDB:
         assert result["metadatas"] == [{"user_id": "user-123"}]
 
         # Verify collection.get was called
-        mock_collection.get.assert_called_once_with(ids=["sample-123"])
+        mock_collection.get.assert_called_once_with(ids=["sample-123"], include=["embeddings", "metadatas", "documents"])
 
     @patch("database.vector_config.chromadb")
     def test_get_embedding_not_found(self, mock_chromadb, temp_vector_db_path):

@@ -9,6 +9,7 @@ help:
 	@echo "  lint    - Run linting for backend and frontend"
 	@echo "  format  - Format code for backend and frontend"
 	@echo "  test    - Run full test suite with Docker"
+	@echo "  test-frontend - Run frontend tests"
 	@echo "  build   - Build Docker images"
 	@echo "  up      - Start services with docker-compose"
 	@echo "  down    - Stop services"
@@ -58,6 +59,11 @@ test-quick:
 	docker-compose run --rm tests
 	@echo "✅ Quick tests completed"
 
+# Frontend test suite
+test-frontend:
+	@echo "Running frontend tests..."
+	docker-compose run --rm -e CI=true frontend npm run test:ci
+
 # Docker Compose operations
 up:
 	docker-compose up -d
@@ -87,3 +93,32 @@ clean:
 # Development workflow
 dev: install lint build up
 	@echo "✅ Development environment ready!"
+
+# Build only the backend and db-init services
+backend-build:
+	@echo "Building backend services..."
+	docker-compose build api db-init
+	@echo "✅ Backend services built"
+
+# Start only the backend and db-init services
+backend-up:
+	@echo "Starting backend services..."
+	docker-compose up -d db-init api
+	@echo "✅ Backend is running on port 8000"
+
+# Stop only the backend services
+backend-down:
+	@echo "Stopping backend services..."
+	docker-compose stop api db-init
+	@echo "✅ Backend services stopped"
+
+# View logs for the backend
+backend-logs:
+	docker-compose logs -f api db-init
+
+# Shell into backend container
+shell-api:
+	docker-compose exec api /bin/bash
+
+backend-prod:
+	docker buildx build --platform linux/amd64 -t madelahn/voxify-api:latest ./backend

@@ -9,6 +9,7 @@ import sys
 import tempfile
 import shutil
 import uuid
+from unittest.mock import patch
 from datetime import datetime, timedelta
 
 # Add the backend directory to Python path
@@ -77,12 +78,27 @@ def temp_file_storage():
 
 
 @pytest.fixture
-def cleanup_test_data():
+def test_db():
+    """Create a test database with in-memory SQLite"""
+    # Use in-memory database for testing
+    test_db_url = "sqlite:///:memory:"
+    db_manager = get_database_manager(test_db_url)
+    
+    # Create tables
+    db_manager.create_tables()
+    db_manager.init_default_data()
+    
+    yield db_manager
+    
+    # Cleanup is automatic for in-memory database
+
+
+@pytest.fixture
+def cleanup_test_data(test_db):
     """Cleanup fixture to remove test data from database"""
     # Clean up before test
     try:
-        db_manager = get_database_manager()
-        session = db_manager.get_session()
+        session = test_db.get_session()
 
         # Delete test users and related data
         test_emails = [
@@ -121,8 +137,7 @@ def cleanup_test_data():
 
     # Clean up after test
     try:
-        db_manager = get_database_manager()
-        session = db_manager.get_session()
+        session = test_db.get_session()
 
         # Delete test users and related data
         test_emails = [
@@ -161,77 +176,78 @@ def cleanup_test_data():
 class TestFileIntegrationFinal:
     """Final integration tests for file management"""
 
-    def test_basic_file_download(self, client, temp_file_storage, cleanup_test_data):
+    def test_basic_file_download(self, client, temp_file_storage, cleanup_test_data, test_db):
         """Test basic file download with JWT authentication"""
 
-        # Create test data
-        db_manager = get_database_manager()
-        session = db_manager.get_session()
+        # Mock the database manager to use test database
+        with patch('api.v1.file.routes.get_database_manager', return_value=test_db):
+            # Create test data
+            session = test_db.get_session()
 
-        # Create user with unique email
-        user = User(
-            email="download_test@example.com",
-            password_hash="hashed_password",
-            first_name="Download",
-            last_name="Test",
-        )
-        session.add(user)
-        session.commit()
+            # Create user with unique email
+            user = User(
+                email="download_test@example.com",
+                password_hash="hashed_password",
+                first_name="Download",
+                last_name="Test",
+            )
+            session.add(user)
+            session.commit()
 
-        # Create voice sample
-        voice_sample = VoiceSample(
-            user_id=user.id,
-            name="Test Voice",
-            file_path="test_voice.wav",
-            file_size=1024,
-            format="wav",
-            duration=1.0,
-            sample_rate=22050,
-        )
-        session.add(voice_sample)
-        session.commit()
+            # Create voice sample
+            voice_sample = VoiceSample(
+                user_id=user.id,
+                name="Test Voice",
+                file_path="test_voice.wav",
+                file_size=1024,
+                format="wav",
+                duration=1.0,
+                sample_rate=22050,
+            )
+            session.add(voice_sample)
+            session.commit()
 
-        # Create voice model
-        voice_model = VoiceModel(
-            voice_sample_id=voice_sample.id,
-            name="Test Model",
-            model_path="test_model.pth",
-            training_status="completed",
-        )
-        session.add(voice_model)
-        session.commit()
+            # Create voice model
+            voice_model = VoiceModel(
+                voice_sample_id=voice_sample.id,
+                name="Test Model",
+                model_path="test_model.pth",
+                status="completed",
+            )
+            session.add(voice_model)
+            session.commit()
 
-        # Create synthesis job
-        job = SynthesisJob(
-            id="download-job-123",
-            user_id=user.id,
-            voice_model_id=voice_model.id,
-            text_content="Hello, this is a test synthesis.",
-            text_hash="download_hash",
-            text_language="en-US",
-            output_path=temp_file_storage["test_file_path"],
-            duration=2.5,
-            status="completed",
-        )
-        session.add(job)
-        session.commit()
+            # Create synthesis job
+            job = SynthesisJob(
+                id="download-job-123",
+                user_id=user.id,
+                voice_model_id=voice_model.id,
+                text_content="Hello, this is a test synthesis.",
+                text_hash="download_hash",
+                text_language="en-US",
+                output_path=temp_file_storage["test_file_path"],
+                duration=2.5,
+                status="completed",
+            )
+            session.add(job)
+            session.commit()
 
-        # Get user ID before closing session
-        user_id = user.id
-        session.close()
+            # Get user ID before closing session
+            user_id = user.id
+            session.close()
 
-        # Create JWT token within app context
-        with client.application.app_context():
-            access_token = create_access_token(identity=user_id)
+            # Create JWT token within app context
+            with client.application.app_context():
+                access_token = create_access_token(identity=user_id)
 
-        # Test download
-        response = client.get(
-            "/api/v1/file/synthesis/download-job-123",
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
+            # Test download
+            response = client.get(
+                "/api/v1/file/synthesis/download-job-123",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
 
-        assert response.status_code == 200
-        assert response.headers["Content-Type"] == "audio/wav"
+            assert response.status_code == 200
+            assert response.headers["Content-Type"] == "audio/wav"
 
     def test_file_download_without_auth(self, client):
         """Test file download without authentication"""
@@ -240,274 +256,278 @@ class TestFileIntegrationFinal:
 
         assert response.status_code == 401
 
-    def test_file_info_with_auth(self, client, temp_file_storage, cleanup_test_data):
+    def test_file_info_with_auth(self, client, temp_file_storage, cleanup_test_data, test_db):
         """Test file info endpoint with JWT authentication"""
 
-        # Create test data
-        db_manager = get_database_manager()
-        session = db_manager.get_session()
+        # Mock the database manager to use test database
+        with patch('api.v1.file.routes.get_database_manager', return_value=test_db):
+            # Create test data
+            session = test_db.get_session()
 
-        # Create user with unique email
-        user = User(
-            email="info_test@example.com",
-            password_hash="hashed_password",
-            first_name="Info",
-            last_name="Test",
-        )
-        session.add(user)
-        session.commit()
+            # Create user with unique email
+            user = User(
+                email="info_test@example.com",
+                password_hash="hashed_password",
+                first_name="Info",
+                last_name="Test",
+            )
+            session.add(user)
+            session.commit()
 
-        # Create voice sample and model
-        voice_sample = VoiceSample(
-            user_id=user.id,
-            name="Test Voice",
-            file_path="test_voice.wav",
-            file_size=1024,
-            format="wav",
-            duration=1.0,
-            sample_rate=22050,
-        )
-        session.add(voice_sample)
-        session.commit()
+            # Create voice sample and model
+            voice_sample = VoiceSample(
+                user_id=user.id,
+                name="Test Voice",
+                file_path="test_voice.wav",
+                file_size=1024,
+                format="wav",
+                duration=1.0,
+                sample_rate=22050,
+            )
+            session.add(voice_sample)
+            session.commit()
 
-        voice_model = VoiceModel(
-            voice_sample_id=voice_sample.id,
-            name="Test Model",
-            model_path="test_model.pth",
-            training_status="completed",
-        )
-        session.add(voice_model)
-        session.commit()
+            voice_model = VoiceModel(
+                voice_sample_id=voice_sample.id,
+                name="Test Model",
+                model_path="test_model.pth",
+                status="completed",
+            )
+            session.add(voice_model)
+            session.commit()
 
-        # Create synthesis job
-        job = SynthesisJob(
-            id="info-job-123",
-            user_id=user.id,
-            voice_model_id=voice_model.id,
-            text_content="Test content for info",
-            text_hash="info_hash",
-            text_language="en-US",
-            output_path=temp_file_storage["test_file_path"],
-            status="completed",
-        )
-        session.add(job)
-        session.commit()
+            # Create synthesis job
+            job = SynthesisJob(
+                id="info-job-123",
+                user_id=user.id,
+                voice_model_id=voice_model.id,
+                text_content="Test content for info",
+                text_hash="info_hash",
+                text_language="en-US",
+                output_path=temp_file_storage["test_file_path"],
+                status="completed",
+            )
+            session.add(job)
+            session.commit()
 
-        # Get user ID before closing session
-        user_id = user.id
-        session.close()
+            # Get user ID before closing session
+            user_id = user.id
+            session.close()
 
-        # Create JWT token within app context
-        with client.application.app_context():
-            access_token = create_access_token(identity=user_id)
+            # Create JWT token within app context
+            with client.application.app_context():
+                access_token = create_access_token(identity=user_id)
 
-        # Test file info
-        response = client.get(
-            "/api/v1/file/voice-clone/info-job-123/info",
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
+            # Test file info
+            response = client.get(
+                "/api/v1/file/voice-clone/info-job-123/info",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
 
-        assert response.status_code == 200
-        data = response.get_json()
-        assert data["success"] is True
-        assert "data" in data
-        assert data["data"]["job_id"] == "info-job-123"
+            assert response.status_code == 200
+            data = response.get_json()
+            assert data["success"] is True
+            assert "data" in data
+            assert data["data"]["job_id"] == "info-job-123"
 
-    def test_file_delete_with_auth(self, client, temp_file_storage, cleanup_test_data):
+    def test_file_delete_with_auth(self, client, temp_file_storage, cleanup_test_data, test_db):
         """Test file delete with JWT authentication"""
 
-        # Create test data
-        db_manager = get_database_manager()
-        session = db_manager.get_session()
+        # Mock the database manager to use test database
+        with patch('api.v1.file.routes.get_database_manager', return_value=test_db):
+            # Create test data
+            session = test_db.get_session()
 
-        # Create user with unique email
-        user = User(
-            email="delete_test@example.com",
-            password_hash="hashed_password",
-            first_name="Delete",
-            last_name="Test",
-        )
-        session.add(user)
-        session.commit()
+            # Create user with unique email
+            user = User(
+                email="delete_test@example.com",
+                password_hash="hashed_password",
+                first_name="Delete",
+                last_name="Test",
+            )
+            session.add(user)
+            session.commit()
 
-        # Create voice sample and model
-        voice_sample = VoiceSample(
-            user_id=user.id,
-            name="Test Voice",
-            file_path="test_voice.wav",
-            file_size=1024,
-            format="wav",
-            duration=1.0,
-            sample_rate=22050,
-        )
-        session.add(voice_sample)
-        session.commit()
+            # Create voice sample and model
+            voice_sample = VoiceSample(
+                user_id=user.id,
+                name="Test Voice",
+                file_path="test_voice.wav",
+                file_size=1024,
+                format="wav",
+                duration=1.0,
+                sample_rate=22050,
+            )
+            session.add(voice_sample)
+            session.commit()
 
-        voice_model = VoiceModel(
-            voice_sample_id=voice_sample.id,
-            name="Test Model",
-            model_path="test_model.pth",
-            training_status="completed",
-        )
-        session.add(voice_model)
-        session.commit()
+            voice_model = VoiceModel(
+                voice_sample_id=voice_sample.id,
+                name="Test Model",
+                model_path="test_model.pth",
+                status="completed",
+            )
+            session.add(voice_model)
+            session.commit()
 
-        # Create synthesis job
-        job = SynthesisJob(
-            id="delete-job-123",
-            user_id=user.id,
-            voice_model_id=voice_model.id,
-            text_content="Test content for delete",
-            text_hash="delete_hash",
-            text_language="en-US",
-            output_path=temp_file_storage["test_file_path"],
-            status="completed",
-        )
-        session.add(job)
-        session.commit()
+            # Create synthesis job
+            job = SynthesisJob(
+                id="delete-job-123",
+                user_id=user.id,
+                voice_model_id=voice_model.id,
+                text_content="Test content for delete",
+                text_hash="delete_hash",
+                text_language="en-US",
+                output_path=temp_file_storage["test_file_path"],
+                status="completed",
+            )
+            session.add(job)
+            session.commit()
 
-        # Get user ID before closing session
-        user_id = user.id
-        session.close()
+            # Get user ID before closing session
+            user_id = user.id
+            session.close()
 
-        # Create JWT token within app context
-        with client.application.app_context():
-            access_token = create_access_token(identity=user_id)
+            # Create JWT token within app context
+            with client.application.app_context():
+                access_token = create_access_token(identity=user_id)
 
-        # Test file delete
-        response = client.delete(
-            "/api/v1/file/synthesis/delete-job-123",
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
+            # Test file delete
+            response = client.delete(
+                "/api/v1/file/synthesis/delete-job-123",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
 
-        assert response.status_code == 200
-        data = response.get_json()
-        assert data["success"] is True
-        assert "File deleted successfully" in data["message"]
+            assert response.status_code == 200
+            data = response.get_json()
+            assert data["success"] is True
+            assert "File deleted successfully" in data["message"]
 
-    def test_access_control(self, client, temp_file_storage, cleanup_test_data):
+    def test_access_control(self, client, temp_file_storage, cleanup_test_data, test_db):
         """Test file access control between different users"""
 
-        # Create test data
-        db_manager = get_database_manager()
-        session = db_manager.get_session()
+        # Mock the database manager to use test database
+        with patch('api.v1.file.routes.get_database_manager', return_value=test_db):
+            # Create test data
+            session = test_db.get_session()
 
-        # Create two users
-        user1 = User(
-            email="access_control_user1@example.com",
-            password_hash="hashed_password",
-            first_name="User1",
-            last_name="Test",
-        )
-        session.add(user1)
-        session.commit()
+            # Create two users
+            user1 = User(
+                email="access_control_user1@example.com",
+                password_hash="hashed_password",
+                first_name="User1",
+                last_name="Test",
+            )
+            session.add(user1)
+            session.commit()
 
-        user2 = User(
-            email="access_control_user2@example.com",
-            password_hash="hashed_password",
-            first_name="User2",
-            last_name="Test",
-        )
-        session.add(user2)
-        session.commit()
+            user2 = User(
+                email="access_control_user2@example.com",
+                password_hash="hashed_password",
+                first_name="User2",
+                last_name="Test",
+            )
+            session.add(user2)
+            session.commit()
 
-        # Create voice sample and model for user1
-        voice_sample = VoiceSample(
-            user_id=user1.id,
-            name="Test Voice",
-            file_path="test_voice.wav",
-            file_size=1024,
-            format="wav",
-            duration=1.0,
-            sample_rate=22050,
-        )
-        session.add(voice_sample)
-        session.commit()
+            # Create voice sample and model for user1
+            voice_sample = VoiceSample(
+                user_id=user1.id,
+                name="Test Voice",
+                file_path="test_voice.wav",
+                file_size=1024,
+                format="wav",
+                duration=1.0,
+                sample_rate=22050,
+            )
+            session.add(voice_sample)
+            session.commit()
 
-        voice_model = VoiceModel(
-            voice_sample_id=voice_sample.id,
-            name="Test Model",
-            model_path="test_model.pth",
-            training_status="completed",
-        )
-        session.add(voice_model)
-        session.commit()
+            voice_model = VoiceModel(
+                voice_sample_id=voice_sample.id,
+                name="Test Model",
+                model_path="test_model.pth",
+                status="completed",
+            )
+            session.add(voice_model)
+            session.commit()
 
-        # Create synthesis job for user1
-        job = SynthesisJob(
-            id="access-control-job-123",
-            user_id=user1.id,
-            voice_model_id=voice_model.id,
-            text_content="Test content for access control",
-            text_hash="access_hash",
-            text_language="en-US",
-            output_path=temp_file_storage["test_file_path"],
-            status="completed",
-        )
-        session.add(job)
-        session.commit()
+            # Create synthesis job for user1
+            job = SynthesisJob(
+                id="access-control-job-123",
+                user_id=user1.id,
+                voice_model_id=voice_model.id,
+                text_content="Test content for access control",
+                text_hash="access_hash",
+                text_language="en-US",
+                output_path=temp_file_storage["test_file_path"],
+                status="completed",
+            )
+            session.add(job)
+            session.commit()
 
-        # Get user IDs before closing session
-        user1_id = user1.id
-        user2_id = user2.id
-        session.close()
+            # Get user IDs before closing session
+            user1_id = user1.id
+            user2_id = user2.id
+            session.close()
 
-        # Create JWT tokens within app context
-        with client.application.app_context():
-            user1_token = create_access_token(identity=user1_id)
-            user2_token = create_access_token(identity=user2_id)
+            # Create JWT tokens within app context
+            with client.application.app_context():
+                user1_token = create_access_token(identity=user1_id)
+                user2_token = create_access_token(identity=user2_id)
 
-        # Test that user1 can access their own file
-        response = client.get(
-            "/api/v1/file/synthesis/access-control-job-123",
-            headers={"Authorization": f"Bearer {user1_token}"},
-        )
+            # Test that user1 can access their own file
+            response = client.get(
+                "/api/v1/file/synthesis/access-control-job-123",
+                headers={"Authorization": f"Bearer {user1_token}"},
+            )
 
-        assert response.status_code == 200
+            assert response.status_code == 200
 
-        # Test that user2 cannot access user1's file
-        response = client.get(
-            "/api/v1/file/synthesis/access-control-job-123",
-            headers={"Authorization": f"Bearer {user2_token}"},
-        )
+            # Test that user2 cannot access user1's file
+            response = client.get(
+                "/api/v1/file/synthesis/access-control-job-123",
+                headers={"Authorization": f"Bearer {user2_token}"},
+            )
 
-        assert response.status_code == 403
-        data = response.get_json()
-        assert data["success"] is False
-        assert data["error"]["code"] == "ACCESS_DENIED"
+            assert response.status_code == 403
+            data = response.get_json()
+            assert data["success"] is False
+            assert data["error"]["code"] == "ACCESS_DENIED"
 
-    def test_file_not_found(self, client, temp_file_storage, cleanup_test_data):
+    def test_file_not_found(self, client, temp_file_storage, cleanup_test_data, test_db):
         """Test file not found scenarios"""
 
-        # Create test data
-        db_manager = get_database_manager()
-        session = db_manager.get_session()
+        # Mock the database manager to use test database
+        with patch('api.v1.file.routes.get_database_manager', return_value=test_db):
+            # Create test data
+            session = test_db.get_session()
 
-        # Create user
-        user = User(
-            email="notfound_test_final@example.com",
-            password_hash="hashed_password",
-            first_name="NotFound",
-            last_name="Test",
-        )
-        session.add(user)
-        session.commit()
+            # Create user
+            user = User(
+                email="notfound_test_final@example.com",
+                password_hash="hashed_password",
+                first_name="NotFound",
+                last_name="Test",
+            )
+            session.add(user)
+            session.commit()
 
-        # Get user ID before closing session
-        user_id = user.id
-        session.close()
+            # Get user ID before closing session
+            user_id = user.id
+            session.close()
 
-        # Create JWT token within app context
-        with client.application.app_context():
-            access_token = create_access_token(identity=user_id)
+            # Create JWT token within app context
+            with client.application.app_context():
+                access_token = create_access_token(identity=user_id)
 
-        # Test non-existent job
-        response = client.get(
-            "/api/v1/file/synthesis/non-existent-job",
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
+            # Test non-existent job
+            response = client.get(
+                "/api/v1/file/synthesis/non-existent-job",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
 
-        assert response.status_code == 404
-        data = response.get_json()
-        assert data["success"] is False
-        assert data["error"]["code"] == "FILE_NOT_FOUND"
+            assert response.status_code == 404
+            data = response.get_json()
+            assert data["success"] is False
+            assert data["error"]["code"] == "FILE_NOT_FOUND"

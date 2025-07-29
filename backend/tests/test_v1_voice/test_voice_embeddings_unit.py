@@ -25,8 +25,8 @@ class TestVoiceEmbeddingGeneration:
     """Unit tests for voice embedding generation"""
 
     @patch("api.v1.voice.embeddings.preprocess_wav")
-    @patch("api.v1.voice.embeddings.voice_collection")
-    def test_generate_voice_embedding_success(self, mock_collection, mock_preprocess):
+    @patch("api.v1.voice.embeddings.vector_db")
+    def test_generate_voice_embedding_success(self, mock_vector_db, mock_preprocess):
         """Test successful voice embedding generation"""
         # Mock audio preprocessing
         mock_audio = np.random.rand(16000).astype(np.float32)
@@ -39,8 +39,12 @@ class TestVoiceEmbeddingGeneration:
         with patch("api.v1.voice.embeddings.voice_encoder") as mock_encoder:
             mock_encoder.embed_utterance.return_value = mock_embedding
 
-            # Mock ChromaDB collection
-            mock_collection.add.return_value = None
+            # Mock vector_db operations
+            mock_vector_db.add_voice_embedding.return_value = None
+            mock_vector_db.get_embedding.return_value = {
+                "embeddings": [np.random.rand(256).tolist()],
+                "metadatas": [{"audio_path": "/test/path.wav"}]
+            }
 
             # Test embedding generation
             embedding_id, embedding = generate_voice_embedding("/path/to/audio.wav")
@@ -54,7 +58,7 @@ class TestVoiceEmbeddingGeneration:
             # Verify calls
             mock_preprocess.assert_called_once_with("/path/to/audio.wav")
             mock_encoder.embed_utterance.assert_called_once_with(mock_audio)
-            mock_collection.add.assert_called_once()
+            mock_vector_db.add_voice_embedding.assert_called_once()
 
     @patch("api.v1.voice.embeddings.preprocess_wav")
     def test_generate_voice_embedding_preprocessing_error(self, mock_preprocess):
@@ -78,34 +82,34 @@ class TestVoiceEmbeddingGeneration:
             with pytest.raises(Exception, match="Encoder failed"):
                 generate_voice_embedding("/path/to/audio.wav")
 
-    @patch("api.v1.voice.embeddings.voice_collection")
-    def test_delete_voice_embedding_success(self, mock_collection):
+    @patch("api.v1.voice.embeddings.vector_db")
+    def test_delete_voice_embedding_success(self, mock_vector_db):
         """Test successful voice embedding deletion"""
         embedding_id = str(uuid.uuid4())
-        mock_collection.delete.return_value = None
+        mock_vector_db.delete_embedding.return_value = None
 
         result = delete_voice_embedding(embedding_id)
 
         assert result is True
-        mock_collection.delete.assert_called_once_with(ids=[embedding_id])
+        mock_vector_db.delete_embedding.assert_called_once_with(embedding_id)
 
-    @patch("api.v1.voice.embeddings.voice_collection")
-    def test_delete_voice_embedding_error(self, mock_collection):
+    @patch("api.v1.voice.embeddings.vector_db")
+    def test_delete_voice_embedding_error(self, mock_vector_db):
         """Test voice embedding deletion with error"""
         embedding_id = str(uuid.uuid4())
-        mock_collection.delete.side_effect = Exception("Deletion failed")
+        mock_vector_db.delete_embedding.side_effect = Exception("Deletion failed")
 
         # The function should return False, not raise an exception
         result = delete_voice_embedding(embedding_id)
         assert result is False
 
-    @patch("api.v1.voice.embeddings.voice_collection")
-    def test_get_voice_embedding_success(self, mock_collection):
+    @patch("api.v1.voice.embeddings.vector_db")
+    def test_get_voice_embedding_success(self, mock_vector_db):
         """Test successful voice embedding retrieval"""
         embedding_id = str(uuid.uuid4())
         mock_embedding = np.random.rand(256).astype(np.float32)
 
-        mock_collection.get.return_value = {
+        mock_vector_db.get_embedding.return_value = {
             "embeddings": [mock_embedding.tolist()],
             "metadatas": [{"audio_path": "/path/to/audio.wav"}],
         }
@@ -114,13 +118,13 @@ class TestVoiceEmbeddingGeneration:
 
         assert isinstance(embedding, np.ndarray)
         assert embedding.shape == (256,)
-        mock_collection.get.assert_called_once_with(ids=[embedding_id])
+        mock_vector_db.get_embedding.assert_called_once_with(embedding_id)
 
-    @patch("api.v1.voice.embeddings.voice_collection")
-    def test_get_voice_embedding_not_found(self, mock_collection):
+    @patch("api.v1.voice.embeddings.vector_db")
+    def test_get_voice_embedding_not_found(self, mock_vector_db):
         """Test voice embedding retrieval when not found"""
         embedding_id = str(uuid.uuid4())
-        mock_collection.get.return_value = {"embeddings": [], "metadatas": []}
+        mock_vector_db.get_embedding.return_value = {"embeddings": [], "metadatas": []}
 
         embedding = get_voice_embedding(embedding_id)
 

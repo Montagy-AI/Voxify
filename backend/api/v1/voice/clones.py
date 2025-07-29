@@ -337,7 +337,7 @@ def get_voice_clone(clone_id: str):
                             "language": clone_info.get("language", "zh-CN"),
                             "ref_text": clone_info.get("ref_text"),
                             "quality_metrics": {
-                                "similarity_score": voice_model.similarity_score or 0.95,
+                                "similarity_score": 0.95,  # Default similarity score for F5-TTS
                                 "stability_score": 0.92,  # F5-TTS generally stable
                                 "model_type": "f5_tts",
                             },
@@ -360,7 +360,7 @@ def get_voice_clone(clone_id: str):
                             "status": voice_model.status,
                             "language": "zh-CN",
                             "quality_metrics": {
-                                "similarity_score": voice_model.similarity_score or 0.95,
+                                "similarity_score": 0.95,  # Default similarity score for F5-TTS
                                 "stability_score": 0.92,
                                 "model_type": "f5_tts",
                             },

@@ -75,6 +75,11 @@ class LanguageService {
   getUserPreferredLanguage() {
     const browserLang = navigator.language || navigator.userLanguage;
 
+    // 如果没有浏览器语言信息，直接返回默认语言
+    if (!browserLang) {
+      return DEFAULT_LANGUAGE;
+    }
+
     // 尝试完全匹配
     let match = SUPPORTED_LANGUAGES.find((lang) => lang.code === browserLang);
     if (match) return match.code;
@@ -93,7 +98,11 @@ class LanguageService {
   // 保存用户语言偏好到本地存储
   saveUserLanguagePreference(languageCode) {
     if (this.isValidLanguageLocal(languageCode)) {
-      localStorage.setItem('user_preferred_language', languageCode);
+      try {
+        localStorage.setItem('user_preferred_language', languageCode);
+      } catch (error) {
+        console.warn('Failed to save language preference to localStorage:', error);
+      }
     }
   }
 

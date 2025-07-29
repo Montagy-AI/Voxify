@@ -22,6 +22,8 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_login_at TIMESTAMP,
+    reset_token TEXT,                       -- Password reset token
+    reset_token_expires_at TIMESTAMP,       -- Password reset token expiration
 
     CHECK (storage_used_bytes >= 0)
 );

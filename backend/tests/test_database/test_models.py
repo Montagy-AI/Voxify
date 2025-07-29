@@ -22,7 +22,6 @@ from database.models import (
     VoiceModel,
     SynthesisJob,
     SynthesisCache,
-    PhonemeAlignment,
     UsageStat,
     SystemSetting,
     SchemaVersion,
@@ -229,7 +228,7 @@ class TestVoiceModelModel:
             description="Test model description",
             model_path="/path/to/model.pth",
             model_type="tacotron2",
-            training_status="completed",
+            status="completed",
         )
 
         assert model.voice_sample_id == "sample-uuid"
@@ -237,39 +236,11 @@ class TestVoiceModelModel:
         assert model.description == "Test model description"
         assert model.model_path == "/path/to/model.pth"
         assert model.model_type == "tacotron2"
-        assert model.training_status == "completed"
+        assert model.status == "completed"
         # Check column default values
         assert VoiceModel.is_active.default.arg is True
 
-    def test_voice_model_training_config_property(self):
-        """Test training_config property getter and setter"""
-        model = VoiceModel(voice_sample_id="sample-uuid", name="Test")
 
-        # Test setting training config
-        config = {"epochs": 100, "learning_rate": 0.001, "batch_size": 32}
-        model.training_config_dict = config
-        assert model.training_config == '{"epochs": 100, "learning_rate": 0.001, "batch_size": 32}'
-
-        # Test getting training config
-        model.training_config = '{"epochs": 200, "learning_rate": 0.0001}'
-        assert model.training_config_dict == {"epochs": 200, "learning_rate": 0.0001}
-
-        # Test None config
-        model.training_config = None
-        assert model.training_config_dict == {}
-
-    def test_voice_model_quality_metrics_property(self):
-        """Test quality_metrics property getter and setter"""
-        model = VoiceModel(voice_sample_id="sample-uuid", name="Test")
-
-        # Test setting quality metrics
-        metrics = {"mos_score": 4.5, "similarity": 0.95, "clarity": 0.9}
-        model.quality_metrics_dict = metrics
-        assert model.quality_metrics == '{"mos_score": 4.5, "similarity": 0.95, "clarity": 0.9}'
-
-        # Test getting quality metrics
-        model.quality_metrics = '{"mos_score": 4.8, "similarity": 0.98}'
-        assert model.quality_metrics_dict == {"mos_score": 4.8, "similarity": 0.98}
 
     def test_voice_model_to_dict(self):
         """Test voice model serialization"""
@@ -281,8 +252,7 @@ class TestVoiceModelModel:
             model_path="/path/to/model.pth",
             model_type="tacotron2",
             model_size=1024000,
-            training_status="completed",
-            mos_score=4.5,  # Use mos_score instead of quality_score
+            status="completed",
         )
 
         model_dict = model.to_dict()
@@ -294,8 +264,7 @@ class TestVoiceModelModel:
         # model_path is not included in to_dict() method
         assert model_dict["model_type"] == "tacotron2"
         assert model_dict["model_size"] == 1024000
-        assert model_dict["training_status"] == "completed"
-        assert model_dict["mos_score"] == 4.5
+        assert model_dict["status"] == "completed"
         assert "created_at" in model_dict
         assert "updated_at" in model_dict
 
@@ -334,24 +303,7 @@ class TestSynthesisJobModel:
         job.config = '{"speed": 1.2, "pitch": 0.8}'
         assert job.config_dict == {"speed": 1.2, "pitch": 0.8}
 
-    def test_synthesis_job_word_timestamps_property(self):
-        """Test word_timestamps property getter and setter"""
-        job = SynthesisJob(user_id="user-uuid", voice_model_id="model-uuid", text_content="test")
 
-        # Test setting timestamps
-        timestamps = [
-            {"word": "Hello", "start": 0.0, "end": 0.5},
-            {"word": "world", "start": 0.5, "end": 1.0},
-        ]
-        job.word_timestamps_list = timestamps
-        assert (
-            job.word_timestamps
-            == '[{"word": "Hello", "start": 0.0, "end": 0.5}, {"word": "world", "start": 0.5, "end": 1.0}]'
-        )
-
-        # Test getting timestamps
-        job.word_timestamps = '[{"word": "Test", "start": 0.0, "end": 0.3}]'
-        assert job.word_timestamps_list == [{"word": "Test", "start": 0.0, "end": 0.3}]
 
     def test_synthesis_job_to_dict(self):
         """Test synthesis job serialization"""
@@ -404,30 +356,7 @@ class TestSynthesisCacheModel:
         assert SynthesisCache.hit_count.default.arg == 0
 
 
-class TestPhonemeAlignmentModel:
-    """Test PhonemeAlignment model functionality"""
 
-    def test_phoneme_alignment_creation(self):
-        """Test basic phoneme alignment creation"""
-        alignment = PhonemeAlignment(
-            synthesis_job_id="job-uuid",
-            sequence_number=1,
-            text_unit="Hello",
-            unit_type="word",
-            start_time=0.0,
-            end_time=0.5,
-            duration=0.5,
-            confidence=0.95,
-        )
-
-        assert alignment.synthesis_job_id == "job-uuid"
-        assert alignment.sequence_number == 1
-        assert alignment.text_unit == "Hello"
-        assert alignment.unit_type == "word"
-        assert alignment.start_time == 0.0
-        assert alignment.end_time == 0.5
-        assert alignment.duration == 0.5
-        assert alignment.confidence == 0.95
 
 
 class TestUsageStatModel:
@@ -688,7 +617,7 @@ class TestDatabaseRelationships:
                 voice_sample_id=sample.id,
                 name="Test Model",
                 model_path="/path/to/model.pth",
-                training_status="completed",
+                status="completed",
             )
             session.add(model)
             session.commit()
@@ -737,7 +666,7 @@ class TestDatabaseRelationships:
                 voice_sample_id=sample.id,
                 name="Test Model",
                 model_path="/path/to/model.pth",
-                training_status="completed",
+                status="completed",
             )
             session.add(model)
             session.commit()
