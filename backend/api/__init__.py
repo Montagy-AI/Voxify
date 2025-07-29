@@ -28,7 +28,8 @@ def create_app(test_config=None):
         Configured Flask application
     """
 
-    load_dotenv()
+    # Load .env file from the backend directory (parent of api/)
+    load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
     # Create Flask app
     app = Flask(__name__, instance_relative_config=True)
@@ -64,7 +65,8 @@ def create_app(test_config=None):
             "https://*.vercel.app",  # All Vercel preview deployments
             "https://test-ho72cndbz-jun-yangs-projects-f7853876.vercel.app",
             "https://test-lemon-eight-27.vercel.app",
-            "https://voxify-front.vercel.app",  # Production frontend
+            "https://voxify-prod.vercel.app",  # Production Vercel deployment
+            "https://voxify-dev.vercel.app",  # Development Vercel deployment
         ],
         methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["Content-Type", "Authorization", "Accept"],
