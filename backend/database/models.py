@@ -59,6 +59,10 @@ class User(Base, TimestampMixin):
     is_active = Column(Boolean, default=True, nullable=False)
     email_verified = Column(Boolean, default=False, nullable=False)
     last_login_at = Column(DateTime)
+    
+    # Password reset fields
+    reset_token = Column(String, nullable=True)
+    reset_token_expires_at = Column(DateTime, nullable=True)
 
     # Relationships
     voice_samples = relationship("VoiceSample", back_populates="user", cascade="all, delete-orphan")
