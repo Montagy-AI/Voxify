@@ -8,6 +8,9 @@ import os
 # Add the backend directory to Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
+# Import generate_uuid function
+from database.models import generate_uuid
+
 
 class TestJobServiceAPI:
     """Service tests for job API endpoints and data boundaries"""
@@ -85,21 +88,79 @@ class TestJobServiceAPI:
 
     @pytest.fixture(scope="class")
     def test_voice_model_id(self, server_url, auth_tokens):
-        """Get a real voice model id from the database, or skip if not found"""
+        """Get a real voice model id from the database, or create one for testing"""
         import sqlite3
+        import os
 
+        # Use the same database path as the server
         db_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "voxify.db")
+        
+        # Ensure database exists with correct schema
+        try:
+            # First, try to create/update the database schema
+            from database.models import get_database_manager
+            db_manager = get_database_manager(f"sqlite:///{db_path}")
+            db_manager.create_tables()
+            db_manager.init_default_data()
+        except Exception as e:
+            print(f"[TEST] Warning: Could not initialize database schema: {e}")
+        
         try:
             conn = sqlite3.connect(db_path)
             cursor = conn.cursor()
+            
+            # Check if voice_models table has the status column
+            cursor.execute("PRAGMA table_info(voice_models)")
+            columns = [row[1] for row in cursor.fetchall()]
+            
+            if 'status' not in columns:
+                print("[TEST] Warning: voice_models table missing 'status' column")
+                pytest.skip("Database schema is outdated - missing 'status' column")
+            
+            # First try to find an existing active voice model
             cursor.execute("SELECT id FROM voice_models WHERE is_active=1 LIMIT 1;")
             row = cursor.fetchone()
-            conn.close()
+            
             if row:
-                print(f"[TEST] Using voice_model_id from DB: {row[0]}")
+                print(f"[TEST] Using existing voice_model_id from DB: {row[0]}")
+                conn.close()
                 return row[0]
             else:
-                pytest.skip("No active voice model found in database")
+                # Create a test voice model if none exists
+                print("[TEST] No active voice model found, creating test voice model...")
+                
+                # First create a test user if needed
+                cursor.execute("SELECT id FROM users WHERE email='jobtest@example.com' LIMIT 1;")
+                user_row = cursor.fetchone()
+                if not user_row:
+                    cursor.execute("""
+                        INSERT INTO users (email, password_hash, first_name, last_name, created_at, updated_at)
+                        VALUES ('jobtest@example.com', 'hashed_password', 'Job', 'Tester', datetime('now'), datetime('now'))
+                    """)
+                    user_id = cursor.lastrowid
+                else:
+                    user_id = user_row[0]
+                
+                # Create a test voice sample
+                voice_sample_id = generate_uuid()
+                cursor.execute("""
+                    INSERT INTO voice_samples (id, user_id, name, description, file_path, file_size, format, duration, sample_rate, status, created_at, updated_at)
+                    VALUES (?, ?, 'Test Voice Sample', 'Test voice sample for job testing', '/test/path/sample.wav', 1024, 'wav', 5.0, 22050, 'ready', datetime('now'), datetime('now'))
+                """, (voice_sample_id, user_id))
+                
+                # Create a test voice model
+                voice_model_id = generate_uuid()
+                cursor.execute("""
+                    INSERT INTO voice_models (id, voice_sample_id, name, description, model_path, status, is_active, created_at, updated_at)
+                    VALUES (?, ?, 'Test Voice Model', 'Test voice model for job testing', '/test/path/model.pth', 'completed', 1, datetime('now'), datetime('now'))
+                """, (voice_model_id, voice_sample_id))
+                
+                conn.commit()
+                conn.close()
+                
+                print(f"[TEST] Created test voice_model_id: {voice_model_id}")
+                return voice_model_id
+                
         except Exception as e:
             print(f"[TEST] Error accessing database: {e}")
             pytest.skip(f"Database access failed: {e}")

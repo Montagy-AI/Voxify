@@ -23,7 +23,11 @@ from api.utils.password import (
     verify_password,
     validate_password_strength,
     validate_email,
+    generate_reset_token,
+    is_reset_token_valid,
+    get_reset_token_expiry,
 )
+from api.utils.email_service import get_email_service
 
 
 # Standard error response format
@@ -394,3 +398,156 @@ def update_profile():
             "PROFILE_UPDATE_ERROR",
             status_code=500,
         )
+
+
+@auth_bp.route("/forgot-password", methods=["POST"])
+def forgot_password():
+    """
+    Request password reset email
+
+    Request Body:
+    - email: User's email address
+
+    Returns:
+    - 200: Reset email sent (or would be sent)
+    - 400: Invalid request data
+    """
+    # Get request data
+    data = request.get_json()
+    if not data:
+        return error_response("Request body is required", "MISSING_BODY")
+
+    # Validate required fields
+    email = data.get("email")
+    if not email:
+        return error_response("Email is required", "MISSING_EMAIL")
+
+    # Validate email format
+    is_valid, error_message = validate_email(email)
+    if not is_valid:
+        return error_response(error_message, "INVALID_EMAIL")
+
+    # Get database session
+    db_manager = get_database_manager()
+    session = db_manager.get_session()
+
+    try:
+        # Look for user by email
+        user = session.query(User).filter_by(email=email).first()
+
+        if user and user.is_active:
+            # Generate reset token and expiry
+            reset_token = generate_reset_token()
+            reset_expires = get_reset_token_expiry()
+
+            # Update user with reset token
+            user.reset_token = reset_token
+            user.reset_token_expires_at = reset_expires
+            session.commit()
+
+            # Send reset email
+            email_service = get_email_service()
+            success, error_msg = email_service.send_password_reset_email(
+                to_email=user.email,
+                reset_token=reset_token,
+                user_name=user.first_name
+            )
+
+            if not success:
+                # Log the error but don't expose it to user
+                print(f"Failed to send reset email: {error_msg}")
+
+        # Always return success to prevent user enumeration
+        # This prevents attackers from discovering valid email addresses
+        return success_response(
+            message="If an account with that email exists, a password reset link has been sent."
+        )
+
+    except Exception as e:
+        session.rollback()
+        # Log the error but return generic message
+        print(f"Password reset request failed: {str(e)}")
+        return success_response(
+            message="If an account with that email exists, a password reset link has been sent."
+        )
+    finally:
+        session.close()
+
+
+@auth_bp.route("/reset-password", methods=["POST"])
+def reset_password():
+    """
+    Reset user password using reset token
+
+    Request Body:
+    - token: Password reset token
+    - new_password: New password
+
+    Returns:
+    - 200: Password reset successful
+    - 400: Invalid request data or token
+    - 401: Invalid or expired token
+    """
+    # Get request data
+    data = request.get_json()
+    if not data:
+        return error_response("Request body is required", "MISSING_BODY")
+
+    # Validate required fields
+    token = data.get("token")
+    new_password = data.get("new_password")
+
+    if not token or not new_password:
+        return error_response("Token and new password are required", "MISSING_FIELDS")
+
+    # Validate password strength
+    is_valid, error_message = validate_password_strength(new_password)
+    if not is_valid:
+        return error_response(error_message, "WEAK_PASSWORD")
+
+    # Get database session
+    db_manager = get_database_manager()
+    session = db_manager.get_session()
+
+    try:
+        # Find user with matching reset token
+        user = session.query(User).filter_by(reset_token=token).first()
+
+        if not user:
+            return error_response("Invalid or expired reset token", "INVALID_TOKEN", status_code=401)
+
+        # Validate token and expiry
+        is_valid, error_message = is_reset_token_valid(
+            token=token,
+            stored_token=user.reset_token,
+            expires_at=user.reset_token_expires_at
+        )
+
+        if not is_valid:
+            # Clear the expired token
+            user.reset_token = None
+            user.reset_token_expires_at = None
+            session.commit()
+            return error_response(error_message, "INVALID_TOKEN", status_code=401)
+
+        # Hash new password
+        new_password_hash = hash_password(new_password)
+
+        # Update user password and clear reset token
+        user.password_hash = new_password_hash
+        user.reset_token = None
+        user.reset_token_expires_at = None
+        user.updated_at = datetime.utcnow()
+        session.commit()
+
+        return success_response(message="Password has been reset successfully")
+
+    except Exception as e:
+        session.rollback()
+        return error_response(
+            f"Failed to reset password: {str(e)}",
+            "PASSWORD_RESET_ERROR",
+            status_code=500
+        )
+    finally:
+        session.close()

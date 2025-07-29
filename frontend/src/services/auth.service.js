@@ -137,6 +137,57 @@ class AuthService {
     }
     throw new Error('Invalid response format');
   }
+
+  async forgotPassword(email) {
+    try {
+      const response = await api.post('/auth/forgot-password', {
+        email,
+      });
+
+      if (response.data.success) {
+        return {
+          success: true,
+          message: response.data.message,
+        };
+      }
+
+      return {
+        success: false,
+        error: response.data.error?.message || 'Failed to send reset email',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error?.message || 'Failed to send reset email',
+      };
+    }
+  }
+
+  async resetPassword(token, newPassword) {
+    try {
+      const response = await api.post('/auth/reset-password', {
+        token,
+        new_password: newPassword,
+      });
+
+      if (response.data.success) {
+        return {
+          success: true,
+          message: response.data.message,
+        };
+      }
+
+      return {
+        success: false,
+        error: response.data.error?.message || 'Failed to reset password',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error?.message || 'Failed to reset password',
+      };
+    }
+  }
 }
 
 const authService = new AuthService();

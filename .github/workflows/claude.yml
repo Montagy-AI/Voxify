@@ -13,14 +13,14 @@ on:
   pull_request:
     types: [opened, synchronize]
     paths:
-      - '**/*f5*.py'
-      - '**/*tts*.py' 
-      - '**/*voice*.py'
-      - '**/audio/**'
-      - '**/components/**/*audio*'
-      - '**/api/**'
-      - 'app.py'
-      - 'requirements.txt'
+      - "**/*f5*.py"
+      - "**/*tts*.py"
+      - "**/*voice*.py"
+      - "**/audio/**"
+      - "**/components/**/*audio*"
+      - "**/api/**"
+      - "app.py"
+      - "requirements.txt"
 
 jobs:
   claude-code-action:
@@ -37,14 +37,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write  # Changed to write for auto-comments
+      pull-requests: write # Changed to write for auto-comments
       issues: read
       id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Get full history for better context
+          fetch-depth: 0 # Get full history for better context
 
       - name: Run Claude TTS Analysis
         uses: anthropics/claude-code-action@beta
@@ -57,7 +57,7 @@ jobs:
             - Flask backend with F5-TTS integration
             - React frontend for voice recording/playback
             - Focus on performance, security, and audio quality
-            
+
             Priority areas: F5-TTS optimization, audio security, React audio components
 
   # Optional: Auto-comment on TTS-critical PRs
