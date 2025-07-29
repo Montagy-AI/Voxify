@@ -24,7 +24,9 @@ class TestVoiceServiceExtended:
         """Check if server is running before tests"""
         try:
             response = requests.get(f"{server_url}/api/v1/auth/login", timeout=5)
-            assert response.status_code == 405, f"Unexpected status code: {response.status_code}"
+            assert (
+                response.status_code == 405
+            ), f"Unexpected status code: {response.status_code}"
         except Exception as e:
             pytest.skip(f"Server not available: {e}")
 
@@ -39,7 +41,9 @@ class TestVoiceServiceExtended:
     def check_curl_available(self):
         """Check if curl is available on the system"""
         try:
-            result = subprocess.run(["curl", "--version"], capture_output=True, text=True)
+            result = subprocess.run(
+                ["curl", "--version"], capture_output=True, text=True
+            )
             if result.returncode != 0:
                 pytest.skip("curl is not available on this system")
         except FileNotFoundError:
@@ -80,7 +84,9 @@ class TestVoiceServiceExtended:
             "-H",
             "Content-Type: application/json",
             "-d",
-            json.dumps({"email": test_user["email"], "password": test_user["password"]}),
+            json.dumps(
+                {"email": test_user["email"], "password": test_user["password"]}
+            ),
         ]
         result = subprocess.run(login_cmd, capture_output=True, text=True)
         response = json.loads(result.stdout)
@@ -109,7 +115,9 @@ class TestVoiceServiceExtended:
         assert result.returncode == 0, f"Service info failed: {result.stderr}"
 
         info_response = json.loads(result.stdout)
-        assert info_response.get("success") is True, f"Service info failed: {info_response}"
+        assert (
+            info_response.get("success") is True
+        ), f"Service info failed: {info_response}"
 
         data = info_response["data"]
         assert "service" in data
@@ -132,13 +140,17 @@ class TestVoiceServiceExtended:
         assert result.returncode == 0, f"Models endpoint failed: {result.stderr}"
 
         models_response = json.loads(result.stdout)
-        assert models_response.get("success") is True, f"Models endpoint failed: {models_response}"
+        assert (
+            models_response.get("success") is True
+        ), f"Models endpoint failed: {models_response}"
 
         data = models_response["data"]
         assert "models" in data
         assert len(data["models"]) > 0
 
-    def test_upload_voice_sample_large_file(self, server_url, auth_tokens, test_audio_file):
+    def test_upload_voice_sample_large_file(
+        self, server_url, auth_tokens, test_audio_file
+    ):
         """Test uploading a large voice sample"""
         # For testing, we'll use the existing file but test the concept
         upload_cmd = [
@@ -158,7 +170,7 @@ class TestVoiceServiceExtended:
         assert result.returncode == 0, f"Large file upload failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
-        
+
         # Check if upload was successful or if there's a duplicate detection
         if upload_response.get("success") is False:
             error_msg = upload_response.get("error", "")
@@ -167,9 +179,13 @@ class TestVoiceServiceExtended:
             else:
                 assert False, f"Large file upload failed: {upload_response}"
         else:
-            assert upload_response.get("success") is True, f"Large file upload failed: {upload_response}"
+            assert (
+                upload_response.get("success") is True
+            ), f"Large file upload failed: {upload_response}"
 
-    def test_upload_voice_sample_with_description(self, server_url, auth_tokens, test_audio_file):
+    def test_upload_voice_sample_with_description(
+        self, server_url, auth_tokens, test_audio_file
+    ):
         """Test uploading voice sample with description"""
         upload_cmd = [
             "curl",
@@ -187,10 +203,12 @@ class TestVoiceServiceExtended:
         ]
 
         result = subprocess.run(upload_cmd, capture_output=True, text=True)
-        assert result.returncode == 0, f"Upload with description failed: {result.stderr}"
+        assert (
+            result.returncode == 0
+        ), f"Upload with description failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
-        
+
         # Check if upload was successful or if there's a duplicate detection
         if upload_response.get("success") is False:
             error_msg = upload_response.get("error", "")
@@ -199,7 +217,9 @@ class TestVoiceServiceExtended:
             else:
                 assert False, f"Upload with description failed: {upload_response}"
         else:
-            assert upload_response.get("success") is True, f"Upload with description failed: {upload_response}"
+            assert (
+                upload_response.get("success") is True
+            ), f"Upload with description failed: {upload_response}"
 
     def test_list_voice_samples_with_filters(self, server_url, auth_tokens):
         """Test listing voice samples with various filters"""
@@ -214,10 +234,14 @@ class TestVoiceServiceExtended:
         ]
 
         result = subprocess.run(list_cmd, capture_output=True, text=True)
-        assert result.returncode == 0, f"List with status filter failed: {result.stderr}"
+        assert (
+            result.returncode == 0
+        ), f"List with status filter failed: {result.stderr}"
 
         list_response = json.loads(result.stdout)
-        assert list_response.get("success") is True, f"List with status filter failed: {list_response}"
+        assert (
+            list_response.get("success") is True
+        ), f"List with status filter failed: {list_response}"
 
         # Test with pagination
         list_cmd_paginated = [
@@ -233,9 +257,13 @@ class TestVoiceServiceExtended:
         assert result.returncode == 0, f"List with pagination failed: {result.stderr}"
 
         list_response = json.loads(result.stdout)
-        assert list_response.get("success") is True, f"List with pagination failed: {list_response}"
+        assert (
+            list_response.get("success") is True
+        ), f"List with pagination failed: {list_response}"
 
-    def test_create_voice_clone_with_advanced_config(self, server_url, auth_tokens, test_audio_file):
+    def test_create_voice_clone_with_advanced_config(
+        self, server_url, auth_tokens, test_audio_file
+    ):
         """Test creating voice clone with advanced configuration"""
         # First upload a sample
         upload_cmd = [
@@ -252,10 +280,12 @@ class TestVoiceServiceExtended:
         ]
 
         result = subprocess.run(upload_cmd, capture_output=True, text=True)
-        assert result.returncode == 0, f"Upload for advanced clone failed: {result.stderr}"
+        assert (
+            result.returncode == 0
+        ), f"Upload for advanced clone failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
-        
+
         # Check if upload was successful or if there's a duplicate detection
         if upload_response.get("success") is False:
             error_msg = upload_response.get("error", "")
@@ -264,7 +294,9 @@ class TestVoiceServiceExtended:
             else:
                 assert False, f"Upload for advanced clone failed: {upload_response}"
         else:
-            assert upload_response.get("success") is True, f"Upload for advanced clone failed: {upload_response}"
+            assert (
+                upload_response.get("success") is True
+            ), f"Upload for advanced clone failed: {upload_response}"
 
         sample_id = upload_response["data"]["sample_id"]
 
@@ -291,12 +323,18 @@ class TestVoiceServiceExtended:
         ]
 
         result = subprocess.run(clone_cmd, capture_output=True, text=True)
-        assert result.returncode == 0, f"Advanced clone creation failed: {result.stderr}"
+        assert (
+            result.returncode == 0
+        ), f"Advanced clone creation failed: {result.stderr}"
 
         clone_response = json.loads(result.stdout)
-        assert clone_response.get("success") is True, f"Advanced clone creation failed: {clone_response}"
+        assert (
+            clone_response.get("success") is True
+        ), f"Advanced clone creation failed: {clone_response}"
 
-    def test_synthesize_with_advanced_parameters(self, server_url, auth_tokens, test_audio_file):
+    def test_synthesize_with_advanced_parameters(
+        self, server_url, auth_tokens, test_audio_file
+    ):
         """Test speech synthesis with advanced parameters"""
         # First create a clone
         upload_cmd = [
@@ -313,10 +351,12 @@ class TestVoiceServiceExtended:
         ]
 
         result = subprocess.run(upload_cmd, capture_output=True, text=True)
-        assert result.returncode == 0, f"Upload for synthesis test failed: {result.stderr}"
+        assert (
+            result.returncode == 0
+        ), f"Upload for synthesis test failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
-        
+
         # Check if upload was successful or if there's a duplicate detection
         if upload_response.get("success") is False:
             error_msg = upload_response.get("error", "")
@@ -325,7 +365,9 @@ class TestVoiceServiceExtended:
             else:
                 assert False, f"Upload for synthesis test failed: {upload_response}"
         else:
-            assert upload_response.get("success") is True, f"Upload for synthesis test failed: {upload_response}"
+            assert (
+                upload_response.get("success") is True
+            ), f"Upload for synthesis test failed: {upload_response}"
 
         sample_id = upload_response["data"]["sample_id"]
 
@@ -350,10 +392,14 @@ class TestVoiceServiceExtended:
         ]
 
         result = subprocess.run(clone_cmd, capture_output=True, text=True)
-        assert result.returncode == 0, f"Clone creation for synthesis failed: {result.stderr}"
+        assert (
+            result.returncode == 0
+        ), f"Clone creation for synthesis failed: {result.stderr}"
 
         clone_response = json.loads(result.stdout)
-        assert clone_response.get("success") is True, f"Clone creation for synthesis failed: {clone_response}"
+        assert (
+            clone_response.get("success") is True
+        ), f"Clone creation for synthesis failed: {clone_response}"
 
         clone_id = clone_response["data"]["clone_id"]
 
@@ -383,9 +429,13 @@ class TestVoiceServiceExtended:
         assert result.returncode == 0, f"Advanced synthesis failed: {result.stderr}"
 
         synthesis_response = json.loads(result.stdout)
-        assert synthesis_response.get("success") is True, f"Advanced synthesis failed: {synthesis_response}"
+        assert (
+            synthesis_response.get("success") is True
+        ), f"Advanced synthesis failed: {synthesis_response}"
 
-    def test_concurrent_voice_operations(self, server_url, auth_tokens, test_audio_file):
+    def test_concurrent_voice_operations(
+        self, server_url, auth_tokens, test_audio_file
+    ):
         """Test concurrent voice operations"""
         import threading
         import time
@@ -409,7 +459,7 @@ class TestVoiceServiceExtended:
 
             result = subprocess.run(upload_cmd, capture_output=True, text=True)
             response = json.loads(result.stdout)
-            
+
             # Check if upload was successful or if there's a duplicate detection
             if response.get("success") is False:
                 error_msg = response.get("error", "")
@@ -434,15 +484,17 @@ class TestVoiceServiceExtended:
         # Check results
         successful_uploads = [r for r in results if r[1]]
         duplicate_detections = [r for r in results if r[2] == "duplicate"]
-        
+
         # If all uploads failed due to duplicate detection, skip the test
         if len(duplicate_detections) == len(results):
             pytest.skip("All concurrent uploads failed due to duplicate detection")
-        
+
         # Otherwise, check that at least some uploads succeeded
         assert len(successful_uploads) > 0, "No successful concurrent uploads"
 
-    def test_voice_sample_metadata_retrieval(self, server_url, auth_tokens, test_audio_file):
+    def test_voice_sample_metadata_retrieval(
+        self, server_url, auth_tokens, test_audio_file
+    ):
         """Test retrieving detailed voice sample metadata"""
         # First upload a sample
         upload_cmd = [
@@ -459,10 +511,12 @@ class TestVoiceServiceExtended:
         ]
 
         result = subprocess.run(upload_cmd, capture_output=True, text=True)
-        assert result.returncode == 0, f"Upload for metadata test failed: {result.stderr}"
+        assert (
+            result.returncode == 0
+        ), f"Upload for metadata test failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
-        
+
         # Check if upload was successful or if there's a duplicate detection
         if upload_response.get("success") is False:
             error_msg = upload_response.get("error", "")
@@ -471,7 +525,9 @@ class TestVoiceServiceExtended:
             else:
                 assert False, f"Upload for metadata test failed: {upload_response}"
         else:
-            assert upload_response.get("success") is True, f"Upload for metadata test failed: {upload_response}"
+            assert (
+                upload_response.get("success") is True
+            ), f"Upload for metadata test failed: {upload_response}"
 
         sample_id = upload_response["data"]["sample_id"]
 
@@ -489,7 +545,9 @@ class TestVoiceServiceExtended:
         assert result.returncode == 0, f"Get sample metadata failed: {result.stderr}"
 
         get_response = json.loads(result.stdout)
-        assert get_response.get("success") is True, f"Get sample metadata failed: {get_response}"
+        assert (
+            get_response.get("success") is True
+        ), f"Get sample metadata failed: {get_response}"
 
         data = get_response["data"]
         assert "id" in data
@@ -498,7 +556,9 @@ class TestVoiceServiceExtended:
         assert "duration" in data
         assert "format" in data
 
-    def test_voice_clone_selection_workflow(self, server_url, auth_tokens, test_audio_file):
+    def test_voice_clone_selection_workflow(
+        self, server_url, auth_tokens, test_audio_file
+    ):
         """Test complete voice clone selection workflow"""
         # Upload multiple samples
         sample_ids = []
@@ -517,19 +577,27 @@ class TestVoiceServiceExtended:
             ]
 
             result = subprocess.run(upload_cmd, capture_output=True, text=True)
-            assert result.returncode == 0, f"Upload {i+1} for selection test failed: {result.stderr}"
+            assert (
+                result.returncode == 0
+            ), f"Upload {i+1} for selection test failed: {result.stderr}"
 
             upload_response = json.loads(result.stdout)
-            
+
             # Check if upload was successful or if there's a duplicate detection
             if upload_response.get("success") is False:
                 error_msg = upload_response.get("error", "")
                 if "Duplicate voice sample detected" in error_msg:
-                    pytest.skip(f"Upload {i+1} failed due to duplicate detection: {error_msg}")
+                    pytest.skip(
+                        f"Upload {i+1} failed due to duplicate detection: {error_msg}"
+                    )
                 else:
-                    assert False, f"Upload {i+1} for selection test failed: {upload_response}"
+                    assert (
+                        False
+                    ), f"Upload {i+1} for selection test failed: {upload_response}"
             else:
-                assert upload_response.get("success") is True, f"Upload {i+1} for selection test failed: {upload_response}"
+                assert (
+                    upload_response.get("success") is True
+                ), f"Upload {i+1} for selection test failed: {upload_response}"
 
             sample_ids.append(upload_response["data"]["sample_id"])
 
@@ -556,10 +624,14 @@ class TestVoiceServiceExtended:
             ]
 
             result = subprocess.run(clone_cmd, capture_output=True, text=True)
-            assert result.returncode == 0, f"Clone {i+1} creation failed: {result.stderr}"
+            assert (
+                result.returncode == 0
+            ), f"Clone {i+1} creation failed: {result.stderr}"
 
             clone_response = json.loads(result.stdout)
-            assert clone_response.get("success") is True, f"Clone {i+1} creation failed: {clone_response}"
+            assert (
+                clone_response.get("success") is True
+            ), f"Clone {i+1} creation failed: {clone_response}"
 
             clone_ids.append(clone_response["data"]["clone_id"])
 
@@ -577,7 +649,9 @@ class TestVoiceServiceExtended:
         assert result.returncode == 0, f"Clone selection failed: {result.stderr}"
 
         select_response = json.loads(result.stdout)
-        assert select_response.get("success") is True, f"Clone selection failed: {select_response}"
+        assert (
+            select_response.get("success") is True
+        ), f"Clone selection failed: {select_response}"
 
         # Verify selection by listing clones
         list_cmd = [
@@ -590,12 +664,18 @@ class TestVoiceServiceExtended:
         ]
 
         result = subprocess.run(list_cmd, capture_output=True, text=True)
-        assert result.returncode == 0, f"List clones after selection failed: {result.stderr}"
+        assert (
+            result.returncode == 0
+        ), f"List clones after selection failed: {result.stderr}"
 
         list_response = json.loads(result.stdout)
-        assert list_response.get("success") is True, f"List clones after selection failed: {list_response}"
+        assert (
+            list_response.get("success") is True
+        ), f"List clones after selection failed: {list_response}"
 
-    def test_voice_service_rate_limiting(self, server_url, auth_tokens, test_audio_file):
+    def test_voice_service_rate_limiting(
+        self, server_url, auth_tokens, test_audio_file
+    ):
         """Test voice service rate limiting behavior"""
         # Perform multiple rapid requests
         responses = []
@@ -637,7 +717,9 @@ class TestVoiceServiceExtended:
         assert result.returncode == 0, f"Get invalid sample failed: {result.stderr}"
 
         get_response = json.loads(result.stdout)
-        assert get_response.get("success") is False, f"Expected error but got success: {get_response}"
+        assert (
+            get_response.get("success") is False
+        ), f"Expected error but got success: {get_response}"
         assert "error" in get_response, f"No error message in response: {get_response}"
 
         # Test with invalid clone ID
@@ -654,8 +736,12 @@ class TestVoiceServiceExtended:
         assert result.returncode == 0, f"Get invalid clone failed: {result.stderr}"
 
         get_clone_response = json.loads(result.stdout)
-        assert get_clone_response.get("success") is False, f"Expected error but got success: {get_clone_response}"
-        assert "error" in get_clone_response, f"No error message in response: {get_clone_response}"
+        assert (
+            get_clone_response.get("success") is False
+        ), f"Expected error but got success: {get_clone_response}"
+        assert (
+            "error" in get_clone_response
+        ), f"No error message in response: {get_clone_response}"
 
 
 if __name__ == "__main__":

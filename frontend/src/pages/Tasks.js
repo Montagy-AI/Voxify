@@ -225,8 +225,12 @@ const Tasks = () => {
         <audio
           ref={audioRef}
           onEnded={handleAudioEnded}
-          onTimeUpdate={() => setAudioProgress(audioRef.current?.currentTime || 0)}
-          onLoadedMetadata={() => setAudioDuration(audioRef.current?.duration || 0)}
+          onTimeUpdate={() =>
+            setAudioProgress(audioRef.current?.currentTime || 0)
+          }
+          onLoadedMetadata={() =>
+            setAudioDuration(audioRef.current?.duration || 0)
+          }
           className="hidden"
         />
 
@@ -321,9 +325,7 @@ const Tasks = () => {
                   </div>
                 )}
 
-
                 <div className="flex items-center space-x-4">
-
                   {/* Download Button */}
                   <button
                     onClick={() => handleDownload(job)}
@@ -412,12 +414,17 @@ const Tasks = () => {
                         }}
                       />
                       <div className="flex justify-between text-xs text-gray-400 mt-1">
-                        <span>{(playingJobId === job.id ? audioProgress : 0).toFixed(1)}s</span>
+                        <span>
+                          {(playingJobId === job.id
+                            ? audioProgress
+                            : 0
+                          ).toFixed(1)}
+                          s
+                        </span>
                         <span>{audioDuration.toFixed(1)}s</span>
                       </div>
                     </div>
                   )}
-
                 </div>
 
                 {job.error_message && (

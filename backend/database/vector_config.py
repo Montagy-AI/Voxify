@@ -80,7 +80,9 @@ class ChromaVectorDB:
         collection_name = config["name"]
         try:
             # Get or create collection
-            collection = self.client.get_or_create_collection(name=collection_name, metadata=config["metadata"])
+            collection = self.client.get_or_create_collection(
+                name=collection_name, metadata=config["metadata"]
+            )
             self.voice_embeddings_collection = collection
             logger.info(f"Initialized collection: {collection_name}")
 
@@ -93,7 +95,9 @@ class ChromaVectorDB:
 
         return self.voice_embeddings_collection
 
-    def add_voice_embedding(self, voice_sample_id: str, embedding: List[float], metadata: Dict[str, Any]) -> None:
+    def add_voice_embedding(
+        self, voice_sample_id: str, embedding: List[float], metadata: Dict[str, Any]
+    ) -> None:
         """
         Add voice embedding to the voice_embeddings collection
 
@@ -125,7 +129,9 @@ class ChromaVectorDB:
             "created_at": metadata.get("created_at"),
         }
 
-        enhanced_metadata = {k: v for k, v in enhanced_metadata.items() if v is not None}
+        enhanced_metadata = {
+            k: v for k, v in enhanced_metadata.items() if v is not None
+        }
 
         collection.add(
             ids=[voice_sample_id],
@@ -133,7 +139,7 @@ class ChromaVectorDB:
             documents=[document],
             metadatas=[enhanced_metadata],
         )
-        
+
         logger.debug(f"Added voice embedding for sample: {voice_sample_id}")
 
     def get_embedding(self, sample_id: str) -> Dict[str, List]:
@@ -151,9 +157,13 @@ class ChromaVectorDB:
             A dictionary containing the embedding, metadata, and document for the given sample ID.
         """
 
-        return self.get_collection().get(ids=[sample_id], include=["embeddings", "metadatas", "documents"])
+        return self.get_collection().get(
+            ids=[sample_id], include=["embeddings", "metadatas", "documents"]
+        )
 
-    def update_embedding_metadata(self, embedding_id: str, new_metadata: Dict[str, Any]) -> None:
+    def update_embedding_metadata(
+        self, embedding_id: str, new_metadata: Dict[str, Any]
+    ) -> None:
         """Update metadata for an existing embedding"""
         collection = self.get_collection()
 
@@ -212,7 +222,9 @@ def create_vector_db(config_path: str = None) -> ChromaVectorDB:
     # Load configs
     configs = load_config(config_path)
 
-    return ChromaVectorDB(config=configs.get("config"), persist_directory=configs.get("persist_directory"))
+    return ChromaVectorDB(
+        config=configs.get("config"), persist_directory=configs.get("persist_directory")
+    )
 
 
 def load_config(config_path: str = None) -> Dict[str, Any]:
@@ -222,7 +234,8 @@ def load_config(config_path: str = None) -> Dict[str, Any]:
             config = json.load(f)
 
     return {
-        "persist_directory": os.getenv("VECTOR_DB_PATH") or config.get("persist_directory", "data/chroma_db"),
+        "persist_directory": os.getenv("VECTOR_DB_PATH")
+        or config.get("persist_directory", "data/chroma_db"),
         "host": os.getenv("CHROMA_HOST") or config.get("host"),
         "port": int(os.getenv("CHROMA_PORT") or config.get("port", 8000)),
     }

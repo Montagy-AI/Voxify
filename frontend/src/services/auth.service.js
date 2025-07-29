@@ -158,7 +158,8 @@ class AuthService {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error?.message || 'Failed to send reset email',
+        error:
+          error.response?.data?.error?.message || 'Failed to send reset email',
       };
     }
   }
@@ -184,7 +185,8 @@ class AuthService {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error?.message || 'Failed to reset password',
+        error:
+          error.response?.data?.error?.message || 'Failed to reset password',
       };
     }
   }

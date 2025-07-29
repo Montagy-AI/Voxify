@@ -110,7 +110,9 @@ class TestChromaVectorDB:
         assert vector_db.client == mock_client
 
     @patch("database.vector_config.chromadb")
-    def test_chroma_vector_db_initialization_error(self, mock_chromadb, temp_vector_db_path):
+    def test_chroma_vector_db_initialization_error(
+        self, mock_chromadb, temp_vector_db_path
+    ):
         """Test ChromaVectorDB initialization error handling"""
         # Mock ChromaDB to raise an exception
         mock_persistent_client = Mock(side_effect=Exception("ChromaDB error"))
@@ -212,7 +214,9 @@ class TestChromaVectorDB:
         assert result["metadatas"] == [{"user_id": "user-123"}]
 
         # Verify collection.get was called
-        mock_collection.get.assert_called_once_with(ids=["sample-123"], include=["embeddings", "metadatas", "documents"])
+        mock_collection.get.assert_called_once_with(
+            ids=["sample-123"], include=["embeddings", "metadatas", "documents"]
+        )
 
     @patch("database.vector_config.chromadb")
     def test_get_embedding_not_found(self, mock_chromadb, temp_vector_db_path):
@@ -355,7 +359,9 @@ class TestVectorDBFunctions:
 
     @patch("database.vector_config.load_config")
     @patch("database.vector_config.ChromaVectorDB")
-    def test_create_vector_db_with_config_path(self, mock_chroma_vector_db, mock_load_config):
+    def test_create_vector_db_with_config_path(
+        self, mock_chroma_vector_db, mock_load_config
+    ):
         """Test create_vector_db with config path"""
         # Mock load_config
         mock_load_config.return_value = {

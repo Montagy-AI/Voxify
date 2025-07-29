@@ -134,7 +134,9 @@ class TestUserModel:
         # The constraint should be enforced by SQLAlchemy
         # This test verifies the constraint is defined
         constraints = User.__table_args__
-        assert any("storage_used_bytes" in str(constraint) for constraint in constraints)
+        assert any(
+            "storage_used_bytes" in str(constraint) for constraint in constraints
+        )
 
 
 class TestVoiceSampleModel:
@@ -240,8 +242,6 @@ class TestVoiceModelModel:
         # Check column default values
         assert VoiceModel.is_active.default.arg is True
 
-
-
     def test_voice_model_to_dict(self):
         """Test voice model serialization"""
         model = VoiceModel(
@@ -292,7 +292,9 @@ class TestSynthesisJobModel:
 
     def test_synthesis_job_config_property(self):
         """Test config property getter and setter"""
-        job = SynthesisJob(user_id="user-uuid", voice_model_id="model-uuid", text_content="test")
+        job = SynthesisJob(
+            user_id="user-uuid", voice_model_id="model-uuid", text_content="test"
+        )
 
         # Test setting config
         config = {"speed": 1.0, "pitch": 1.0, "volume": 1.0}
@@ -302,8 +304,6 @@ class TestSynthesisJobModel:
         # Test getting config
         job.config = '{"speed": 1.2, "pitch": 0.8}'
         assert job.config_dict == {"speed": 1.2, "pitch": 0.8}
-
-
 
     def test_synthesis_job_to_dict(self):
         """Test synthesis job serialization"""
@@ -356,9 +356,6 @@ class TestSynthesisCacheModel:
         assert SynthesisCache.hit_count.default.arg == 0
 
 
-
-
-
 class TestUsageStatModel:
     """Test UsageStat model functionality"""
 
@@ -405,7 +402,9 @@ class TestSystemSettingModel:
         assert setting_int.get_typed_value() == 123
 
         # Test float
-        setting_float = SystemSetting(key="test_float", value="123.45", data_type="float")
+        setting_float = SystemSetting(
+            key="test_float", value="123.45", data_type="float"
+        )
         assert setting_float.get_typed_value() == 123.45
 
         # Test boolean
@@ -413,11 +412,15 @@ class TestSystemSettingModel:
         assert setting_bool.get_typed_value() is True
 
         # Test string
-        setting_string = SystemSetting(key="test_string", value="hello", data_type="string")
+        setting_string = SystemSetting(
+            key="test_string", value="hello", data_type="string"
+        )
         assert setting_string.get_typed_value() == "hello"
 
         # Test unknown type
-        setting_unknown = SystemSetting(key="test_unknown", value="test", data_type="unknown")
+        setting_unknown = SystemSetting(
+            key="test_unknown", value="test", data_type="unknown"
+        )
         assert setting_unknown.get_typed_value() == "test"
 
 

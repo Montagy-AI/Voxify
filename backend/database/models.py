@@ -59,15 +59,21 @@ class User(Base, TimestampMixin):
     is_active = Column(Boolean, default=True, nullable=False)
     email_verified = Column(Boolean, default=False, nullable=False)
     last_login_at = Column(DateTime)
-    
+
     # Password reset fields
     reset_token = Column(String, nullable=True)
     reset_token_expires_at = Column(DateTime, nullable=True)
 
     # Relationships
-    voice_samples = relationship("VoiceSample", back_populates="user", cascade="all, delete-orphan")
-    synthesis_jobs = relationship("SynthesisJob", back_populates="user", cascade="all, delete-orphan")
-    usage_stats = relationship("UsageStat", back_populates="user", cascade="all, delete-orphan")
+    voice_samples = relationship(
+        "VoiceSample", back_populates="user", cascade="all, delete-orphan"
+    )
+    synthesis_jobs = relationship(
+        "SynthesisJob", back_populates="user", cascade="all, delete-orphan"
+    )
+    usage_stats = relationship(
+        "UsageStat", back_populates="user", cascade="all, delete-orphan"
+    )
 
     # Constraints
     __table_args__ = (
@@ -95,7 +101,9 @@ class User(Base, TimestampMixin):
             "is_active": self.is_active,
             "email_verified": self.email_verified,
             "created_at": self.created_at.isoformat() if self.created_at else None,
-            "last_login_at": self.last_login_at.isoformat() if self.last_login_at else None,
+            "last_login_at": (
+                self.last_login_at.isoformat() if self.last_login_at else None
+            ),
         }
 
 
@@ -147,7 +155,9 @@ class VoiceSample(Base, TimestampMixin):
 
     # Relationships
     user = relationship("User", back_populates="voice_samples")
-    voice_models = relationship("VoiceModel", back_populates="voice_sample", cascade="all, delete-orphan")
+    voice_models = relationship(
+        "VoiceModel", back_populates="voice_sample", cascade="all, delete-orphan"
+    )
 
     # Constraints
     __table_args__ = (
@@ -220,7 +230,9 @@ class VoiceModel(Base, TimestampMixin):
     __tablename__ = "voice_models"
 
     id = Column(String, primary_key=True, default=generate_uuid)
-    voice_sample_id = Column(String, ForeignKey("voice_samples.id", ondelete="CASCADE"), nullable=False)
+    voice_sample_id = Column(
+        String, ForeignKey("voice_samples.id", ondelete="CASCADE"), nullable=False
+    )
     name = Column(String, nullable=False)
     description = Column(Text)
 
@@ -285,7 +297,9 @@ class SynthesisJob(Base, TimestampMixin):
 
     id = Column(String, primary_key=True, default=generate_uuid)
     user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    voice_model_id = Column(String, ForeignKey("voice_models.id", ondelete="CASCADE"), nullable=False)
+    voice_model_id = Column(
+        String, ForeignKey("voice_models.id", ondelete="CASCADE"), nullable=False
+    )
 
     # Input text information
     text_content = Column(Text, nullable=False)
@@ -335,7 +349,9 @@ class SynthesisJob(Base, TimestampMixin):
             'status IN ("pending", "processing", "completed", "failed", "cancelled")',
             name="check_synthesis_status",
         ),
-        CheckConstraint("progress >= 0.0 AND progress <= 1.0", name="check_synthesis_progress"),
+        CheckConstraint(
+            "progress >= 0.0 AND progress <= 1.0", name="check_synthesis_progress"
+        ),
         CheckConstraint("speed >= 0.1 AND speed <= 3.0", name="check_speed_range"),
         CheckConstraint("pitch >= 0.1 AND pitch <= 3.0", name="check_pitch_range"),
         CheckConstraint("volume >= 0.0 AND volume <= 3.0", name="check_volume_range"),
@@ -388,7 +404,9 @@ class SynthesisJob(Base, TimestampMixin):
             "processing_time_ms": self.processing_time_ms,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "started_at": self.started_at.isoformat() if self.started_at else None,
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "completed_at": (
+                self.completed_at.isoformat() if self.completed_at else None
+            ),
         }
 
 
@@ -399,7 +417,9 @@ class SynthesisCache(Base, TimestampMixin):
 
     id = Column(String, primary_key=True, default=generate_uuid)
     text_hash = Column(String, nullable=False)
-    voice_model_id = Column(String, ForeignKey("voice_models.id", ondelete="CASCADE"), nullable=False)
+    voice_model_id = Column(
+        String, ForeignKey("voice_models.id", ondelete="CASCADE"), nullable=False
+    )
     config_hash = Column(String, nullable=False)
 
     # Cached content
@@ -419,7 +439,9 @@ class SynthesisCache(Base, TimestampMixin):
     __table_args__ = (
         CheckConstraint("duration > 0", name="check_cache_duration_positive"),
         CheckConstraint("hit_count >= 0", name="check_hit_count_positive"),
-        UniqueConstraint("text_hash", "voice_model_id", "config_hash", name="unique_cache_key"),
+        UniqueConstraint(
+            "text_hash", "voice_model_id", "config_hash", name="unique_cache_key"
+        ),
         Index("idx_synthesis_cache_hash", "text_hash"),
         Index("idx_synthesis_cache_model", "voice_model_id"),
         Index("idx_synthesis_cache_expires", "expires_at"),
@@ -459,7 +481,9 @@ class UsageStat(Base):
 
     # Constraints
     __table_args__ = (
-        CheckConstraint("synthesis_duration >= 0", name="check_synthesis_duration_positive"),
+        CheckConstraint(
+            "synthesis_duration >= 0", name="check_synthesis_duration_positive"
+        ),
         CheckConstraint("storage_used >= 0", name="check_storage_used_positive"),
         CheckConstraint(
             "cache_hit_rate >= 0 AND cache_hit_rate <= 1",
@@ -533,9 +557,13 @@ class DatabaseManager:
         self.engine = create_engine(
             database_url,
             echo=False,  # Set to True for SQL debugging
-            connect_args={"check_same_thread": False} if "sqlite" in database_url else {},
+            connect_args=(
+                {"check_same_thread": False} if "sqlite" in database_url else {}
+            ),
         )
-        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
+        self.SessionLocal = sessionmaker(
+            autocommit=False, autoflush=False, bind=self.engine
+        )
 
     def create_tables(self):
         """Create all database tables"""
@@ -600,12 +628,16 @@ class DatabaseManager:
             ]
 
             for setting in default_settings:
-                existing = session.query(SystemSetting).filter_by(key=setting.key).first()
+                existing = (
+                    session.query(SystemSetting).filter_by(key=setting.key).first()
+                )
                 if not existing:
                     session.add(setting)
 
             # Add schema version
-            existing_version = session.query(SchemaVersion).filter_by(version="1.0.0").first()
+            existing_version = (
+                session.query(SchemaVersion).filter_by(version="1.0.0").first()
+            )
             if not existing_version:
                 version = SchemaVersion(
                     version="1.0.0",

@@ -142,7 +142,9 @@ class TestDatabaseOperations:
             assert user.full_name == "John Doe"
 
             # Query user
-            queried_user = session.query(User).filter_by(email="test@example.com").first()
+            queried_user = (
+                session.query(User).filter_by(email="test@example.com").first()
+            )
             assert queried_user is not None
             assert queried_user.id == user.id
 
@@ -151,7 +153,9 @@ class TestDatabaseOperations:
             session.commit()
 
             # Verify update
-            updated_user = session.query(User).filter_by(email="test@example.com").first()
+            updated_user = (
+                session.query(User).filter_by(email="test@example.com").first()
+            )
             assert updated_user.last_login_at is not None
 
         finally:
@@ -413,8 +417,6 @@ class TestDatabaseOperations:
         finally:
             session.close()
 
-
-
     def test_usage_stat_workflow(self, temp_db_path):
         """Test usage statistics workflow"""
         db_url = f"sqlite:///{temp_db_path}"
@@ -508,13 +510,19 @@ class TestDatabaseOperations:
             assert len(settings) == 3
 
             # Test typed value retrieval
-            max_file_size = session.query(SystemSetting).filter_by(key="max_file_size").first()
+            max_file_size = (
+                session.query(SystemSetting).filter_by(key="max_file_size").first()
+            )
             assert max_file_size.get_typed_value() == 10485760
 
-            default_language = session.query(SystemSetting).filter_by(key="default_language").first()
+            default_language = (
+                session.query(SystemSetting).filter_by(key="default_language").first()
+            )
             assert default_language.get_typed_value() == "en-US"
 
-            enable_cache = session.query(SystemSetting).filter_by(key="enable_cache").first()
+            enable_cache = (
+                session.query(SystemSetting).filter_by(key="enable_cache").first()
+            )
             assert enable_cache.get_typed_value() is True
 
             # Update setting
@@ -522,7 +530,9 @@ class TestDatabaseOperations:
             session.commit()
 
             # Verify update
-            updated_setting = session.query(SystemSetting).filter_by(key="max_file_size").first()
+            updated_setting = (
+                session.query(SystemSetting).filter_by(key="max_file_size").first()
+            )
             assert updated_setting.get_typed_value() == 20971520
 
         finally:
@@ -597,7 +607,9 @@ class TestDatabaseRelationships:
             session.commit()
 
             # Create usage stat
-            stat = UsageStat(user_id=user.id, date="2024-01-01", voice_samples_uploaded=1)
+            stat = UsageStat(
+                user_id=user.id, date="2024-01-01", voice_samples_uploaded=1
+            )
             session.add(stat)
             session.commit()
 
@@ -937,7 +949,12 @@ class TestDatabasePerformance:
             assert session.query(VoiceSample).count() == 50
 
             # Test bulk query
-            user_samples = session.query(VoiceSample).join(User).filter(User.email.like("user%")).all()
+            user_samples = (
+                session.query(VoiceSample)
+                .join(User)
+                .filter(User.email.like("user%"))
+                .all()
+            )
             assert len(user_samples) == 50
 
         finally:

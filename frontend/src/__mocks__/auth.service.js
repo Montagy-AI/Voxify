@@ -9,7 +9,7 @@ const authService = {
     // Mock successful login
     return Promise.resolve({
       token: 'mock-token',
-      user: { id: 1, email: credentials.email, first_name: 'Test' }
+      user: { id: 1, email: credentials.email, first_name: 'Test' },
     });
   }),
   register: jest.fn(() => {

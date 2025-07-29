@@ -16,7 +16,9 @@ def setup_import_path():
     Add backend directory to Python path and verify api/__init__.py exists.
     """
     current_dir = os.path.dirname(__file__)
-    api_init_path = os.path.abspath(os.path.join(current_dir, "../../../backend", "api", "__init__.py"))
+    api_init_path = os.path.abspath(
+        os.path.join(current_dir, "../../../backend", "api", "__init__.py")
+    )
 
     # Verify file exists and is readable
     if not os.path.exists(api_init_path):
@@ -132,7 +134,11 @@ class TestCreateAppFunction:
         except ImportError:
             pytest.skip("Could not import create_app from api")
 
-        test_config = {"TESTING": True, "SECRET_KEY": "test_override_secret", "DATABASE_URL": "sqlite:///:memory:"}
+        test_config = {
+            "TESTING": True,
+            "SECRET_KEY": "test_override_secret",
+            "DATABASE_URL": "sqlite:///:memory:",
+        }
 
         with (
             patch("api.load_dotenv"),
@@ -299,7 +305,10 @@ class TestConfigurationErrorHandling:
         except ImportError:
             pytest.skip("Could not import create_app from api")
 
-        invalid_env = {"JWT_ACCESS_TOKEN_EXPIRES": "not_a_number", "JWT_REFRESH_TOKEN_EXPIRES": "also_not_a_number"}
+        invalid_env = {
+            "JWT_ACCESS_TOKEN_EXPIRES": "not_a_number",
+            "JWT_REFRESH_TOKEN_EXPIRES": "also_not_a_number",
+        }
 
         with (
             patch("api.load_dotenv"),

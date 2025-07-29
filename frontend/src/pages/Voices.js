@@ -103,11 +103,23 @@ const Voices = () => {
           </div>
         ) : clones.length === 0 ? (
           <div className="text-center py-12 bg-zinc-900 rounded-lg border border-zinc-800">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m4 0V9a4 4 0 00-4-4H9a4 4 0 00-4 4v8" />
+            <svg
+              className="mx-auto h-12 w-12 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m4 0V9a4 4 0 00-4-4H9a4 4 0 00-4 4v8"
+              />
             </svg>
             <p className="text-gray-400 text-lg mt-4">No voice clones found</p>
-            <p className="text-gray-500 text-sm mt-2">You can create your first voice clone using the Dashboard</p>
+            <p className="text-gray-500 text-sm mt-2">
+              You can create your first voice clone using the Dashboard
+            </p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -123,7 +135,9 @@ const Voices = () => {
                       <span className="px-2 py-1 text-xs bg-zinc-800 text-gray-300 rounded">
                         {clone.language || 'zh-CN'}
                       </span>
-                      <span className={`${getStatusColor(clone.status)} capitalize`}>
+                      <span
+                        className={`${getStatusColor(clone.status)} capitalize`}
+                      >
                         {getDisplayStatus(clone.status)}
                       </span>
                     </div>
