@@ -24,7 +24,6 @@ from database import (
     VoiceModel,
     SynthesisJob,
     SynthesisCache,
-    PhonemeAlignment,
     UsageStat,
     SystemSetting,
     SchemaVersion,
@@ -241,9 +240,7 @@ class TestDatabaseOperations:
                 description="Test model description",
                 model_path="/path/to/model.pth",
                 model_type="tacotron2",
-                training_status="completed",
-                training_epochs=100,
-                learning_rate=0.001,
+                status="completed",
             )
             session.add(model)
             session.commit()
@@ -251,7 +248,7 @@ class TestDatabaseOperations:
             # Verify model creation
             assert model.id is not None
             assert model.voice_sample_id == sample.id
-            assert model.training_status == "completed"
+            assert model.status == "completed"
 
             # Test training config property
             training_config = {"epochs": 100, "learning_rate": 0.001, "batch_size": 32}
@@ -303,7 +300,7 @@ class TestDatabaseOperations:
                 voice_sample_id=sample.id,
                 name="Test Model",
                 model_path="/path/to/model.pth",
-                training_status="completed",
+                status="completed",
             )
             session.add(model)
             session.commit()
@@ -335,18 +332,6 @@ class TestDatabaseOperations:
             # Query job with config
             queried_job = session.query(SynthesisJob).filter_by(id=job.id).first()
             assert queried_job.config_dict == config
-
-            # Test word timestamps
-            timestamps = [
-                {"word": "Hello", "start": 0.0, "end": 0.5},
-                {"word": "world", "start": 0.5, "end": 1.0},
-            ]
-            job.word_timestamps_list = timestamps
-            session.commit()
-
-            # Verify timestamps
-            updated_job = session.query(SynthesisJob).filter_by(id=job.id).first()
-            assert updated_job.word_timestamps_list == timestamps
 
             # Update job status
             job.status = "completed"
@@ -393,7 +378,7 @@ class TestDatabaseOperations:
                 voice_sample_id=sample.id,
                 name="Test Model",
                 model_path="/path/to/model.pth",
-                training_status="completed",
+                status="completed",
             )
             session.add(model)
             session.commit()
@@ -428,89 +413,7 @@ class TestDatabaseOperations:
         finally:
             session.close()
 
-    def test_phoneme_alignment_workflow(self, temp_db_path):
-        """Test phoneme alignment workflow"""
-        db_url = f"sqlite:///{temp_db_path}"
-        db_manager = DatabaseManager(db_url)
-        db_manager.create_tables()
 
-        session = db_manager.get_session()
-        try:
-            # Create synthesis job for alignment
-            user = User(email="test@example.com", password_hash="hash")
-            session.add(user)
-            session.commit()
-
-            sample = VoiceSample(
-                user_id=user.id,
-                name="Test Sample",
-                file_path="/path/to/file.wav",
-                file_size=1024,
-                format="WAV",
-                duration=10.0,
-                sample_rate=22050,
-            )
-            session.add(sample)
-            session.commit()
-
-            model = VoiceModel(
-                voice_sample_id=sample.id,
-                name="Test Model",
-                model_path="/path/to/model.pth",
-                training_status="completed",
-            )
-            session.add(model)
-            session.commit()
-
-            job = SynthesisJob(
-                user_id=user.id,
-                voice_model_id=model.id,
-                text_content="Hello world",
-                text_hash="hash123",
-                status="completed",
-            )
-            session.add(job)
-            session.commit()
-
-            # Create phoneme alignments
-            alignments = [
-                PhonemeAlignment(
-                    synthesis_job_id=job.id,
-                    sequence_number=1,
-                    text_unit="Hello",
-                    unit_type="word",
-                    start_time=0.0,
-                    end_time=0.5,
-                    duration=0.5,
-                    confidence=0.95,
-                ),
-                PhonemeAlignment(
-                    synthesis_job_id=job.id,
-                    sequence_number=2,
-                    text_unit="world",
-                    unit_type="word",
-                    start_time=0.5,
-                    end_time=1.0,
-                    duration=0.5,
-                    confidence=0.92,
-                ),
-            ]
-
-            for alignment in alignments:
-                session.add(alignment)
-            session.commit()
-
-            # Verify alignments
-            assert len(alignments) == 2
-            assert alignments[0].text_unit == "Hello"
-            assert alignments[1].text_unit == "world"
-
-            # Query alignments for job
-            job_alignments = session.query(PhonemeAlignment).filter_by(synthesis_job_id=job.id).all()
-            assert len(job_alignments) == 2
-
-        finally:
-            session.close()
 
     def test_usage_stat_workflow(self, temp_db_path):
         """Test usage statistics workflow"""
@@ -678,7 +581,7 @@ class TestDatabaseRelationships:
                 voice_sample_id=sample.id,
                 name="Test Model",
                 model_path="/path/to/model.pth",
-                training_status="completed",
+                status="completed",
             )
             session.add(model)
             session.commit()
@@ -749,7 +652,7 @@ class TestDatabaseRelationships:
                 voice_sample_id=sample.id,
                 name="Test Model",
                 model_path="/path/to/model.pth",
-                training_status="completed",
+                status="completed",
             )
             session.add(model)
             session.commit()
@@ -830,7 +733,7 @@ class TestDatabaseRelationships:
                 voice_sample_id=sample.id,
                 name="Test Model",
                 model_path="/path/to/model.pth",
-                training_status="completed",
+                status="completed",
             )
             session.add(model)
             session.commit()
@@ -844,43 +747,15 @@ class TestDatabaseRelationships:
             session.add(job)
             session.commit()
 
-            # Create phoneme alignments
-            alignments = [
-                PhonemeAlignment(
-                    synthesis_job_id=job.id,
-                    sequence_number=1,
-                    text_unit="Hello",
-                    unit_type="word",
-                    start_time=0.0,
-                    end_time=0.5,
-                    duration=0.5,
-                ),
-                PhonemeAlignment(
-                    synthesis_job_id=job.id,
-                    sequence_number=2,
-                    text_unit="world",
-                    unit_type="word",
-                    start_time=0.5,
-                    end_time=1.0,
-                    duration=0.5,
-                ),
-            ]
-
-            for alignment in alignments:
-                session.add(alignment)
-            session.commit()
-
             # Verify data exists
             assert session.query(SynthesisJob).count() == 1
-            assert session.query(PhonemeAlignment).count() == 2
 
-            # Delete synthesis job (should cascade to alignments)
+            # Delete synthesis job
             session.delete(job)
             session.commit()
 
             # Verify cascade delete
             assert session.query(SynthesisJob).count() == 0
-            assert session.query(PhonemeAlignment).count() == 0
 
         finally:
             session.close()
