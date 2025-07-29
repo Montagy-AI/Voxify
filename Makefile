@@ -9,6 +9,7 @@ help:
 	@echo "  lint    - Run linting for backend and frontend"
 	@echo "  format  - Format code for backend and frontend"
 	@echo "  test    - Run full test suite with Docker"
+	@echo "  test-frontend - Run frontend tests"
 	@echo "  build   - Build Docker images"
 	@echo "  up      - Start services with docker-compose"
 	@echo "  down    - Stop services"
@@ -57,6 +58,11 @@ test-quick:
 	@echo "Running quick tests..."
 	docker-compose run --rm tests
 	@echo "✅ Quick tests completed"
+
+# Frontend test suite
+test-frontend:
+	@echo "Running frontend tests..."
+	docker-compose run --rm -e CI=true frontend npm run test:ci
 
 # Docker Compose operations
 up:

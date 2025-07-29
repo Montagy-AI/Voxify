@@ -37,6 +37,7 @@ yarn-error.log*
 frontend/build/
 frontend/dist/
 frontend/.next/
+frontend/coverage/
 
 # Logs
 logs

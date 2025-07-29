@@ -1,12 +1,12 @@
 
 export const SUPPORTED_LANGUAGES = [
-    // 原生多语言支持 (F5TTS_v1_Base) - 最佳质量
+    // Native Language Support (F5TTS_v1_Base) - Best quality
     { code: "zh-CN", name: "Chinese (Simplified)", nativeName: "中文 (简体)", flag: "🇨🇳", supportLevel: "native" },
     { code: "zh-TW", name: "Chinese (Traditional)", nativeName: "中文 (繁體)", flag: "🇹🇼", supportLevel: "native" },
     { code: "en-US", name: "English (US)", nativeName: "English (United States)", flag: "🇺🇸", supportLevel: "native" },
     { code: "en-GB", name: "English (UK)", nativeName: "English (United Kingdom)", flag: "🇬🇧", supportLevel: "native" },
     
-    // 专用模型支持 - 高质量但需要特定模型
+    // Dedicated model support - high quality but requires specific models
     { code: "ja-JP", name: "Japanese", nativeName: "日本語", flag: "🇯🇵", supportLevel: "specialized" },
     { code: "fr-FR", name: "French", nativeName: "Français", flag: "🇫🇷", supportLevel: "specialized" },
     { code: "de-DE", name: "German", nativeName: "Deutsch", flag: "🇩🇪", supportLevel: "specialized" },
@@ -15,7 +15,7 @@ export const SUPPORTED_LANGUAGES = [
     { code: "ru-RU", name: "Russian", nativeName: "Русский", flag: "🇷🇺", supportLevel: "specialized" },
     { code: "hi-IN", name: "Hindi", nativeName: "हिन्दी", flag: "🇮🇳", supportLevel: "specialized" },
     
-    // Fallback支持 - 基础支持，效果可能有限
+    // Fallback support - basic model with limited quality
     { code: "ko-KR", name: "Korean", nativeName: "한국어", flag: "🇰🇷", supportLevel: "fallback" },
     { code: "pt-BR", name: "Portuguese (Brazil)", nativeName: "Português (Brasil)", flag: "🇧🇷", supportLevel: "fallback" },
     { code: "ar-SA", name: "Arabic", nativeName: "العربية", flag: "🇸🇦", supportLevel: "fallback" },
@@ -33,7 +33,6 @@ export const LANGUAGE_GROUPS = {
     "基础支持 (有限效果)": ["ko-KR", "pt-BR", "ar-SA", "th-TH", "vi-VN"],
 };
 
-// 支持级别映射
 export const SUPPORT_LEVEL_INFO = {
     native: {
         label: "原生支持",
@@ -125,34 +124,31 @@ export const SAMPLE_TEXTS = {
     "vi-VN": "Xin chào, đây là bài kiểm tra tổng hợp giọng nói tiếng Việt. Hôm nay thời tiết rất đẹp.",
 };
 
-// 获取语言支持级别
 export const getLanguageSupportLevel = (code) => {
     const lang = getLanguageInfo(code);
     return lang ? lang.supportLevel : 'unknown';
 };
 
-// 检查是否为原生支持的语言
+// Check if the language is natively supported
 export const isNativeSupported = (code) => {
     return getLanguageSupportLevel(code) === 'native';
 };
 
-// 检查是否为专用模型支持的语言
+// Check if it is a language supported by the dedicated model
 export const isSpecializedSupported = (code) => {
     return getLanguageSupportLevel(code) === 'specialized';
 };
 
-// 检查是否为fallback支持的语言
+// Check if it is a language supported by the fallback model
 export const isFallbackSupported = (code) => {
     return getLanguageSupportLevel(code) === 'fallback';
 };
 
-// 获取支持级别信息
 export const getSupportLevelInfo = (code) => {
     const level = getLanguageSupportLevel(code);
     return SUPPORT_LEVEL_INFO[level] || null;
 };
 
-// 按支持级别分组语言
 export const getLanguagesByLevel = () => {
     const grouped = {
         native: [],
