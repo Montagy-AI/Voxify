@@ -5,20 +5,24 @@
 # Default target
 help:
 	@echo "Available targets:"
-	@echo "  install - Install all dependencies"
-	@echo "  lint    - Run linting for backend and frontend"
-	@echo "  format  - Format code for backend and frontend"
-	@echo "  test    - Run full test suite with Docker"
-	@echo "  test-frontend - Run frontend tests"
-	@echo "  build   - Build Docker images"
-	@echo "  up      - Start services with docker-compose"
-	@echo "  down    - Stop services"
-	@echo "  test-quick - Run tests without full Docker rebuild"
-	@echo "  logs    - Show logs from running services"
-	@echo "  shell-backend  - Open shell in backend container"
-	@echo "  shell-frontend - Open shell in frontend container"
-	@echo "  clean   - Clean up Docker resources"
-	@echo "  dev     - Install, lint, build, and start services"
+	@echo " install       - Install all dependencies"
+	@echo " lint          - Run linting for backend and frontend"
+	@echo " format        - Format code for backend and frontend"
+	@echo " test          - Run full test suite with Docker"
+	@echo " test-frontend - Run frontend tests"
+	@echo " build         - Build Docker images"
+	@echo " up            - Start services with docker-compose"
+	@echo " down          - Stop services"
+	@echo " test-quick    - Run tests without full Docker rebuild"
+	@echo " logs          - Show logs from running services"
+	@echo " shell-backend - Open shell in backend container"
+	@echo " shell-frontend- Open shell in frontend container"
+	@echo " clean         - Clean up Docker resources"
+	@echo " dev           - Install, lint, build, and start services"
+	@echo " backend-up    - Start only backend services"
+	@echo " backend-https - Start backend with HTTPS support"
+	@echo " setup-certs   - Copy SSL certificates for Docker use"
+	@echo " clean         - Clean up Docker resources"
 
 # Install dependencies
 install:
@@ -120,5 +124,19 @@ backend-logs:
 shell-api:
 	docker-compose exec api /bin/bash
 
-backend-prod:
-	docker buildx build --platform linux/amd64 -t madelahn/voxify-api:latest ./backend
+# Setup SSL certificates for Docker
+setup-certs:
+	@echo "Setting up SSL certificates for Docker..."
+	mkdir -p ./backend/certs
+	sudo cp /etc/letsencrypt/live/milaniez-cheetah.duckdns.org/fullchain.pem ./backend/certs/
+	sudo cp /etc/letsencrypt/live/milaniez-cheetah.duckdns.org/privkey.pem ./backend/certs/
+	sudo chown $(USER):$(USER) ./backend/certs/*
+	chmod 644 ./backend/certs/fullchain.pem
+	chmod 600 ./backend/certs/privkey.pem
+	@echo "✅ Certificates copied and permissions set"
+ 
+ backend-up: setup-certs
+	@echo "Starting backend services with HTTPS..."
+	docker-compose up -d db-init
+	SSL_CERT_FILE=/app/certs/fullchain.pem SSL_KEY_FILE=/app/certs/privkey.pem docker-compose run --rm -d -p 8000:8000 -v $(PWD)/backend/certs:/app/certs:ro api python startup.py --https
+	@echo "✅ Backend is running with HTTPS on port 8000"

@@ -7,6 +7,7 @@ Automatically initializes database and starts Flask application server
 
 import os
 import sys
+import ssl
 import argparse
 from api import create_app
 
@@ -170,7 +171,37 @@ def seed_database():
         return False
 
 
-def start_flask_app(skip_db_init=False, skip_file_init=False, seed_data=False):
+def setup_ssl_context():
+    """Setup SSL context for HTTPS"""
+    # Check for SSL certificate environment variables first
+    cert_file = os.getenv("SSL_CERT_FILE", "/etc/letsencrypt/live/milaniez-cheetah.duckdns.org/fullchain.pem")
+    key_file = os.getenv("SSL_KEY_FILE", "/etc/letsencrypt/live/milaniez-cheetah.duckdns.org/privkey.pem")
+    
+    # Check if certificate files exist
+    if not os.path.exists(cert_file):
+        print(f"⚠️  SSL certificate file not found: {cert_file}")
+        return None
+    
+    if not os.path.exists(key_file):
+        print(f"⚠️  SSL private key file not found: {key_file}")
+        return None
+    
+    try:
+        # Create SSL context
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        context.load_cert_chain(cert_file, key_file)
+        print(f"🔒 SSL certificates loaded successfully")
+        print(f"   - Certificate: {cert_file}")
+        print(f"   - Private Key: {key_file}")
+        return context
+    except Exception as e:
+        print(f"❌ Error loading SSL certificates: {e}")
+        print("   Make sure the certificate files are readable by the current user")
+        print("   You may need to run with sudo or copy certificates to a user-accessible location")
+        return None
+
+
+def start_flask_app(skip_db_init=False, skip_file_init=False, seed_data=False, use_https=False):
     """Start Flask application"""
 
     # Initialize file storage (unless skipped)
@@ -201,12 +232,28 @@ def start_flask_app(skip_db_init=False, skip_file_init=False, seed_data=False):
     port = int(os.getenv("PORT", os.getenv("FLASK_PORT", 8000)))  # Use PORT for cloud platforms
     debug = os.getenv("FLASK_DEBUG", "False").lower() == "true"
 
+    # Setup SSL if requested
+    ssl_context = None
+    protocol = "http"
+    if use_https:
+        ssl_context = setup_ssl_context()
+        if ssl_context:
+            protocol = "https"
+        else:
+            print("🔄 Falling back to HTTP due to SSL setup issues")
+
     print("Starting Voxify API Server...")
-    print(f"Server: http://{host}:{port}")
-    print(f"Auth endpoints: http://{host}:{port}/api/v1/auth")
-    print(f"Voice endpoints: http://{host}:{port}/api/v1/voice")
-    print(f"Job endpoints: http://{host}:{port}/api/v1/jobs")
-    print(f"File endpoints: http://{host}:{port}/api/v1/file")
+    print(f"Server: {protocol}://{host}:{port}")
+    print(f"Auth endpoints: {protocol}://{host}:{port}/api/v1/auth")
+    print(f"Voice endpoints: {protocol}://{host}:{port}/api/v1/voice")
+    print(f"Job endpoints: {protocol}://{host}:{port}/api/v1/jobs")
+    print(f"File endpoints: {protocol}://{host}:{port}/api/v1/file")
+    
+    if use_https and ssl_context:
+        print("🔒 HTTPS encryption enabled")
+    elif use_https:
+        print("⚠️  HTTPS requested but SSL setup failed - running HTTP")
+    
     print("\nServer started! Press Ctrl+C to stop the server")
     print("=" * 50)
 
@@ -221,14 +268,20 @@ def start_flask_app(skip_db_init=False, skip_file_init=False, seed_data=False):
                 from waitress import serve
 
                 print("🚀 Starting with Waitress WSGI server (production)")
-                serve(app, host=host, port=port, threads=4)
+                if ssl_context:
+                    # Note: Waitress doesn't directly support SSL context
+                    # In production, you'd typically use a reverse proxy (nginx) for SSL
+                    print("⚠️  Production mode with Waitress - SSL should be handled by reverse proxy")
+                    serve(app, host=host, port=port, threads=4)
+                else:
+                    serve(app, host=host, port=port, threads=4)
             except ImportError:
                 print("⚠️  Waitress not available, falling back to Flask dev server")
-                app.run(host=host, port=port, debug=False, threaded=True)
+                app.run(host=host, port=port, debug=False, threaded=True, ssl_context=ssl_context)
         else:
             # Development server
             print("🔧 Starting with Flask development server")
-            app.run(host=host, port=port, debug=debug, threaded=True)
+            app.run(host=host, port=port, debug=debug, threaded=True, ssl_context=ssl_context)
 
     except KeyboardInterrupt:
         print("\n\nServer stopped")
@@ -259,6 +312,11 @@ def main():
         "--seed-only",
         action="store_true",
         help="Only seed the database with test data, do not start server",
+    )
+    parser.add_argument(
+        "--https",
+        action="store_true",
+        help="Enable HTTPS using SSL certificates",
     )
 
     args = parser.parse_args()
@@ -294,6 +352,7 @@ def main():
             skip_db_init=args.skip_db_init,
             skip_file_init=args.skip_file_init,
             seed_data=args.seed,
+            use_https=args.https,
         )
 
 
