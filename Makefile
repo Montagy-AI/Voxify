@@ -104,12 +104,6 @@ backend-build:
 	docker-compose build api db-init
 	@echo "✅ Backend services built"
 
-# Start only the backend and db-init services
-backend-up:
-	@echo "Starting backend services..."
-	docker-compose up -d db-init api
-	@echo "✅ Backend is running on port 8000"
-
 # Stop only the backend services
 backend-down:
 	@echo "Stopping backend services..."
@@ -128,15 +122,42 @@ shell-api:
 setup-certs:
 	@echo "Setting up SSL certificates for Docker..."
 	mkdir -p ./backend/certs
-	sudo cp /etc/letsencrypt/live/milaniez-cheetah.duckdns.org/fullchain.pem ./backend/certs/
-	sudo cp /etc/letsencrypt/live/milaniez-cheetah.duckdns.org/privkey.pem ./backend/certs/
+	sudo cp /etc/letsencrypt/live/milaniez-montagy.duckdns.org/fullchain.pem ./backend/certs/
+	sudo cp /etc/letsencrypt/live/milaniez-montagy.duckdns.org/privkey.pem ./backend/certs/
 	sudo chown $(USER):$(USER) ./backend/certs/*
 	chmod 644 ./backend/certs/fullchain.pem
 	chmod 600 ./backend/certs/privkey.pem
 	@echo "✅ Certificates copied and permissions set"
  
- backend-up: setup-certs
-	@echo "Starting backend services with HTTPS..."
-	docker-compose up -d db-init
-	SSL_CERT_FILE=/app/certs/fullchain.pem SSL_KEY_FILE=/app/certs/privkey.pem docker-compose run --rm -d -p 8000:8000 -v $(PWD)/backend/certs:/app/certs:ro api python startup.py --https
-	@echo "✅ Backend is running with HTTPS on port 8000"
+# Production deployment targets
+setup-nginx:
+	@echo "Setting up nginx configuration..."
+	sudo cp nginx/voxify.conf /etc/nginx/sites-available/voxify
+	sudo ln -sf /etc/nginx/sites-available/voxify /etc/nginx/sites-enabled/
+	sudo rm -f /etc/nginx/sites-enabled/default
+	sudo nginx -t
+	sudo systemctl restart nginx
+	sudo systemctl enable nginx
+	@echo "✅ Nginx configured and running"
+
+# Production backend with nginx handling SSL
+backend-prod: 
+	@echo "Starting backend for production."
+	docker-compose up -d db-init api
+	@echo "✅ Backend running in production mode on port 8000"
+
+# Full production setup
+prod-deploy: setup-nginx backend-prod
+	@echo "✅ Production deployment complete!"
+	@echo "Your API is now available at: https://milaniez-montagy.duckdns.org"
+
+# Check production status
+prod-status:
+	@echo "=== Nginx Status ==="
+	sudo systemctl status nginx --no-pager -l
+	@echo ""
+	@echo "=== Backend Status ==="
+	docker-compose ps
+	@echo ""
+	@echo "=== SSL Certificate Status ==="
+	sudo certbot certificates
