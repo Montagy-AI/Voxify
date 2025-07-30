@@ -98,10 +98,10 @@ clean:
 dev: install lint build up
 	@echo "✅ Development environment ready!"
 
-# Build only the backend and db-init services
+# Build only the backend  services
 backend-build:
 	@echo "Building backend services..."
-	docker-compose build api db-init
+	docker-compose build api
 	@echo "✅ Backend services built"
 
 # Stop only the backend services
@@ -143,7 +143,7 @@ setup-nginx:
 # Production backend with nginx handling SSL
 backend-prod: 
 	@echo "Starting backend for production."
-	docker-compose up -d db-init api
+	docker-compose up -d  api
 	@echo "✅ Backend running in production mode on port 8000"
 
 # Full production setup

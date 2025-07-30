@@ -34,6 +34,14 @@ services:
       - VECTOR_DB_PATH=data/chroma_db
       - JWT_SECRET_KEY=Majick
       - SECRET_KEY=Majick
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USERNAME=voxifynoreply@gmail.com
+      - SMTP_PASSWORD=uhxxrskdlliidcyg
+      - SMTP_USE_TLS=true
+      - SMTP_FROM_EMAIL=voxifynoreply@gmail.com
+      - SMTP_FROM_NAME=Voxify
+      - FRONTEND_URL=https://voxify-prod.vercel.app
     volumes:
       - data_volume:/data
     restart: unless-stopped
