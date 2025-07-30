@@ -7,13 +7,12 @@ import apiConfig from '../config/api.config';
 const TextToSpeech = () => {
   const [text, setText] = useState('');
   const [voice, setVoice] = useState('');
-  const [voiceType, setVoiceType] = useState('clone'); // 'clone' or 'system'
   const [voiceClones, setVoiceClones] = useState([]);
   const [loadingClones, setLoadingClones] = useState(true);
   const [config, setConfig] = useState({
-    speed: 1.0,
-    pitch: 1.0,
-    volume: 1.0,
+     speed: 1.0,
+     pitch: 1.0,
+     volume: 1.0,
     outputFormat: 'wav',
     sampleRate: 22050,
     language: 'en-US',
@@ -57,10 +56,7 @@ const TextToSpeech = () => {
       try {
         // If audio source is not set, fetch it first
         if (!audioRef.current?.src || audioRef.current.src === '') {
-          const audioBlob = await fetchAudioBlob(
-            generatedAudio.jobId,
-            generatedAudio.voiceType === 'clone'
-          );
+          const audioBlob = await fetchAudioBlob(generatedAudio.jobId, true);
           if (audioBlob && audioRef.current) {
             const audioUrl = URL.createObjectURL(audioBlob);
             audioRef.current.src = audioUrl;
@@ -78,11 +74,9 @@ const TextToSpeech = () => {
     }
   };
 
-  const fetchAudioBlob = async (jobId, isVoiceClone) => {
+  const fetchAudioBlob = async (jobId) => { // Remove isVoiceClone parameter
     try {
-      const endpoint = isVoiceClone
-        ? `/file/voice-clone/${jobId}`
-        : `/file/synthesis/${jobId}`;
+      const endpoint = `/file/voice-clone/${jobId}`; // Always use voice-clone endpoint
       const token = localStorage.getItem('access_token');
 
       const response = await fetch(`${apiConfig.apiBaseUrl}${endpoint}`, {
@@ -117,10 +111,7 @@ const TextToSpeech = () => {
     if (!generatedAudio?.jobId) return;
 
     try {
-      const audioBlob = await fetchAudioBlob(
-        generatedAudio.jobId,
-        generatedAudio.voiceType === 'clone'
-      );
+      const audioBlob = await fetchAudioBlob(generatedAudio.jobId);
       const audioUrl = URL.createObjectURL(audioBlob);
 
       const link = document.createElement('a');
@@ -163,18 +154,12 @@ const TextToSpeech = () => {
         });
       }, 500);
 
-      let result;
-      if (voiceType === 'clone') {
-        // Use voice clone synthesis
-        result = await voiceCloneService.synthesizeWithClone(voice, text, {
-          language: config.language,
-          outputFormat: config.outputFormat,
-          sampleRate: config.sampleRate,
-        });
-      } else {
-        // Use traditional synthesis job
-        result = await jobService.createSynthesisJob(voice, text, config);
-      }
+      // Only use voice clone synthesis
+      const result = await voiceCloneService.synthesizeWithClone(voice, text, {
+        language: config.language,
+        outputFormat: config.outputFormat,
+        sampleRate: config.sampleRate,
+      });
 
       setProgress(100);
 
@@ -185,17 +170,9 @@ const TextToSpeech = () => {
           audioPath: result.data?.output_path,
           jobId: result.data?.job_id,
           language: config.language,
-          voiceType: voiceType,
-          voiceName:
-            voiceType === 'clone'
-              ? voiceClones.find((clone) => clone.clone_id === voice)?.name
-              : voice,
+          voiceName: voiceClones.find((clone) => clone.clone_id === voice)?.name,
           createdAt: new Date().toISOString(),
         });
-
-        // Don't reset form immediately, let user play the audio first
-        // setText('');
-        // setVoice('');
       }
     } catch (error) {
       console.error('Failed to generate speech:', error);
@@ -230,42 +207,6 @@ const TextToSpeech = () => {
             />
           </div>
 
-          {/* Voice Type Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Voice Type
-            </label>
-            <div className="flex space-x-4 mb-4">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  value="clone"
-                  checked={voiceType === 'clone'}
-                  onChange={(e) => {
-                    setVoiceType(e.target.value);
-                    setVoice(''); // Reset voice selection when type changes
-                  }}
-                  className="mr-2"
-                  disabled={isGenerating}
-                />
-                <span className="text-white">Voice Clones</span>
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  value="system"
-                  checked={voiceType === 'system'}
-                  onChange={(e) => {
-                    setVoiceType(e.target.value);
-                    setVoice(''); // Reset voice selection when type changes
-                  }}
-                  className="mr-2"
-                  disabled={isGenerating}
-                />
-                <span className="text-white">System Voices</span>
-              </label>
-            </div>
-          </div>
 
           {/* Voice Selection */}
           <div>
@@ -273,51 +214,35 @@ const TextToSpeech = () => {
               htmlFor="voice"
               className="block text-sm font-medium text-gray-300 mb-2"
             >
-              {voiceType === 'clone'
-                ? 'Select Voice Clone'
-                : 'Select System Voice'}
+              Select Voice Clone
             </label>
-            {voiceType === 'clone' ? (
-              <select
-                id="voice"
-                value={voice}
-                onChange={(e) => setVoice(e.target.value)}
-                className="w-full rounded border border-zinc-800 bg-zinc-900 px-4 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
-                disabled={isGenerating || loadingClones}
-              >
-                <option value="">
-                  {loadingClones
-                    ? 'Loading voice clones...'
-                    : 'Select a voice clone'}
+            <select
+              id="voice"
+              value={voice}
+              onChange={(e) => setVoice(e.target.value)}
+              className="w-full rounded border border-zinc-800 bg-zinc-900 px-4 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
+              disabled={isGenerating || loadingClones}
+            >
+              <option value="">
+                {loadingClones
+                  ? 'Loading voice clones...'
+                  : 'Select a voice clone'}
+              </option>
+              {voiceClones.map((clone) => (
+                <option key={clone.clone_id} value={clone.clone_id}>
+                  {clone.name} ({clone.language}) - {clone.status}
                 </option>
-                {voiceClones.map((clone) => (
-                  <option key={clone.clone_id} value={clone.clone_id}>
-                    {clone.name} ({clone.language}) - {clone.status}
-                  </option>
-                ))}
-                {!loadingClones && voiceClones.length === 0 && (
-                  <option value="" disabled>
-                    No voice clones available. Create one in Voice Clone page.
-                  </option>
-                )}
-              </select>
-            ) : (
-              <select
-                id="voice"
-                value={voice}
-                onChange={(e) => setVoice(e.target.value)}
-                className="w-full rounded border border-zinc-800 bg-zinc-900 px-4 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
-                disabled={isGenerating}
-              >
-                <option value="">Select a system voice</option>
-                <option value="voice1">Voice 1</option>
-                <option value="voice2">Voice 2</option>
-              </select>
-            )}
+              ))}
+              {!loadingClones && voiceClones.length === 0 && (
+                <option value="" disabled>
+                  No voice clones available. Create one in Voice Clone page.
+                </option>
+              )}
+            </select>
           </div>
 
           {/* Selected Voice Clone Info */}
-          {voiceType === 'clone' && voice && (
+          {voice && (
             <div className="bg-zinc-900 border border-zinc-800 rounded p-4">
               <h3 className="text-lg font-semibold mb-2">
                 Selected Voice Clone
@@ -429,9 +354,7 @@ const TextToSpeech = () => {
                   className="w-full rounded border border-zinc-800 bg-zinc-900 px-4 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
                   disabled={isGenerating}
                 >
-                  <option value="0.75">Slow</option>
                   <option value="1.0">Normal</option>
-                  <option value="1.25">Fast</option>
                 </select>
               </div>
 
@@ -455,9 +378,7 @@ const TextToSpeech = () => {
                   className="w-full rounded border border-zinc-800 bg-zinc-900 px-4 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
                   disabled={isGenerating}
                 >
-                  <option value="0.75">Low</option>
                   <option value="1.0">Normal</option>
-                  <option value="1.25">High</option>
                 </select>
               </div>
 
@@ -481,9 +402,7 @@ const TextToSpeech = () => {
                   className="w-full rounded border border-zinc-800 bg-zinc-900 px-4 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
                   disabled={isGenerating}
                 >
-                  <option value="0.75">Quiet</option>
                   <option value="1.0">Normal</option>
-                  <option value="1.25">Loud</option>
                 </select>
               </div>
             </div>
@@ -516,11 +435,7 @@ const TextToSpeech = () => {
                   : ''
               }`}
             >
-              {isGenerating
-                ? 'Generating...'
-                : voiceType === 'clone'
-                  ? 'Generate with Voice Clone'
-                  : 'Generate speech'}
+              {isGenerating ? 'Generating...' : 'Generate with Voice Clone'}
             </button>
           </div>
         </form>
@@ -539,10 +454,7 @@ const TextToSpeech = () => {
                   : generatedAudio.text}
               </div>
               <div>
-                <strong>Voice Type:</strong>{' '}
-                {generatedAudio.voiceType === 'clone'
-                  ? 'Voice Clone'
-                  : 'System Voice'}
+                <strong>Voice Type:</strong> Voice Clone
               </div>
               <div>
                 <strong>Voice Name:</strong> {generatedAudio.voiceName}
