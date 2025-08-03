@@ -1,15 +1,11 @@
 # Voxify Project Makefile
 .PHONY: help install lint reformat test test-quick build up down clean dev logs shell \
-        db-build frontend setup-certs setup-nginx backend-prod prod-deploy prod-status
+        db-build frontend setup-certs setup-nginx prod-deploy prod-status
 
 # Default target
 help:
 	@echo "Available targets:"
-	@echo " install         - Install all dependencies"
-	@echo " lint            - Run linting for backend"
-	@echo " reformat        - Reformat code for backend"
-	@echo " test            - Run full test suite with Docker"
-	@echo " test-quick      - Run tests without full Docker rebuild"
+	@echo " install         - Install all backend dependencies"
 	@echo " build           - Build Docker images"
 	@echo " up              - Start services with docker-compose"
 	@echo " down            - Stop backend services"
@@ -18,14 +14,23 @@ help:
 	@echo " clean           - Clean up Docker resources"
 	@echo " dev             - Install, lint, build, and start services"
 	@echo " db-build        - Build database container"
-	@echo " frontend		- Start frontend development server"
-	@echo " Production:"
+	@echo " frontend        - Start frontend development server"
+	@echo " "
+	@echo " Testing:"
+	@echo " lint            - Run linting for backend"
+	@echo " reformat        - Reformat code for backend"
+	@echo " test            - Run full test suite with Docker"
+	@echo " test-quick      - Run tests without full Docker rebuild"
 	@echo ""
+	@echo " Production:"
 	@echo " setup-certs     - Setup SSL certificates for Docker"
 	@echo " setup-nginx     - Setup nginx configuration"
-	@echo " backend-prod    - Start backend for production"
+	@echo " prod-build      - Build production images"
+	@echo " prod-up         - Start production services"
+	@echo " prod-down       - Stop production services"
 	@echo " prod-deploy     - Full production setup"
 	@echo " prod-status     - Check production status"
+	@echo " prod-logs       - Show production logs"
 
 # Install dependencies
 install:
@@ -130,14 +135,33 @@ setup-nginx:
 	sudo systemctl enable nginx
 	@echo "✅ Nginx configured and running"
 
-# Production backend with nginx handling SSL
-backend-prod:
-	@echo "Starting backend for production."
-	docker-compose up -d api
-	@echo "✅ Backend running in production mode on port 8000"
+
+# Production targets
+prod-build:
+	@echo "Building production images..."
+	docker-compose -f docker-compose.prod.yml build
+	@echo "✅ Production images built"
+
+prod-up:
+	@echo "Starting production services..."
+	@if [ ! -f ".env.prod" ]; then \
+		echo "❌ Error: .env.prod file not found!"; \
+		echo "Please copy .env.prod.example to .env.prod and fill in your values"; \
+		exit 1; \
+	fi
+	docker-compose -f docker-compose.prod.yml --env-file .env.prod up -d
+	@echo "✅ Production services started"
+
+prod-down:
+	@echo "Stopping production services..."
+	docker-compose -f docker-compose.prod.yml down
+	@echo "✅ Production services stopped"
+
+prod-logs:
+	docker-compose -f docker-compose.prod.yml logs -f
 
 # Full production setup
-prod-deploy: setup-nginx backend-prod
+prod-deploy: setup-nginx prod-build prod-up
 	@echo "✅ Production deployment complete!"
 	@echo "Your API is now available at: https://milaniez-montagy.duckdns.org"
 
@@ -146,8 +170,8 @@ prod-status:
 	@echo "=== Nginx Status ==="
 	sudo systemctl status nginx --no-pager -l
 	@echo ""
-	@echo "=== Backend Status ==="
-	docker-compose ps
+	@echo "=== Production Services Status ==="
+	docker-compose -f docker-compose.prod.yml ps
 	@echo ""
 	@echo "=== SSL Certificate Status ==="
 	sudo certbot certificates

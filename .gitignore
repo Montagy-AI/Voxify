@@ -58,6 +58,7 @@ frontend/build/
 frontend/dist/
 frontend/.next/
 frontend/coverage/
+frontend/package-lock.json
 
 # Logs
 logs

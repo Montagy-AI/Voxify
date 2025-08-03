@@ -45,7 +45,7 @@ services:
     volumes:
       - data_volume:/data
     restart: unless-stopped
-    healthcheck: # Add health check for the API
+    healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
