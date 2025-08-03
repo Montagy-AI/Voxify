@@ -1,10 +1,54 @@
-version: '3.8'
 services:
   api:
+    build:
+      context: ./backend/
+      dockerfile: Dockerfile
+      target: production
+    container_name: voxify_api_prod
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+    ports:
+      - "8000:8000"
     environment:
       - FLASK_ENV=production
-      - FLASK_DEBUG=false
+      - DATABASE_URL=sqlite:////data/voxify.db
+      - VECTOR_DB_PATH=/data/chroma_db
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_USE_TLS=true
+      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
+      - SMTP_FROM_NAME=Voxify
+      - FRONTEND_URL=https://voxify-prod.vercel.app
+    volumes:
+      - data_volume:/data
+      - ./backend/certs:/app/certs:ro
     restart: unless-stopped
-    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   db-init:
+    build:
+      context: ./backend/
+      dockerfile: Dockerfile
+      target: production
+    container_name: voxify_db_init_prod
+    volumes:
+      - data_volume:/data
+    environment:
+      - DATABASE_URL=sqlite:////data/voxify.db
+      - VECTOR_DB_PATH=/data/chroma_db
+      - PYTHONPATH=/app
+    command: ["python", "scripts/init_db.py"]
     restart: "no"
+
+volumes:
+  data_volume:
