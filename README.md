@@ -376,7 +376,7 @@ Dependabot (via GitHub) and linting will typically check for many of these depen
 
 ---
 
-## License
+# License
 
 **Academic Evaluation License Agreement**
 
