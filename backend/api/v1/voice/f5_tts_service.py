@@ -72,7 +72,7 @@ class F5TTSService:
             logger.info(f"F5TTS Service initialized with REMOTE API: {self.remote_api_url}")
 
         # Storage paths
-        self.base_path = Path("data/voice_clones")
+        self.base_path = Path("/data/voice_clones")
         self.base_path.mkdir(parents=True, exist_ok=True)
 
     def _lazy_load_model(self):
