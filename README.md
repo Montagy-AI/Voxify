@@ -51,49 +51,57 @@ Beyond professional use, Voxify enables personal expression and memory preservat
 # Getting Started
 
 **Production Link:** https://voxify-prod.vercel.app/login
+
 **Preview Link:** https://voxify-dev.vercel.app/login
 
-Users can get started by first registering for an account, then logging in. Be sure that your password includes a number, capital letter, and special character.
-
-Once you have done so, upload a `.wav` audio recording of your voice so it gets cloned and saved. You can then use the text-to-speech option to generate a new recording with the sampled voice.
-
-## Detailed Overview of Steps
-<details>
-<summary>Click here for screenshots.</summary>
+--- 
 Users can create an account and log in. Once they do so, they will be redirected to the user dashboard.
 
-<img src="https://github.com/user-attachments/assets/4260418f-962e-4fc0-8a36-41ee51465aee" width=49.5% alt="Voxify register" />
-<img src="https://github.com/user-attachments/assets/f84c035e-9e75-4f0b-ab6c-a62f6cfd1243" width=49.5% alt="Voxify login" />
-
-<img src="https://github.com/user-attachments/assets/ab149e10-7f5f-41f5-9367-65aa9bfe62a0" alt="Voxify dashboard" />
+<p align="center">
+<img src="https://imgur.com/rkQl6ho.png" width=48% alt= "Voxify registration">
+<img src="https://imgur.com/ZubwDd8.png" width=48%alt="Voxify Login">
+</p>
 
 The dashboard has access to cloning your voice and the text-to-speech option, as well as statistics of your current voice clones and completed/processed tasks while the audio samples are recording. There is also a set of quick actions where users can view their tasks and profile settings.
 
+<p align="center">
+<img src="https://imgur.com/Iczav58.png" width=75% alt="Voxify dashboard" />
+</p>
+
 Users can clone their voice using a `.wav` audio sample of their own voice. A 10-second audio file is recommened. Once you name the voice, write a description, and include the reference text of what was said in the audio sample, it will be saved to your account.
 
-![image](https://github.com/user-attachments/assets/86dafce4-fd21-457e-8e92-3e2a38fd0ca5)
+<p align="center">
+<img src="https://imgur.com/Ua78aC5.png" width=75% alt="Voxify voice generation page" />
+</p>
 
 The text-to-speech page allows users to input any text they want converted to audio using either a voice clone or the system voice(s). The user can also change the language spoken, as well as the speed, pitch, and volume the generated audio output will be when generated.
 
-![image](https://github.com/user-attachments/assets/81692ae7-ed54-4d8c-9a68-a1d850896cac)
+<p align="center">
+<img src="https://imgur.com/GAMdDbm.png" width=75% alt="Voxify TTS page" />
+</p>
 
 Generated audio recordings are saved in the "Generated Voices" tab, and users can then download/play previously generated sound recordings.
 
-![image](https://github.com/user-attachments/assets/858e9e14-9c51-4d41-8d13-769c20dc7949)
+<p align="center">
+<img src="https://imgur.com/I1BCVjR.png" width=75% alt="Voxify jobs page" />
+</p>
 
 <details>
-<summary>Accessibility Widget (for AI Assignment)</summary>
+<summary><b>Accessibility Widget (for AI Assignment)</b></summary>
 There is an accessibility widget in the bottom right corner that allows users to customize their view to better suit individual needs.
 
-![image](https://github.com/user-attachments/assets/feadf6f8-83e4-4408-ae26-475ee932f5d9)
+<p align="center">
+<img src="https://imgur.com/wdZ0RVf.png" width=75%>
+</p>
 
 The customizable options include adhering to accessibility profiles, content adjustments, color adjustments, and orientation adjustments.
 
-<img src="https://github.com/user-attachments/assets/74853281-b047-4650-b4fc-f98f58c3ea52" width=27% />
-<img src="https://github.com/user-attachments/assets/22e11b3b-a456-46c0-a90b-918ca9ed028a" width=22% />
-<img src="https://github.com/user-attachments/assets/11790a18-cb98-4dfb-9739-e207257417c9" width=25% />
-<img src="https://github.com/user-attachments/assets/65593945-df04-4bcd-ba6a-33f9805d6772" width=24% />
-</details>
+<p align="center">
+<img src="https://imgur.com/tr49lhN.png" width=24% />
+<img src="https://imgur.com/VgC0IXX.png" width=25% />
+<img src="https://imgur.com/OqX9m7O.png" width=24% />
+<img src="https://imgur.com/hLJhKmo.png" width=24% />
+</p>
 
 </details>
 
@@ -101,17 +109,9 @@ The customizable options include adhering to accessibility profiles, content adj
 
 # Development
 
-This project is a **backend service** exposed through RESTful APIs using **Flask**. It is intended to be consumed by external frontend clients or integrated into other platforms. API usage documentation will be added in the `D1/mock` directory as the first design, will be evolved while developing.
+This project is a **backend and frontend service service** using a Python/Flask backend, and a React/JavaScript frontend.
 
-#### Containerization
-
-Docker is used for containerization:
-
-- Docker Compose allows for multiple services to be run and compiled from individual Dockerfiles. A Dockerfile.base is used in the `backend/` for corresponding containers in to be built.
-- Containers are orchestrated to make local development and testing easy to conduct.
-- Integrations with the CI/CD pipeline are integrated for automated builds and testing. Using GitHub Actions, Formatting tests as well as tests for end-to-end API calls are tested to ensure branch merges do not affect existing test cases and the project is successful.
-
-#### API Structure
+## Backend Structure
 
 Voxify utilises a RESTful API structure. It uses Python and Flask with capabilities for the following:
 
@@ -122,29 +122,48 @@ Voxify utilises a RESTful API structure. It uses Python and Flask with capabilit
 - Synthesis job status monitoring
 - Rate limiting and usage tracking
 
-#### Databases
+## Frontend Structure
+#TODO (for Kiko)
+
+## Databases
 
 Voxify uses two databases - a relational database for user management and storage of voice samples, and a vector database for storing voice embeddings.
 
 - SQLite is used to store user profiles, authentication data, and metadata, as well as their uploaded voices.
 - ChromaDB is used for storing and querying voice embeddings, each with metadata linking it back to corresponding users or tasks.
 
-#### AI Components
+## AI Components
 
 The AI functionality of Voxify uses voice synthesis models used for text-to-speech (TTS) generation. We are currently using F5-TTS, which is an open-source TTS synthesis tool using diffusion transformers.
 
 - Voice embeddings are extracted for personalized cloning.
 - There will be fine-tuning capabiltiies for improved voice quality.
 - Real-time processing is used for immediate feedback.
-- There are also plans for model versioning/management, and syllable-to-time or word-to-time mapping for accurate timing and intonation.
+
+## Containerization
+
+Docker is used for containerization:
+
+- Docker Compose allows for multiple services to be run and compiled from individual Dockerfiles. A Dockerfile.base is used in the `backend/` for corresponding containers in to be built.
+- Containers are orchestrated to make local development and testing easy to conduct.
+- Integrations with the CI/CD pipeline are integrated for automated builds and testing. Using GitHub Actions, Formatting tests as well as tests for end-to-end API calls are tested to ensure branch merges do not affect existing test cases and the project is successful.
 
 ---
 
-## Project Task Management
+# Deployment
+#TODO for Michael and Maddie
+
+## Testing
+
+## Local Deployment
+
+---
+
+# Project Task Management
 
  **GitHub Projects** is used to plan, track, and manage our development tasks, and the project boards will serve as the central hub for any work-related activities. Progress is checked and tasks are assigned each week during our weekly standups with our partner. Status of the project is also updated regularly and during the sync meetings.
 
-### GitHub Workflow Overview
+## GitHub Workflow Overview
 
 - **Sprints -** We are operating on a 1-week sprint-based development, where each member is assigned a task to complete for that week. New tasks are added based on our goals and requirements for upcoming milestones, and they may carryover from previous sprints depending on the progress made.
 - **Tasks & Issues -** Each task is created as a GitHub issue and is linked to the project board. We assign each task to the member and include the necessary milestones and labels to it. Any development-related tasks also get linked to a new branch beginning with `pr/[ISSUE]`.
@@ -156,9 +175,9 @@ The AI functionality of Voxify uses voice synthesis models used for text-to-spee
 
 # Partner Information:
 
-Mehdi Zeinali  
+**Mehdi Zeinali** 
 
-Engineer of Computer Vision, Network Security and Embedded Solutions  
+*Engineer of Computer Vision, Network Security and Embedded Solutions*
 
 📧: mehdi@zeina.li  
 
@@ -169,10 +188,32 @@ Engineer of Computer Vision, Network Security and Embedded Solutions
 
 ## License
 
-This project is currently licensed under the MIT License.
+**Academic Evaluation License Agreement**
 
-We deicided to release under an open-source MIT License to encourage adoption and changes to our project as we continue development. It will allow users to freely use, modify, and integrate our technology using only basic attribution. We hope that this project can be an opportunity for individual developers and startup companies to experiment and work on issues surrounding AI and voice synthesis.
+Copyright (c) 2025 Majick
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+This license governs the use of the software product named "Voxify" (the "Software") developed by Majick and Mehdi Zeinali for academic purposes as part of the CSC301 course.
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+1. **Grant of License** -
+You are hereby granted a limited, non-exclusive, non-transferable, revocable license to use the Software solely for the purpose of academic evaluation and coursework related to CSC301.
+
+2. **Restrictions** -
+You may not: 
+(a) Use the Software for any commercial purpose; 
+(b) Modify, reverse engineer, decompile, disassemble, or create derivative works based on the Software; 
+(c) Distribute, sublicense, rent, lease, or transfer the Software or any portion thereof to any third party; 
+(d) Use the Software beyond the scope of CSC301 coursework without prior written permission from the Majick team.
+
+3. **Ownership** -
+All intellectual property rights in and to the Software remain the sole property of Maijck. This license does not convey any ownership rights to you.
+
+4. **Term** -
+This license is effective from the date of access and shall automatically terminate upon conclusion of the CSC301 course, or earlier if you fail to comply with any of the terms. Upon termination, you must cease all use of the Software and destroy any copies in your possession.
+
+5. **Disclaimer of Warranty** -
+The Software is provided "as is" without warranty of any kind, express or implied. Majick will make no warranties, including but not limited to the implied warranties of merchantability or fitness for a particular purpose.
+
+6. **Limitation of Liability** -
+In no event shall Majick be liable for any damages arising from the use or inability to use the Software, including but not limited to incidental, consequential, or special damages.
+
+By using the Software, you agree to the terms of this license.
