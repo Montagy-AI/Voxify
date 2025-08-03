@@ -38,7 +38,7 @@ def main():
     # Get database URL from environment variables, use default if not set
     # This is consistent with get_database_manager in models.py
     sqlite_db_url = os.getenv("DATABASE_URL", "sqlite:///data/voxify.db")
-    vector_db_path = os.getenv("VECTOR_DB_PATH", "data/chroma_db")
+    vector_db_path = os.getenv("VECTOR_DB_PATH", "/data/chroma_db")
 
     print(f"ℹ️  SQLite database location: {sqlite_db_url}")
     print(f"ℹ️  Vector database location: {vector_db_path}")

@@ -1,28 +1,31 @@
 # Voxify Project Makefile
-
-.PHONY: help install lint format test test-quick build up down clean dev logs shell-backend shell-frontend
+.PHONY: help install lint reformat test test-quick build up down clean dev logs shell \
+        db-build frontend setup-certs setup-nginx backend-prod prod-deploy prod-status
 
 # Default target
 help:
 	@echo "Available targets:"
-	@echo " install       - Install all dependencies"
-	@echo " lint          - Run linting for backend and frontend"
-	@echo " format        - Format code for backend and frontend"
-	@echo " test          - Run full test suite with Docker"
-	@echo " test-frontend - Run frontend tests"
-	@echo " build         - Build Docker images"
-	@echo " up            - Start services with docker-compose"
-	@echo " down          - Stop services"
-	@echo " test-quick    - Run tests without full Docker rebuild"
-	@echo " logs          - Show logs from running services"
-	@echo " shell-backend - Open shell in backend container"
-	@echo " shell-frontend- Open shell in frontend container"
-	@echo " clean         - Clean up Docker resources"
-	@echo " dev           - Install, lint, build, and start services"
-	@echo " backend-up    - Start only backend services"
-	@echo " backend-https - Start backend with HTTPS support"
-	@echo " setup-certs   - Copy SSL certificates for Docker use"
-	@echo " clean         - Clean up Docker resources"
+	@echo " install         - Install all dependencies"
+	@echo " lint            - Run linting for backend"
+	@echo " reformat        - Reformat code for backend"
+	@echo " test            - Run full test suite with Docker"
+	@echo " test-quick      - Run tests without full Docker rebuild"
+	@echo " build           - Build Docker images"
+	@echo " up              - Start services with docker-compose"
+	@echo " down            - Stop backend services"
+	@echo " logs            - Show logs from running services"
+	@echo " shell           - Open shell in backend container"
+	@echo " clean           - Clean up Docker resources"
+	@echo " dev             - Install, lint, build, and start services"
+	@echo " db-build        - Build database container"
+	@echo " frontend		- Start frontend development server"
+	@echo " Production:"
+	@echo ""
+	@echo " setup-certs     - Setup SSL certificates for Docker"
+	@echo " setup-nginx     - Setup nginx configuration"
+	@echo " backend-prod    - Start backend for production"
+	@echo " prod-deploy     - Full production setup"
+	@echo " prod-status     - Check production status"
 
 # Install dependencies
 install:
@@ -35,21 +38,13 @@ install:
 lint:
 	@echo "Running linting..."
 	cd backend && black --check . && flake8 .
-	cd frontend && npm run lint && npm run format:check
 	@echo "✅ Linting completed"
 
 # Formatting
-format:
+reformat:
 	@echo "Formatting code..."
 	cd backend && black .
-	cd frontend && npm run format
 	@echo "✅ Code formatted"
-
-# Build Docker images
-build:
-	@echo "Building Docker images..."
-	docker-compose build
-	@echo "✅ Images built"
 
 # Full test suite (uses docker-compose)
 test: build
@@ -63,30 +58,33 @@ test-quick:
 	docker-compose run --rm tests
 	@echo "✅ Quick tests completed"
 
-# Frontend test suite
-test-frontend:
-	@echo "Running frontend tests..."
-	docker-compose run --rm -e CI=true frontend npm run test:ci
+# Build Docker images
+build:
+	@echo "Building backend services..."
+	docker-compose build api
+	@echo "✅ Backend services built"
 
-# Docker Compose operations
+# Start services
 up:
-	docker-compose up -d
+	@echo "Initializing database..."
+	docker-compose up db-init
+	@echo "Starting API service..."
+	docker-compose up -d api
 	@echo "✅ Services started"
 
+# Stop services
 down:
+	@echo "Stopping backend services..."
 	docker-compose down
-	@echo "✅ Services stopped"
+	@echo "✅ Backend services stopped"
 
 # Show logs
 logs:
 	docker-compose logs -f
 
-# Shell access for debugging
-shell-backend:
-	docker-compose run --rm api /bin/bash
-
-shell-frontend:
-	docker-compose run --rm frontend /bin/sh
+# Shell into backend container
+shell:
+	docker-compose exec api /bin/bash
 
 # Cleanup
 clean:
@@ -94,29 +92,21 @@ clean:
 	docker volume prune -f
 	@echo "✅ Cleanup completed"
 
+# Build database
+db-build:
+	@echo "Building database..."
+	docker-compose build db-init
+	@echo "✅ Database built"
+
+# Start frontend development server
+frontend:
+	@echo "Starting frontend development server..."
+	cd frontend && npm start
+	@echo "✅ Frontend server running on http://localhost:3000"
+
 # Development workflow
-dev: install lint build up
+dev: install lint build up frontend
 	@echo "✅ Development environment ready!"
-
-# Build only the backend  services
-backend-build:
-	@echo "Building backend services..."
-	docker-compose build api
-	@echo "✅ Backend services built"
-
-# Stop only the backend services
-backend-down:
-	@echo "Stopping backend services..."
-	docker-compose stop api db-init
-	@echo "✅ Backend services stopped"
-
-# View logs for the backend
-backend-logs:
-	docker-compose logs -f api db-init
-
-# Shell into backend container
-shell-api:
-	docker-compose exec api /bin/bash
 
 # Setup SSL certificates for Docker
 setup-certs:
@@ -128,8 +118,8 @@ setup-certs:
 	chmod 644 ./backend/certs/fullchain.pem
 	chmod 600 ./backend/certs/privkey.pem
 	@echo "✅ Certificates copied and permissions set"
- 
-# Production deployment targets
+
+# Setup nginx configuration
 setup-nginx:
 	@echo "Setting up nginx configuration..."
 	sudo cp nginx/voxify.conf /etc/nginx/sites-available/voxify
@@ -141,9 +131,9 @@ setup-nginx:
 	@echo "✅ Nginx configured and running"
 
 # Production backend with nginx handling SSL
-backend-prod: 
+backend-prod:
 	@echo "Starting backend for production."
-	docker-compose up -d  api
+	docker-compose up -d api
 	@echo "✅ Backend running in production mode on port 8000"
 
 # Full production setup

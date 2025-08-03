@@ -31,7 +31,7 @@ services:
     environment:
       - FLASK_ENV=development
       - DATABASE_URL=sqlite:////data/voxify.db
-      - VECTOR_DB_PATH=data/chroma_db
+      - VECTOR_DB_PATH=/data/chroma_db
       - JWT_SECRET_KEY=Majick
       - SECRET_KEY=Majick
       - SMTP_HOST=smtp.gmail.com
@@ -80,7 +80,7 @@ services:
     working_dir: /app/backend
     environment:
       - DATABASE_URL=sqlite:////data/voxify.db
-      - VECTOR_DB_PATH=data/chroma_db
+      - VECTOR_DB_PATH=/data/chroma_db
       - DOCKER_ENV=true
       - FLASK_HOST=voxify_api
     command:
