@@ -1,28 +1,42 @@
 # Voxify Project Makefile
-.PHONY: help install lint reformat test test-quick build up down clean dev logs shell \
-        db-build frontend setup-certs setup-nginx prod-deploy prod-status
+.PHONY: help install lint reformat test test-backend test-frontend test-security test-quick build build-backend build-frontend \
+        up up-backend up-full down clean dev logs shell db-build frontend setup-certs setup-nginx \
+        prod-build prod-up prod-down prod-deploy prod-status prod-logs
 
 # Default target
 help:
 	@echo "Available targets:"
-	@echo " install         - Install all backend dependencies"
-	@echo " build           - Build Docker images"
-	@echo " up              - Start services with docker-compose"
-	@echo " down            - Stop backend services"
+	@echo " install         - Install all dependencies"
+	@echo " lint            - Run linting for backend and frontend"
+	@echo " reformat        - Format code for backend and frontend"
+	@echo ""
+	@echo "Testing:"
+	@echo " test            - Run all tests (backend + frontend + security)"
+	@echo " test-backend    - Run only backend tests"
+	@echo " test-frontend   - Run only frontend tests"
+	@echo " test-security   - Run security tests with Snyk"
+	@echo " test-quick      - Run backend tests without full rebuild"
+	@echo ""
+	@echo "Building:"
+	@echo " build           - Build all Docker images"
+	@echo " build-backend   - Build only backend services"
+	@echo " build-frontend  - Build only frontend service"
+	@echo " db-build        - Build database container"
+	@echo ""
+	@echo "Running:"
+	@echo " up              - Start backend services only"
+	@echo " up-full         - Start all services (backend + frontend)"
+	@echo " up-backend      - Alias for 'up' (backend only)"
+	@echo " down            - Stop all services"
+	@echo " frontend        - Start frontend development server locally"
+	@echo ""
+	@echo "Development:"
+	@echo " dev             - Install, lint, build, and start backend services"
 	@echo " logs            - Show logs from running services"
 	@echo " shell           - Open shell in backend container"
 	@echo " clean           - Clean up Docker resources"
-	@echo " dev             - Install, lint, build, and start services"
-	@echo " db-build        - Build database container"
-	@echo " frontend        - Start frontend development server"
-	@echo " "
-	@echo " Testing:"
-	@echo " lint            - Run linting for backend"
-	@echo " reformat        - Reformat code for backend"
-	@echo " test            - Run full test suite with Docker"
-	@echo " test-quick      - Run tests without full Docker rebuild"
 	@echo ""
-	@echo " Production:"
+	@echo "Production:"
 	@echo " setup-certs     - Setup SSL certificates for Docker"
 	@echo " setup-nginx     - Setup nginx configuration"
 	@echo " prod-build      - Build production images"
@@ -35,27 +49,75 @@ help:
 # Install dependencies
 install:
 	@echo "Installing dependencies..."
-	cd backend && pip install -r requirements.txt && pip install -r requirements-dev.txt
-	cd frontend && npm ci
+	@if [ -d "backend" ]; then \
+		cd backend && pip install -r requirements.txt && pip install -r requirements-dev.txt; \
+	fi
+	@if [ -d "frontend" ]; then \
+		cd frontend && \
+		if [ ! -f "package-lock.json" ] || [ ! -d "node_modules" ]; then \
+			echo "Running npm install (fresh install)..."; \
+			npm install; \
+		else \
+			echo "Running npm ci (clean install)..."; \
+			npm ci; \
+		fi; \
+	fi
 	@echo "✅ Dependencies installed"
 
 # Linting
 lint:
 	@echo "Running linting..."
 	cd backend && black --check . && flake8 .
+	@if [ -d "frontend" ] && [ -d "frontend/node_modules" ]; then \
+		echo "Running frontend linting..."; \
+		cd frontend && npm run lint:all; \
+	fi
 	@echo "✅ Linting completed"
 
 # Formatting
 reformat:
 	@echo "Formatting code..."
 	cd backend && black .
+	@if [ -d "frontend" ] && [ -d "frontend/node_modules" ]; then \
+		echo "Formatting frontend code..."; \
+		cd frontend && npm run format; \
+	fi
 	@echo "✅ Code formatted"
 
-# Full test suite (uses docker-compose)
+# Run all tests
 test: build
-	@echo "Running tests..."
+	@echo "Running all tests..."
 	docker-compose run --rm tests
-	@echo "✅ Tests completed"
+	@if [ -d "frontend" ]; then \
+		docker-compose run --rm frontend-tests; \
+	fi
+	@echo "✅ All tests completed"
+
+# Run only backend tests
+test-backend: build-backend
+	@echo "Running backend tests..."
+	docker-compose run --rm tests
+	@echo "✅ Backend tests completed"
+
+# Run only frontend tests
+test-frontend: build-frontend
+	@echo "Running frontend tests..."
+	@if [ -d "frontend" ]; then \
+		docker-compose run --rm frontend-tests; \
+	else \
+		echo "Frontend directory not found, skipping frontend tests"; \
+	fi
+	@echo "✅ Frontend tests completed"
+
+# Run security tests
+test-security:
+	@echo "Running security tests..."
+	@if [ -z "$(SNYK_TOKEN)" ]; then \
+		echo "Warning: SNYK_TOKEN not set, skipping security tests"; \
+	else \
+		docker-compose run --rm snyk-security; \
+	fi
+	@echo "✅ Security tests completed"
 
 # Quick test (reuses existing images)
 test-quick:
@@ -63,25 +125,46 @@ test-quick:
 	docker-compose run --rm tests
 	@echo "✅ Quick tests completed"
 
-# Build Docker images
+# Build all Docker images
 build:
+	@echo "Building all Docker images..."
+	docker-compose build api db-init frontend
+	@echo "✅ All Docker images built"
+
+# Build only backend services
+build-backend:
 	@echo "Building backend services..."
-	docker-compose build api
+	docker-compose build api db-init
 	@echo "✅ Backend services built"
 
-# Start services
+# Build only frontend service
+build-frontend:
+	@echo "Building frontend service..."
+	docker-compose build frontend
+	@echo "✅ Frontend service built"
+
+# Start services (backend only for development)
 up:
 	@echo "Initializing database..."
 	docker-compose up db-init
 	@echo "Starting API service..."
 	docker-compose up -d api
-	@echo "✅ Services started"
+	@echo "✅ Backend services started"
 
-# Stop services
+# Start all services including frontend
+up-full:
+	@echo "Starting all services..."
+	docker-compose up -d
+	@echo "✅ All services started"
+
+# Alias for up (backend only)
+up-backend: up
+
+# Stop all services
 down:
-	@echo "Stopping backend services..."
+	@echo "Stopping all services..."
 	docker-compose down
-	@echo "✅ Backend services stopped"
+	@echo "✅ All services stopped"
 
 # Show logs
 logs:
@@ -103,15 +186,20 @@ db-build:
 	docker-compose build db-init
 	@echo "✅ Database built"
 
-# Start frontend development server
+# Start frontend development server locally
 frontend:
 	@echo "Starting frontend development server..."
-	cd frontend && npm start
-	@echo "✅ Frontend server running on http://localhost:3000"
+	@if [ -d "frontend" ] && [ -d "frontend/node_modules" ]; then \
+		cd frontend && npm start; \
+	else \
+		echo "Frontend not found or dependencies not installed. Run 'make install' first."; \
+		exit 1; \
+	fi
 
-# Development workflow
-dev: install lint build up frontend
-	@echo "✅ Development environment ready!"
+# Development workflow (backend focused since frontend is deprecated)
+dev: install lint build-backend up
+	@echo "✅ Development environment ready! Backend running on http://localhost:8000"
+	@echo "To start frontend: make frontend"
 
 # Setup SSL certificates for Docker
 setup-certs:

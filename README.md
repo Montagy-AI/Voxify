@@ -123,6 +123,9 @@ Voxify utilises a RESTful API structure. It uses Python and Flask with capabilit
 - Rate limiting and usage tracking
 
 ## Frontend Structure
+
+The project uses a React-based frontend with Material UI and Tailwind.
+
 #TODO (for Kiko)
 
 ## Databases
@@ -144,24 +147,211 @@ The AI functionality of Voxify uses voice synthesis models used for text-to-spee
 
 Docker is used for containerization:
 
-- Docker Compose allows for multiple services to be run and compiled from individual Dockerfiles. A Dockerfile.base is used in the `backend/` for corresponding containers in to be built.
+- Docker Compose allows for multiple services to be run and compiled from individual Dockerfiles. A Dockerfile is used across subdirectories for corresponding containers in to be built based on their requirements/dependencies.
 - Containers are orchestrated to make local development and testing easy to conduct.
-- Integrations with the CI/CD pipeline are integrated for automated builds and testing. Using GitHub Actions, Formatting tests as well as tests for end-to-end API calls are tested to ensure branch merges do not affect existing test cases and the project is successful.
+- Integrations with the CI/CD pipeline are integrated for automated builds and testing. Using GitHub Actions, formatting/linting, as well as tests for end-to-end API calls are tested to ensure branch merges do not affect existing test cases and the project is successful.
 
 ---
 
 # Deployment
-#TODO for Michael and Maddie
+
+The backend of this project is deployed onto our partner's home computing server that we have privileges to SSH into. It is served via Waitress (WGSI server).
+All code is pulled from the GitHub repository, and is built and run using the orchestrated Docker Compose services.
+
+The F5-TTS AI service is also run from the partner's server with a minimum dedicated GPU memory allocation for the service.
+
+The frontend is deployed using Vercel, which takes directly from a GitHub repository. It allows for multiple environments and deployments for preview/development (based on pull requests) and production.
+
+## Running Locally
+
+**Prerequisites:**
+- [Docker](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
+
+**Environment Secrets:**
+
+Most of the environment secrets are configured in the `docker-compose.yml` file, however, if required, look at the `.env.example` example below. You will also need a `.env.prod` if trying to deploy to production.
+
+```
+DATABASE_URL=sqlite:///data/voxify.db
+FRONTEND_URL=localhost:3000
+VECTOR_DB_PATH=data/chroma_db
+JWT_SECRET_KEY=Majick
+SECRET_KEY=Majick
+SMTP_FROM_EMAIL=voxifynoreply@gmail.com
+SMTP_FROM_NAME=Voxify
+SMTP_HOST=smtp.gmail.com
+SMTP_PASSWORD=uhxxrskdlliidcyg
+SMTP_PORT=587
+SMTP_USERNAME=voxifynoreply@gmail.com
+SMTP_USE_TLS=true
+```
+
+**Local Setup:**
+
+Clone the repository and launch the full stack:
+```
+git clone https://github.com/csc301-2025-y/project-2-Voxify.git
+cd Voxify
+make dev
+```
+Services started:
+| Services | Description | URL |
+| -------- | ----------- | --- |
+| `frontend` | React App (CRA) | http://localhost:3000 |
+| `api` | Flask backend API | http://localhost:8000 |
+| `db-init` | One-time DB initialization script | N/a|
+
+You can check the backend health using `curl http://localhost:8000/health`.
+
+Additional commands for local testing and deployment can be found using `make help`.
+
+<details>
+<summary><i>Click here to see all Makefile targets.</i></summary>
+<code>Available targets:
+ install         - Install all dependencies
+ lint            - Run linting for backend and frontend
+ reformat        - Format code for backend and frontend
+Testing:
+ test            - Run all tests (backend + frontend + security)
+ test-backend    - Run only backend tests
+ test-frontend   - Run only frontend tests
+ test-security   - Run security tests with Snyk
+ test-quick      - Run backend tests without full rebuild
+Building:
+ build           - Build all Docker images
+ build-backend   - Build only backend services
+ build-frontend  - Build only frontend service
+ db-build        - Build database container
+Running:
+ up              - Start backend services only
+ up-full         - Start all services (backend + frontend)
+ up-backend      - Alias for 'up' (backend only)
+ down            - Stop all services
+ frontend        - Start frontend development server locally
+Development:
+ dev             - Install, lint, build, and start backend services
+ logs            - Show logs from running services
+ shell           - Open shell in backend container
+ clean           - Clean up Docker resources
+Production:
+ setup-certs     - Setup SSL certificates for Docker
+ setup-nginx     - Setup nginx configuration
+ prod-build      - Build production images
+ prod-up         - Start production services
+ prod-down       - Stop production services
+ prod-deploy     - Full production setup
+ prod-status     - Check production status
+ prod-logs       - Show production logs
+</code>
+</details>
 
 ## Testing
 
-## Local Deployment
+Testing is conducted using pytest for the backend using comprehensive fixtures and mocking for the backend.
+
+The frontend uses Jest with React Testing Library for unit and integration testing.
+
+**Running Tests:**
+
+```
+make test  # Runs all tests
+make test-backend  # Runs only backend tests 
+make test-frontend  # Runs only frontend tests
+make test-quick  # Runs backend tests without a full rebuild
+```
+
+### Backend Testing
+
+Tests are conducted in layers with the following:
+- **Unit Tests** - Core logic, utilities, file and audio processing.
+- **Service/API Tests** - Full REST API endpoints using Flask test client and `curl`.
+- **Integration Tests** - End-to-end workflows across auth, voice, cloning, synthesis, job queues.
+- **Performance Tests** - Audio upload, clone generation, TTS response times.
+- **Security Tests** - Input validation, path traversal, SQL injecion prevention.
+
+More generally, authentication, voice processing, database, jobs, files, error handling, and external services, were the key areas covered while integrating the project's testing structure.
+
+**Coverage Overview (for D3):**
+- **Total Test Cases:** 512
+- **Pass Rate:** 96.9% (496 passed, 16 skipped)
+- **Coverage:** 85% overall (8985/10,326 lines)
+- **High-Coverage Models:** database models, authentication logic, embedding services, error handling
+- **Low-Coverage Models:** voice clone APIs, modal integration
+
+**Tools Used:**
+- `pytest`
+- `pytest-cov` for coverage reporting
+- SQLite for isolated test databases
+- `psutil` for performance and resource monitoring
+
+### Frontend Testing
+
+Voxify was not initially planned to have a frontend, and tests were not as rigorous as our backend API.
+
+A global test setup is defined in `frontend/src/setupTests.js` to ensure compatability with the React environment. Tests live alongside components using the `.test.js` extension.
+
+For D3, frontend test coverage reached 42% line coverage in 250 tests. For D4, there are plans to achieve at *least* 50% coverage.
+
+**Testing Setup Inclusions:**
+- `@testing-library/jest-dom` for extended matchers like `.toBeInTheDocument()`.
+- Mocks for browser APIs unavailable in Jest by default:
+    - `ResizeObserver`
+    - `IntersectionObserver`
+    - `matchMedia`
+    - `localStorage`
+    - `URL.createObjectURL`
+    - `HTMLAudioElement`
+- Global `fetch` and `alert` mocks.
+- Suppressess `console.error` noise during test runs.
+
+### Linting
+Linting and formatting checks are done automatically whenever a push is made onto a GitHub branch. The following are checked:
+- **Backend** - Black, Flake8
+- **Frontend** -  ESLint, Prettier
+
+**Running Lint Checks:**
+```
+make lint  # For both frontend and backend
+make reformat  # Reformats the code for linting
+```
+
+## Maintenance
+
+### Dependency Management
+Dependencies for the backend are managed in the `requirements.txt` and `requirements-dev.txt`. To update packages:
+```
+pip list --outdated
+pip install --upgrade <package>
+```
+
+Frontend dependencies are managed via `npm`. To check and update:
+```
+npm outdated
+npm update
+```
+
+Whenever code or dependencies are changed, be sure to end/down all services using `make down` and rebuild using `make build`. 
+
+You can also clear stale volumes or containers using `docker system prune -a --volumes`, but note that this will stop all containers and unused volumes/images.
+
+### Logs and Monitoring
+
+Container logs can be checked using `make logs` and a shell for the backend container is opened through `make shell`. The backend health endpoint is at http://localhost:8000/health.
+
+### Cleanup and Refactoring
+
+Periodically prune unused Docker resources and remove deprecated components and dead code. Also keep documentation and comments up-to-date when updating APIs or architecture.
+
+Dependabot (via GitHub) and linting will typically check for many of these dependency and security-related issues that come with deprecated packages and libraries.
 
 ---
 
 # Project Task Management
 
- **GitHub Projects** is used to plan, track, and manage our development tasks, and the project boards will serve as the central hub for any work-related activities. Progress is checked and tasks are assigned each week during our weekly standups with our partner. Status of the project is also updated regularly and during the sync meetings.
+ **GitHub Projects** and **GitHub Issues** are used to plan, track, and manage our development tasks, and the project boards will serve as the central hub for any work-related activities. 
+ 
+ Progress is checked and tasks are assigned each week during our weekly standups with our partner. Status of the project is also updated regularly and during the sync meetings.
 
 ## GitHub Workflow Overview
 
