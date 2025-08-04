@@ -58,7 +58,7 @@ describe('Settings Component', () => {
       expect(screen.getByText('Verified')).toBeInTheDocument();
       // Use a more flexible approach for date matching - just check that a date is displayed
       expect(
-        screen.getByText(/\d{1,2}\/\d{1,2}\/\d{4}, \d{1,2}:\d{2}:\d{2} (AM|PM)/)
+        screen.getByText(/\d{4}\/\d{1,2}\/\d{1,2} \d{1,2}:\d{2}:\d{2}/)
       ).toBeInTheDocument();
     });
 
@@ -371,7 +371,7 @@ describe('Settings Component', () => {
       await waitFor(() => {
         // Use a flexible regex to match the date format as it appears
         expect(
-          screen.getByText(/1\/15\/2025, \d{1,2}:\d{2}:\d{2} (AM|PM)/)
+          screen.getByText(/2025\/1\/15 \d{1,2}:\d{2}:\d{2}/)
         ).toBeInTheDocument();
       });
     });
