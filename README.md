@@ -50,9 +50,11 @@ Beyond professional use, Voxify enables personal expression and memory preservat
 
 # Getting Started
 
-**Production Link:** https://voxify-prod.vercel.app/login
+**Frontend Production Link:** https://voxify-prod.vercel.app/login
 
-**Preview Link:** https://voxify-dev.vercel.app/login
+**Frontend Preview Link:** https://voxify-dev.vercel.app/login
+
+**Backend Service Link:** https://milaniez-montagy.duckdns.org/
 
 --- 
 Users can create an account and log in. Once they do so, they will be redirected to the user dashboard.
@@ -106,10 +108,47 @@ The customizable options include adhering to accessibility profiles, content adj
 </details>
 
 ---
+# API service and fast start locally
+Here are some key API endpoints for our backend. For more reference please check backend.ApiDoc.md.
+Authentication & Profile
+- POST /api/v1/auth/register – Register a new user
+- POST /api/v1/auth/login – Log in and receive JWT token
+- GET /api/v1/auth/profile – Get current user profile
+- PUT /api/v1/auth/profile – Update user profile
 
-# Development
+Voice Sample Management
+- POST /api/v1/voice/samples – Upload a voice sample (WAV/MP3)
+- GET /api/v1/voice/samples – List uploaded samples
+- DELETE /api/v1/voice/samples/{sample_id} – Delete a sample
 
-This project is a **backend and frontend service service** using a Python/Flask backend, and a React/JavaScript frontend.
+Voice Clone Management
+- POST /api/v1/voice/clones – Create a voice clone from sample IDs
+- GET /api/v1/voice/clones – List voice clones
+- POST /api/v1/voice/clones/{clone_id}/synthesize – Synthesize using a clone
+
+Synthesis Job Management
+- POST /api/v1/job – Create a new synthesis job
+- GET /api/v1/job/{job_id}/progress – Track job progress in real-time
+- GET /api/v1/file/synthesis/{job_id} – Download synthesized audio
+
+We have've configured **Swagger** to test our backend locally, pls following these command:
+- cd backend
+- pip install -r requirements.txt
+- python start.py
+- Then open http://localhost:8000/docs/
+
+Suggested test flows using Swagger or Postman:
+
+- **Create users**:
+Post:/auth/register -> Post:/auth/login -> Set Bear <token> using token returned from previous step
+
+- **Create voice clone**:
+Post:/voice/samples -> Post:/voice/clones -> Post:/voice/clones/{clone_id}/select -> Post:/voice/clones/{clone_id}/synthesize
+
+- **Download synthesized audio file**:
+Get:/file/synthesis/{job_id}
+
+<img width="870" height="961" alt="image" src="https://github.com/user-attachments/assets/95b0cde8-2aca-4ec6-9eaf-6a1d252a4f93" />
 
 ## Backend Structure
 
@@ -125,8 +164,14 @@ Voxify utilises a RESTful API structure. It uses Python and Flask with capabilit
 ## Frontend Structure
 
 The project uses a React-based frontend with Material UI and Tailwind.
-
-#TODO (for Kiko)
+Core Framework:
+- React 18.2.0 - Modern React framework using functional components and Hooks
+- React Router DOM 6.21.3 - Client-side routing management
+- Material UI 5.15.6 - Material Design component library 1
+- Tailwind CSS 3.4.1 - Utility-first CSS framework
+Additional Dependencies:
+- Axios 1.6.7 - HTTP client for API communication
+- Emotion - CSS-in-JS solution (Material UI dependency)
 
 ## Databases
 
