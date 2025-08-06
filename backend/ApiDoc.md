@@ -350,14 +350,6 @@ curl -X GET "http://localhost:8000/api/v1/file/synthesis/job_123" \
 5. **Monitor Progress** → `GET /api/v1/job/{job_id}/progress`
 6. **Download Result** → `GET /api/v1/file/synthesis/{job_id}`
 
-### Advanced Voice Cloning Workflow
-
-1. **Upload Multiple Voice Samples**
-2. **Process and Validate Samples**
-3. **Create Voice Clone with Multiple References**
-4. **Test Clone Quality with Sample Synthesis**
-5. **Production Synthesis with Optimized Parameters**
-
 ---
 
 ## Error Handling
