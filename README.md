@@ -135,7 +135,7 @@ We have've configured **Swagger** to test our backend locally, pls following the
 - cd backend
 - pip install -r requirements.txt
 - python start.py
-- Than open http://localhost:8000/docs/
+- Then open http://localhost:8000/docs/
 
 Suggested test flows using Swagger or Postman:
 
