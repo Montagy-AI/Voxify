@@ -131,15 +131,24 @@ Synthesis Job Management
 - GET /api/v1/job/{job_id}/progress – Track job progress in real-time
 - GET /api/v1/file/synthesis/{job_id} – Download synthesized audio
 
-We have've configured swagger to test our backend locally, pls following these command:
+We have've configured **Swagger** to test our backend locally, pls following these command:
 - cd backend
 - pip install -r requirements.txt
 - python start.py
 - Than open http://localhost:8000/docs/
 
-# Development
+Suggested test flows using Swagger or Postman:
 
-This project is a **backend and frontend service service** using a Python/Flask backend, and a React/JavaScript frontend.
+- **Create users**:
+Post:/auth/register -> Post:/auth/login -> Set Bear <token> using token returned from previous step
+
+- **Create voice clone**:
+Post:/voice/samples -> Post:/voice/clones -> Post:/voice/clones/{clone_id}/select -> Post:/voice/clones/{clone_id}/synthesize
+
+- **Download synthesized audio file**:
+Get:/file/synthesis/{job_id}
+
+<img width="870" height="961" alt="image" src="https://github.com/user-attachments/assets/95b0cde8-2aca-4ec6-9eaf-6a1d252a4f93" />
 
 ## Backend Structure
 
