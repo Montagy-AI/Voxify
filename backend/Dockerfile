@@ -1,6 +1,6 @@
-ARG INSTALL_DEV=false
-
 FROM python:3.11-slim AS production
+
+ARG INSTALL_DEV=false
 
 RUN apt-get update && apt-get install -y \
     build-essential \
