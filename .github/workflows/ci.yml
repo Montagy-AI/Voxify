@@ -13,12 +13,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Cache pip dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/requirements-dev.txt') }}
@@ -42,7 +42,7 @@ jobs:
           echo "✅ Flake8 linting completed"
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "18"
           cache: "npm"
@@ -60,7 +60,7 @@ jobs:
           echo "✅ Prettier formatting check completed"
 
       - name: Run Snyk security scan
-        if: ${{ env.secrets.SNYK_TOKEN != '' }}
+        if: ${{ secrets.SNYK_TOKEN != '' }}
         run: |
           npm install -g snyk
           cd backend
@@ -100,8 +100,6 @@ jobs:
           push: false
           load: true
           tags: voxify-backend:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Build frontend image
         uses: docker/build-push-action@v5
@@ -111,13 +109,11 @@ jobs:
           push: false
           load: true
           tags: voxify-frontend:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Initialize database
         run: |
           docker run --rm \
-            -v voxify-data:/data \
+            -v voxify_data:/data \
             -e DATABASE_URL=sqlite:////data/voxify.db \
             -e VECTOR_DB_PATH=data/chroma_db \
             voxify-backend:latest python scripts/init_db.py
@@ -137,10 +133,10 @@ jobs:
         run: |
           timeout 60 bash -c '
             until curl -f http://localhost:8000/health; do
-              echo "Waiting for API..."
+              echo "Waiting for API... (attempt $((++i)))"
               sleep 2
             done
-          '
+          ' || (echo "API failed to start" && docker logs voxify_api && exit 1)
 
       - name: Run tests
         run: |
