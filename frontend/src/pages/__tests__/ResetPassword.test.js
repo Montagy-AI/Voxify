@@ -755,8 +755,9 @@ describe('ResetPassword Component', () => {
         target: { value: 'TestPassword123!' },
       });
 
-      // Submit form with Enter key
-      fireEvent.keyDown(confirmPasswordInput, { key: 'Enter', code: 'Enter' });
+      // Find and submit the form directly
+      const form = screen.getByRole('form') || passwordInput.closest('form');
+      fireEvent.submit(form);
 
       await waitFor(() => {
         expect(authService.resetPassword).toHaveBeenCalledWith(

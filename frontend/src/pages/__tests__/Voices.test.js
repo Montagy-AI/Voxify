@@ -361,10 +361,10 @@ describe('Voices Component', () => {
       renderWithRouter(<Voices />);
 
       await waitFor(() => {
-        // Check that date is formatted (actual format from component)
-        // The component shows "Created: Jan 15, 2025, 05:30 AM" format (UTC to local time conversion)
+        // Check that date is formatted correctly regardless of timezone
+        // The component should show "Created: Jan 15, 2025, [time]" format
         expect(
-          screen.getByText(/Created:\s*Jan\s*15,\s*2025,\s*05:30\s*AM/)
+          screen.getByText(/Created:\s*Jan\s*15,\s*2025,\s*\d{1,2}:\d{2}\s*(AM|PM)/)
         ).toBeInTheDocument();
       });
     });
