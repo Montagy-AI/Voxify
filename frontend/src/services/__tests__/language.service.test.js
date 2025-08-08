@@ -1,12 +1,12 @@
-import languageService from './language.service';
-import api from './api';
-import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES } from '../config/languages';
+import languageService from '../language.service';
+import api from '../api';
+import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES } from '../../config/languages';
 
 // Mock the api module
-jest.mock('./api');
+jest.mock('../api');
 
 // Mock the languages config
-jest.mock('../config/languages', () => ({
+jest.mock('../../config/languages', () => ({
   DEFAULT_LANGUAGE: 'en',
   SUPPORTED_LANGUAGES: [
     { code: 'en', name: 'English', nativeName: 'English' },

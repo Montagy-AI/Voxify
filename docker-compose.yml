@@ -96,9 +96,6 @@ services:
       context: ./frontend/
       dockerfile: Dockerfile.test
     container_name: voxify_frontend_tests
-    depends_on:
-      api:
-        condition: service_healthy
     volumes:
       - ./frontend:/app
       - /app/node_modules
