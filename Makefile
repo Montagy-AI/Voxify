@@ -124,13 +124,13 @@ test-quick:
 # Build all Docker images
 build:
 	@echo "Building all Docker images..."
-	docker-compose build api db-init frontend
+	docker-compose build api db-init frontend tests
 	@echo "✅ All Docker images built"
 
 # Build only backend services
 build-backend:
 	@echo "Building backend services..."
-	docker-compose build api db-init
+	docker-compose build api db-init tests
 	@echo "✅ Backend services built"
 
 # Build only frontend service
