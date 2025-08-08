@@ -152,7 +152,7 @@ jobs:
             -e VECTOR_DB_PATH=data/chroma_db \
             -e DOCKER_ENV=true \
             -e FLASK_HOST=localhost \
-            voxify-backend:test python -m pytest tests/ -v
+            voxify-backend python -m pytest tests/ -v
 
       - name: Cleanup
         if: always()
