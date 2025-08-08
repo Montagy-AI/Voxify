@@ -68,20 +68,16 @@ install:
 lint:
 	@echo "Running linting..."
 	cd backend && black --check . && flake8 .
-	@if [ -d "frontend" ] && [ -d "frontend/node_modules" ]; then \
-		echo "Running frontend linting..."; \
-		cd frontend && npm run lint:all; \
-	fi
+	@echo "Running frontend linting...";
+	cd frontend && npm run lint:all;
 	@echo "✅ Linting completed"
 
 # Formatting
 reformat:
-	@echo "Formatting code..."
-	cd backend && black .
-	@if [ -d "frontend" ] && [ -d "frontend/node_modules" ]; then \
-		echo "Formatting frontend code..."; \
-		cd frontend && npm run format; \
-	fi
+	@echo "Formatting backend code..."
+	cd backend && black . && flake8 .
+	@echo "Formatting frontend code...";
+	cd frontend && npm run format;
 	@echo "✅ Code formatted"
 
 # Run all tests
