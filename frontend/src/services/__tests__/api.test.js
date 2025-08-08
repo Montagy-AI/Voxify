@@ -20,14 +20,14 @@ Object.defineProperty(window, 'location', {
 });
 
 // Mock authService
-jest.mock('./auth.service', () => ({
+jest.mock('../auth.service', () => ({
   default: {
     refreshToken: jest.fn(),
   },
 }));
 
 // Mock apiConfig
-jest.mock('../config/api.config', () => ({
+jest.mock('../../config/api.config', () => ({
   default: {
     apiBaseUrl: 'https://api.example.com',
     timeout: 10000,
@@ -54,11 +54,11 @@ describe('API Configuration', () => {
 
   describe('Module Loading', () => {
     test('Successfully import api module', () => {
-      expect(() => require('./api')).not.toThrow();
+      expect(() => require('../api')).not.toThrow();
     });
 
     test('API module exports expected functions', () => {
-      const apiModule = require('./api');
+      const apiModule = require('../api');
       expect(apiModule.default).toBeDefined();
       expect(typeof apiModule.createAudioUrl).toBe('function');
     });
@@ -67,7 +67,7 @@ describe('API Configuration', () => {
   describe('createAudioUrl Helper', () => {
     test('Create synthesis audio URL with token', () => {
       localStorageMock.getItem.mockReturnValue('audio_token');
-      const { createAudioUrl } = require('./api');
+      const { createAudioUrl } = require('../api');
       const result = createAudioUrl('job123');
       expect(localStorageMock.getItem).toHaveBeenCalledWith('access_token');
       expect(result).toBe(
@@ -77,7 +77,7 @@ describe('API Configuration', () => {
 
     test('Create voice clone audio URL with token', () => {
       localStorageMock.getItem.mockReturnValue('audio_token');
-      const { createAudioUrl } = require('./api');
+      const { createAudioUrl } = require('../api');
       const result = createAudioUrl('job456', true);
       expect(localStorageMock.getItem).toHaveBeenCalledWith('access_token');
       expect(result).toBe(
@@ -87,7 +87,7 @@ describe('API Configuration', () => {
 
     test('Create synthesis audio URL when isVoiceClone is false', () => {
       localStorageMock.getItem.mockReturnValue('audio_token');
-      const { createAudioUrl } = require('./api');
+      const { createAudioUrl } = require('../api');
       const result = createAudioUrl('job789', false);
       expect(result).toBe(
         'https://api.example.com/file/synthesis/job789?token=audio_token'
@@ -96,7 +96,7 @@ describe('API Configuration', () => {
 
     test('Create URL with null token when no token in localStorage', () => {
       localStorageMock.getItem.mockReturnValue(null);
-      const { createAudioUrl } = require('./api');
+      const { createAudioUrl } = require('../api');
       const result = createAudioUrl('job123');
       expect(result).toBe(
         'https://api.example.com/file/synthesis/job123?token=null'
@@ -105,7 +105,7 @@ describe('API Configuration', () => {
 
     test('Create URL with empty token when empty string in localStorage', () => {
       localStorageMock.getItem.mockReturnValue('');
-      const { createAudioUrl } = require('./api');
+      const { createAudioUrl } = require('../api');
       const result = createAudioUrl('job123');
       expect(result).toBe(
         'https://api.example.com/file/synthesis/job123?token='
@@ -114,7 +114,7 @@ describe('API Configuration', () => {
 
     test('Handle different job ID formats', () => {
       localStorageMock.getItem.mockReturnValue('token');
-      const { createAudioUrl } = require('./api');
+      const { createAudioUrl } = require('../api');
       expect(createAudioUrl('123')).toBe(
         'https://api.example.com/file/synthesis/123?token=token'
       );
@@ -130,7 +130,7 @@ describe('API Configuration', () => {
   describe('Configuration', () => {
     test('Ensure createAudioUrl uses correct base URL', () => {
       localStorageMock.getItem.mockReturnValue('test_token');
-      const { createAudioUrl } = require('./api');
+      const { createAudioUrl } = require('../api');
       const result = createAudioUrl('job123');
       // Verify it uses the expected base URL from our mock
       expect(result).toContain('https://api.example.com');
@@ -138,7 +138,7 @@ describe('API Configuration', () => {
 
     test('Ensure createAudioUrl constructs URLs correctly', () => {
       localStorageMock.getItem.mockReturnValue('token123');
-      const { createAudioUrl } = require('./api');
+      const { createAudioUrl } = require('../api');
       const synthesisUrl = createAudioUrl('job456');
       const voiceCloneUrl = createAudioUrl('job789', true);
       expect(synthesisUrl).toBe(
@@ -152,11 +152,11 @@ describe('API Configuration', () => {
 
   describe('Module Exports', () => {
     test('Export default api instance', () => {
-      const api = require('./api').default;
+      const api = require('../api').default;
       expect(api).toBeDefined();
     });
     test('Export createAudioUrl function', () => {
-      const { createAudioUrl } = require('./api');
+      const { createAudioUrl } = require('../api');
       expect(typeof createAudioUrl).toBe('function');
     });
   });
@@ -164,7 +164,7 @@ describe('API Configuration', () => {
   describe('Edge Cases', () => {
     test('Check createAudioUrl handles undefined jobId', () => {
       localStorageMock.getItem.mockReturnValue('token');
-      const { createAudioUrl } = require('./api');
+      const { createAudioUrl } = require('../api');
       const result = createAudioUrl(undefined);
       expect(result).toBe(
         'https://api.example.com/file/synthesis/undefined?token=token'
@@ -173,7 +173,7 @@ describe('API Configuration', () => {
 
     test('Check createAudioUrl handles null jobId', () => {
       localStorageMock.getItem.mockReturnValue('token');
-      const { createAudioUrl } = require('./api');
+      const { createAudioUrl } = require('../api');
       const result = createAudioUrl(null);
       expect(result).toBe(
         'https://api.example.com/file/synthesis/null?token=token'
@@ -182,7 +182,7 @@ describe('API Configuration', () => {
 
     test('Check createAudioUrl handles empty string jobId', () => {
       localStorageMock.getItem.mockReturnValue('token');
-      const { createAudioUrl } = require('./api');
+      const { createAudioUrl } = require('../api');
       const result = createAudioUrl('');
       expect(result).toBe(
         'https://api.example.com/file/synthesis/?token=token'
@@ -192,7 +192,7 @@ describe('API Configuration', () => {
 
   describe('localStorage Integration', () => {
     test('Check createAudioUrl always calls localStorage.getItem', () => {
-      const { createAudioUrl } = require('./api');
+      const { createAudioUrl } = require('../api');
       createAudioUrl('test');
       createAudioUrl('test2', true);
       createAudioUrl('test3', false);
@@ -201,7 +201,7 @@ describe('API Configuration', () => {
     });
 
     test('Check createAudioUrl works with various token values', () => {
-      const { createAudioUrl } = require('./api');
+      const { createAudioUrl } = require('../api');
       // Test with different token values
       const testCases = [
         { token: 'simple_token', expected: 'simple_token' },

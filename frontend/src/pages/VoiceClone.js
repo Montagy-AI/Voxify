@@ -25,6 +25,11 @@ const VoiceClone = () => {
     setFiles(selectedFiles);
   };
 
+const handleSubmit = (e) => {
+  e.preventDefault();
+  handleCreateClone(e);
+};
+
   const handleFileUpload = async () => {
     if (files.length === 0) return;
 
@@ -121,7 +126,7 @@ const VoiceClone = () => {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold mb-12">Clone your voice</h1>
 
-        <form onSubmit={handleCreateClone} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-8">
           {/* Name Input */}
           <div>
             <label

@@ -1,30 +1,35 @@
 import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
-import Tasks from './Tasks';
-
-// Mock react-router-dom
-const mockNavigate = jest.fn();
-jest.mock('react-router-dom', () => ({
-	...jest.requireActual('react-router-dom'),
-	useNavigate: () => mockNavigate,
-}));
+import Tasks from '../Tasks';
 
 // Mock the services
-jest.mock('../services/job.service', () => ({
+jest.mock('../../services/job.service', () => ({
 	getSynthesisJobs: jest.fn(),
 	cancelSynthesisJob: jest.fn(),
 }));
 
-jest.mock('../services/auth.service', () => ({
+jest.mock('../../services/auth.service', () => ({
 	getCurrentUser: jest.fn(),
 	isAuthenticated: jest.fn(),
 	refreshToken: jest.fn(),
 }));
 
-jest.mock('../config/api.config', () => ({
+jest.mock('../../config/api.config', () => ({
 	apiBaseUrl: 'http://localhost:8000',
 }));
+
+// Mock react-router-dom hooks
+const mockNavigate = jest.fn();
+
+jest.mock('react-router-dom', () => ({
+	...jest.requireActual('react-router-dom'),
+	useNavigate: () => mockNavigate,
+}));
+
+// Import the mocked services
+import jobService from '../../services/job.service';
+import authService from '../../services/auth.service';
 
 // Mock localStorage
 const mockLocalStorage = {
@@ -36,10 +41,6 @@ const mockLocalStorage = {
 Object.defineProperty(window, 'localStorage', {
 	value: mockLocalStorage,
 });
-
-// Import mocked services
-import jobService from './services/job.service';
-import authService from './auth.service';
 
 // Helper component to wrap Tasks with Router
 const TasksWithRouter = () => (
@@ -58,6 +59,7 @@ describe('Tasks Component', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		mockLocalStorage.getItem.mockReturnValue('mock-token');
+		mockNavigate.mockClear();
 		
 		// Default authentication mocks
 		authService.getCurrentUser.mockReturnValue({

@@ -1,5 +1,5 @@
 export const SUPPORTED_LANGUAGES = [
-  // 原生多语言支持 (F5TTS_v1_Base) - 最佳质量
+  // Native multi-language support (F5TTS_v1_Base) - Best quality
   {
     code: 'zh-CN',
     name: 'Chinese (Simplified)',
@@ -29,7 +29,7 @@ export const SUPPORTED_LANGUAGES = [
     supportLevel: 'native',
   },
 
-  // 专用模型支持 - 高质量但需要特定模型
+  // Dedicated model support - High quality, requires specific models
   {
     code: 'ja-JP',
     name: 'Japanese',
@@ -80,7 +80,7 @@ export const SUPPORTED_LANGUAGES = [
     supportLevel: 'specialized',
   },
 
-  // Fallback支持 - 基础支持，效果可能有限
+  // Fallback support - Basic support with limited quality
   {
     code: 'ko-KR',
     name: 'Korean',

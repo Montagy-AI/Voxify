@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
-import Navbar from './Navbar';
+import Navbar from '../Navbar';
 
 // Mock react-router-dom
 const mockNavigate = jest.fn();
@@ -11,14 +11,14 @@ jest.mock('react-router-dom', () => ({
 }));
 
 // Mock auth service module
-jest.mock('../services/auth.service', () => ({
+jest.mock('../../services/auth.service', () => ({
   getCurrentUser: jest.fn(),
   isAuthenticated: jest.fn(),
   logout: jest.fn(),
 }));
 
 // Import mocked auth service
-import authService from '../services/auth.service';
+import authService from '../../services/auth.service';
 
 // Helper component to wrap Navbar with Router
 const NavbarWithRouter = () => (

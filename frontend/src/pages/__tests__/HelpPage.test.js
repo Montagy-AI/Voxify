@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import HelpPage from './HelpPage';
+import HelpPage from '../HelpPage';
 
 // Mock useNavigate hook
 const mockNavigate = jest.fn();
