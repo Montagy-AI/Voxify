@@ -1,13 +1,13 @@
 import jobService from '../job.service';
 
+// Import the mocked api
+import api from '../api';
+
 // Mock the api module
 jest.mock('../api', () => ({
   post: jest.fn(),
   get: jest.fn(),
 }));
-
-// Import the mocked api
-import api from '../api';
 
 // Mock localStorage
 const localStorageMock = {

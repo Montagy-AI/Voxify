@@ -25,10 +25,10 @@ const VoiceClone = () => {
     setFiles(selectedFiles);
   };
 
-const handleSubmit = (e) => {
-  e.preventDefault();
-  handleCreateClone(e);
-};
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleCreateClone(e);
+  };
 
   const handleFileUpload = async () => {
     if (files.length === 0) return;
@@ -257,6 +257,7 @@ const handleSubmit = (e) => {
                   onChange={handleFileSelect}
                   className="hidden"
                   id="file-upload"
+                  aria-label="Upload voice samples"
                 />
                 <button
                   type="button"

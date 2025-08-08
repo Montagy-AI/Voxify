@@ -484,6 +484,8 @@ class TestVoiceServiceIntegration:
     def test_performance_metrics(self, server_url, auth_tokens, test_audio_file):
         """Test performance metrics collection"""
         # Upload sample
+        start_time = time.time()
+
         upload_cmd = [
             "curl",
             "-X",
@@ -498,6 +500,7 @@ class TestVoiceServiceIntegration:
         ]
 
         result = subprocess.run(upload_cmd, capture_output=True, text=True)
+        upload_time = time.time() - start_time
         assert result.returncode == 0, f"Upload failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)

@@ -137,7 +137,10 @@ class TestJobServiceAPI:
                     cursor.execute(
                         """
                         INSERT INTO users (email, password_hash, first_name, last_name, created_at, updated_at)
-                        VALUES ('jobtest@example.com', 'hashed_password', 'Job', 'Tester', datetime('now'), datetime('now'))
+                        VALUES (
+                            'jobtest@example.com', 'hashed_password',
+                            'Job', 'Tester', datetime('now'), datetime('now')
+                        )
                     """
                     )
                     user_id = cursor.lastrowid
@@ -148,8 +151,14 @@ class TestJobServiceAPI:
                 voice_sample_id = generate_uuid()
                 cursor.execute(
                     """
-                    INSERT INTO voice_samples (id, user_id, name, description, file_path, file_size, format, duration, sample_rate, status, created_at, updated_at)
-                    VALUES (?, ?, 'Test Voice Sample', 'Test voice sample for job testing', '/test/path/sample.wav', 1024, 'wav', 5.0, 22050, 'ready', datetime('now'), datetime('now'))
+                    INSERT INTO voice_samples (
+                        id, user_id, name, description, file_path, file_size, format, duration, sample_rate,
+                        status, created_at, updated_at
+                    )
+                    VALUES (
+                        ?, ?, 'Test Voice Sample', 'Test voice sample for job testing', '/test/path/sample.wav',
+                        1024, 'wav', 5.0, 22050, 'ready', datetime('now'), datetime('now')
+                    )
                 """,
                     (voice_sample_id, user_id),
                 )
@@ -158,8 +167,13 @@ class TestJobServiceAPI:
                 voice_model_id = generate_uuid()
                 cursor.execute(
                     """
-                    INSERT INTO voice_models (id, voice_sample_id, name, description, model_path, status, is_active, created_at, updated_at)
-                    VALUES (?, ?, 'Test Voice Model', 'Test voice model for job testing', '/test/path/model.pth', 'completed', 1, datetime('now'), datetime('now'))
+                    INSERT INTO voice_models (
+                        id, voice_sample_id, name, description, model_path, status, is_active, created_at, updated_at
+                    )
+                    VALUES (
+                        ?, ?, 'Test Voice Model', 'Test voice model for job testing', '/test/path/model.pth',
+                        'completed', 1, datetime('now'), datetime('now')
+                    )
                 """,
                     (voice_model_id, voice_sample_id),
                 )

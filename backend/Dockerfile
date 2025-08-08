@@ -1,5 +1,7 @@
 FROM python:3.11-slim AS production
 
+ARG INSTALL_DEV=false
+
 RUN apt-get update && apt-get install -y \
     build-essential \
     pkg-config \
@@ -14,6 +16,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
+
+COPY requirements-dev.txt .
+RUN if [ "$INSTALL_DEV" = "true" ]; then pip install -r requirements-dev.txt; fi
 
 COPY . .
 

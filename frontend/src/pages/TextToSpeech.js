@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import jobService from '../services/job.service';
 import voiceCloneService from '../services/voiceClone.service';
 // import { createAudioUrl } from '../services/api';
 import apiConfig from '../config/api.config';
@@ -10,9 +9,9 @@ const TextToSpeech = () => {
   const [voiceClones, setVoiceClones] = useState([]);
   const [loadingClones, setLoadingClones] = useState(true);
   const [config, setConfig] = useState({
-     speed: 1.0,
-     pitch: 1.0,
-     volume: 1.0,
+    speed: 1.0,
+    pitch: 1.0,
+    volume: 1.0,
     outputFormat: 'wav',
     sampleRate: 22050,
     language: 'en-US',
@@ -74,7 +73,8 @@ const TextToSpeech = () => {
     }
   };
 
-  const fetchAudioBlob = async (jobId) => { // Remove isVoiceClone parameter
+  const fetchAudioBlob = async (jobId) => {
+    // Remove isVoiceClone parameter
     try {
       const endpoint = `/file/voice-clone/${jobId}`; // Always use voice-clone endpoint
       const token = localStorage.getItem('access_token');
@@ -170,7 +170,8 @@ const TextToSpeech = () => {
           audioPath: result.data?.output_path,
           jobId: result.data?.job_id,
           language: config.language,
-          voiceName: voiceClones.find((clone) => clone.clone_id === voice)?.name,
+          voiceName: voiceClones.find((clone) => clone.clone_id === voice)
+            ?.name,
           createdAt: new Date().toISOString(),
         });
       }
@@ -206,7 +207,6 @@ const TextToSpeech = () => {
               disabled={isGenerating}
             />
           </div>
-
 
           {/* Voice Selection */}
           <div>

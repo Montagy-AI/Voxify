@@ -172,11 +172,11 @@ SWAGGER_UI_CSS = """
     .swagger-ui .info .title {
         font-size: 28px;
     }
-    
+
     .swagger-ui .opblock-summary {
         flex-wrap: wrap;
     }
-    
+
     .swagger-ui .opblock-summary-method {
         margin-bottom: 5px;
     }
@@ -200,9 +200,12 @@ window.addEventListener('DOMContentLoaded', function() {
                     <span style="color: #94a3b8; margin-left: 10px; font-size: 14px;">v1.0.0</span>
                 </div>
                 <div style="display: flex; gap: 15px;">
-                    <a href="https://voxify.app" target="_blank" style="color: #94a3b8; text-decoration: none; font-size: 14px;">Website</a>
-                    <a href="mailto:support@voxify.app" style="color: #94a3b8; text-decoration: none; font-size: 14px;">Support</a>
-                    <a href="https://github.com/voxify/api" target="_blank" style="color: #94a3b8; text-decoration: none; font-size: 14px;">GitHub</a>
+                    <a href="https://voxify.app" target="_blank" style="color: #94a3b8; text-decoration: none;
+                        font-size: 14px;">Website</a>
+                    <a href="mailto:support@voxify.app" style="color: #94a3b8; text-decoration: none;
+                        font-size: 14px;">Support</a>
+                    <a href="https://github.com/voxify/api" target="_blank" style="color: #94a3b8;
+                        text-decoration: none; font-size: 14px;">GitHub</a>
                 </div>
             </div>
         `;
@@ -236,8 +239,10 @@ window.addEventListener('DOMContentLoaded', function() {
     if (info) {
         const statusIndicator = document.createElement('div');
         statusIndicator.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px; padding: 15px; background: #d1fae5; border-radius: 8px; margin: 20px 0;">
-                <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite;"></div>
+            <div style="display: flex; align-items: center; gap: 10px; padding: 15px;
+                background: #d1fae5; border-radius: 8px; margin: 20px 0;">
+                <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;
+                    animation: pulse 2s infinite;"></div>
                 <span style="color: #065f46; font-weight: 600;">API Status: Online</span>
                 <span style="color: #047857; font-size: 14px;">Last updated: ${new Date().toLocaleString()}</span>
             </div>
@@ -259,10 +264,22 @@ window.addEventListener('DOMContentLoaded', function() {
             <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <h4 style="margin: 0 0 15px 0; color: #1f2937;">📋 Quick Navigation</h4>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
-                    <a href="#operations-Authentication" style="padding: 10px; background: white; border: 1px solid #e5e7eb; border-radius: 6px; text-decoration: none; color: #374151; font-weight: 500;">🔐 Authentication</a>
-                    <a href="#operations-Voice_Management" style="padding: 10px; background: white; border: 1px solid #e5e7eb; border-radius: 6px; text-decoration: none; color: #374151; font-weight: 500;">🎙️ Voice Management</a>
-                    <a href="#operations-Job_Management" style="padding: 10px; background: white; border: 1px solid #e5e7eb; border-radius: 6px; text-decoration: none; color: #374151; font-weight: 500;">⚙️ Job Management</a>
-                    <a href="#operations-File_Management" style="padding: 10px; background: white; border: 1px solid #e5e7eb; border-radius: 6px; text-decoration: none; color: #374151; font-weight: 500;">📁 File Management</a>
+                    <a href="#operations-Authentication" style="padding: 10px; background: white;
+                        border: 1px solid #e5e7eb; border-radius: 6px; text-decoration: none; color: #374151;
+                        font-weight: 500;"
+                    >🔐 Authentication</a>
+                    <a href="#operations-Voice_Management" style="padding: 10px; background: white;
+                        border: 1px solid #e5e7eb; border-radius: 6px; text-decoration: none; color: #374151;
+                        font-weight: 500;"
+                    >🎙️ Voice Management</a>
+                    <a href="#operations-Job_Management" style="padding: 10px; background: white;
+                        border: 1px solid #e5e7eb; border-radius: 6px; text-decoration: none; color: #374151;
+                        font-weight: 500;"
+                    >⚙️ Job Management</a>
+                    <a href="#operations-File_Management" style="padding: 10px; background: white;
+                        border: 1px solid #e5e7eb; border-radius: 6px; text-decoration: none; color: #374151;
+                        font-weight: 500;"
+                    >📁 File Management</a>
                 </div>
             </div>
         `;
@@ -289,12 +306,14 @@ window.addEventListener('DOMContentLoaded', function() {
         codeBlocks.forEach(block => {
             const copyButton = document.createElement('button');
             copyButton.textContent = 'Copy';
-            copyButton.style.cssText = 'position: absolute; top: 10px; right: 10px; background: #3b82f6; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer;';
-            
+            copyButton.style.cssText =
+                'position: absolute; top: 10px; right: 10px; background: #3b82f6; color: white; border: none;
+                padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer;';
+
             const container = block.parentNode;
             container.style.position = 'relative';
             container.appendChild(copyButton);
-            
+
             copyButton.addEventListener('click', () => {
                 navigator.clipboard.writeText(block.textContent);
                 copyButton.textContent = 'Copied!';
@@ -308,31 +327,29 @@ window.addEventListener('DOMContentLoaded', function() {
 </script>
 """
 
+
 def get_swagger_ui_config():
     """Get Swagger UI configuration with custom styling and functionality"""
     return {
-        'docExpansion': 'list',  # Expand operations list by default
-        'defaultModelsExpandDepth': 2,  # Expand models
-        'defaultModelExpandDepth': 2,
-        'displayRequestDuration': True,  # Show request duration
-        'filter': True,  # Enable filtering
-        'showExtensions': True,  # Show vendor extensions
-        'showCommonExtensions': True,  # Show common extensions
-        'tryItOutEnabled': True,  # Enable "Try it out" functionality
-        'supportedSubmitMethods': ['get', 'post', 'put', 'delete', 'patch'],
-        'validatorUrl': None,  # Disable online validator
-        'oauth2RedirectUrl': None,  # OAuth2 redirect URL
-        'persistAuthorization': True,  # Remember auth between page reloads
-        'layout': 'StandaloneLayout',
-        'deepLinking': True,  # Enable deep linking
-        'displayOperationId': False,  # Hide operation IDs
-        'maxDisplayedTags': 10,  # Maximum number of tags to display
-        'operationsSorter': 'alpha',  # Sort operations alphabetically
-        'tagsSorter': 'alpha',  # Sort tags alphabetically
-        'onComplete': 'customOnComplete',  # Custom completion callback
-        'plugins': ['SwaggerUIBundle.plugins.DownloadUrl'],
-        'presets': [
-            'SwaggerUIBundle.presets.apis',
-            'SwaggerUIBundle.presets.standalone'
-        ]
+        "docExpansion": "list",  # Expand operations list by default
+        "defaultModelsExpandDepth": 2,  # Expand models
+        "defaultModelExpandDepth": 2,
+        "displayRequestDuration": True,  # Show request duration
+        "filter": True,  # Enable filtering
+        "showExtensions": True,  # Show vendor extensions
+        "showCommonExtensions": True,  # Show common extensions
+        "tryItOutEnabled": True,  # Enable "Try it out" functionality
+        "supportedSubmitMethods": ["get", "post", "put", "delete", "patch"],
+        "validatorUrl": None,  # Disable online validator
+        "oauth2RedirectUrl": None,  # OAuth2 redirect URL
+        "persistAuthorization": True,  # Remember auth between page reloads
+        "layout": "StandaloneLayout",
+        "deepLinking": True,  # Enable deep linking
+        "displayOperationId": False,  # Hide operation IDs
+        "maxDisplayedTags": 10,  # Maximum number of tags to display
+        "operationsSorter": "alpha",  # Sort operations alphabetically
+        "tagsSorter": "alpha",  # Sort tags alphabetically
+        "onComplete": "customOnComplete",  # Custom completion callback
+        "plugins": ["SwaggerUIBundle.plugins.DownloadUrl"],
+        "presets": ["SwaggerUIBundle.presets.apis", "SwaggerUIBundle.presets.standalone"],
     }

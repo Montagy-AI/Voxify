@@ -291,32 +291,41 @@ class EmailService:
             <h1>🎙️ Voxify</h1>
             <h2>Password Reset Request</h2>
         </div>
-        
+
         <div class="content">
             <p>{greeting}</p>
-            
-            <p>We received a request to reset your password for your Voxify account. If you made this request, click the button below to reset your password:</p>
-            
+
+            <p>
+                We received a request to reset your password for your Voxify account.
+                 If you made this request, click the button below to reset your password:
+            </p>
+
             <p style="text-align: center;">
                 <a href="{reset_url}" class="button">Reset My Password</a>
             </p>
-            
+
             <p><strong>⚠️ If the button doesn't work properly:</strong></p>
-            <p>Some email clients may redirect links through security services. If you're redirected to an unexpected page, please copy and paste this link directly into your browser address bar:</p>
+            <p>
+                Some email clients may redirect links through security services. If
+                 you're redirected to an unexpected page, please copy and paste this link
+                  directly into your browser address bar:
+            </p>
             <div class="url-box">
                 {reset_url}
             </div>
-            
+
             <div class="warning">
                 <strong>⚠️ Important:</strong>
                 <ul>
                     <li>This link will expire in <strong>15 minutes</strong></li>
-                    <li>If the button redirects to an unexpected page, <strong>copy the link above and paste it directly into your browser</strong></li>
+                    <li>If the button redirects to an unexpected page,
+                         <strong>copy the link above and paste it directly into your browser</strong>
+                    </li>
                     <li>If you didn't request this password reset, please ignore this email</li>
                     <li>Your password will remain unchanged until you create a new one</li>
                 </ul>
             </div>
-            
+
             <div class="footer">
                 <p>If you're having trouble clicking the button, copy and paste the URL above into your web browser.</p>
                 <p>This is an automated message from Voxify. Please do not reply to this email.</p>
