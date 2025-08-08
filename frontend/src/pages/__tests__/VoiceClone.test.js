@@ -140,7 +140,9 @@ describe('VoiceClone Component', () => {
     test('handles file selection through input change', () => {
       render(<VoiceCloneWithRouter />);
 
-      const fileInput = screen.getByLabelText('Upload voice samples', { selector: 'input[type="file"]' });
+      const fileInput = screen.getByLabelText('Upload voice samples', {
+        selector: 'input[type="file"]',
+      });
       const mockFile = createMockFile();
 
       fireEvent.change(fileInput, {
@@ -156,7 +158,9 @@ describe('VoiceClone Component', () => {
     test('handles multiple file selection', () => {
       render(<VoiceCloneWithRouter />);
 
-      const fileInput = screen.getByLabelText('Upload voice samples', { selector: 'input[type="file"]' });
+      const fileInput = screen.getByLabelText('Upload voice samples', {
+        selector: 'input[type="file"]',
+      });
       const mockFiles = [
         createMockFile('audio1.wav', 500000),
         createMockFile('audio2.wav', 750000),
@@ -184,7 +188,9 @@ describe('VoiceClone Component', () => {
     test('browse files button triggers file input click', () => {
       render(<VoiceCloneWithRouter />);
 
-      const fileInput = screen.getByLabelText('Upload voice samples', { selector: 'input[type="file"]' });
+      const fileInput = screen.getByLabelText('Upload voice samples', {
+        selector: 'input[type="file"]',
+      });
       const clickSpy = jest
         .spyOn(fileInput, 'click')
         .mockImplementation(() => {});
@@ -211,7 +217,9 @@ describe('VoiceClone Component', () => {
       render(<VoiceCloneWithRouter />);
 
       // Add a file
-      const fileInput = screen.getByLabelText('Upload voice samples', { selector: 'input[type="file"]' });
+      const fileInput = screen.getByLabelText('Upload voice samples', {
+        selector: 'input[type="file"]',
+      });
       const mockFile = createMockFile();
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
@@ -247,7 +255,9 @@ describe('VoiceClone Component', () => {
 
       render(<VoiceCloneWithRouter />);
 
-      const fileInput = screen.getByLabelText('Upload voice samples', { selector: 'input[type="file"]' });
+      const fileInput = screen.getByLabelText('Upload voice samples', {
+        selector: 'input[type="file"]',
+      });
       const mockFile = createMockFile();
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
@@ -268,7 +278,9 @@ describe('VoiceClone Component', () => {
 
       render(<VoiceCloneWithRouter />);
 
-      const fileInput = screen.getByLabelText('Upload voice samples', { selector: 'input[type="file"]' });
+      const fileInput = screen.getByLabelText('Upload voice samples', {
+        selector: 'input[type="file"]',
+      });
       const mockFile = createMockFile();
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
@@ -291,7 +303,9 @@ describe('VoiceClone Component', () => {
 
       render(<VoiceCloneWithRouter />);
 
-      const fileInput = screen.getByLabelText('Upload voice samples', { selector: 'input[type="file"]' });
+      const fileInput = screen.getByLabelText('Upload voice samples', {
+        selector: 'input[type="file"]',
+      });
       const mockFile = createMockFile();
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
@@ -343,7 +357,9 @@ describe('VoiceClone Component', () => {
 
       render(<VoiceCloneWithRouter />);
 
-      const fileInput = screen.getByLabelText('Upload voice samples', { selector: 'input[type="file"]' });
+      const fileInput = screen.getByLabelText('Upload voice samples', {
+        selector: 'input[type="file"]',
+      });
       const mockFile = createMockFile();
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
@@ -404,7 +420,9 @@ describe('VoiceClone Component', () => {
       };
       voiceCloneService.uploadVoiceSample.mockResolvedValue(mockUploadResponse);
 
-      const fileInput = screen.getByLabelText('Upload voice samples', { selector: 'input[type="file"]' });
+      const fileInput = screen.getByLabelText('Upload voice samples', {
+        selector: 'input[type="file"]',
+      });
       const mockFile = createMockFile();
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
@@ -461,7 +479,9 @@ describe('VoiceClone Component', () => {
       };
       voiceCloneService.uploadVoiceSample.mockResolvedValue(mockUploadResponse);
 
-      const fileInput = screen.getByLabelText('Upload voice samples', { selector: 'input[type="file"]' });
+      const fileInput = screen.getByLabelText('Upload voice samples', {
+        selector: 'input[type="file"]',
+      });
       const mockFile = createMockFile();
       fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
@@ -496,7 +516,9 @@ describe('VoiceClone Component', () => {
     test('file input has correct attributes', () => {
       render(<VoiceCloneWithRouter />);
 
-      const fileInput = screen.getByLabelText('Upload voice samples', { selector: 'input[type="file"]' });
+      const fileInput = screen.getByLabelText('Upload voice samples', {
+        selector: 'input[type="file"]',
+      });
       expect(fileInput).toHaveAttribute('multiple');
       expect(fileInput).toHaveAttribute('accept', 'audio/*');
     });

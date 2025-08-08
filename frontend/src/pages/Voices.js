@@ -95,7 +95,11 @@ const Voices = () => {
 
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white" role="status" aria-label="Loading"></div>
+            <div
+              className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"
+              role="status"
+              aria-label="Loading"
+            ></div>
           </div>
         ) : error ? (
           <div className="text-red-500 text-center bg-red-500/10 py-4 rounded border border-red-500/20">

@@ -122,7 +122,9 @@ describe('Dashboard Component', () => {
     test('Voice clone card links to correct route', async () => {
       render(<DashboardWithRouter />);
       await waitFor(() => {
-        const voiceCloneLink = screen.getByRole('link', { name: /clone your voice/i });
+        const voiceCloneLink = screen.getByRole('link', {
+          name: /clone your voice/i,
+        });
         expect(voiceCloneLink).toHaveAttribute('href', '/voice-clone');
       });
     });

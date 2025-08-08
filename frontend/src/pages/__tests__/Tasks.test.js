@@ -98,9 +98,8 @@ describe('Tasks Component', () => {
 
       render(<TasksWithRouter />);
 
-      // Check for loading spinner by class
-      const spinner = document.querySelector('.animate-spin');
-      expect(spinner).toBeInTheDocument();
+      // Check for loading spinner
+      expect(screen.getByRole('status', { hidden: true })).toBeInTheDocument();
     });
   });
 

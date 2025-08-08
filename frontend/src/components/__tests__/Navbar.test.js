@@ -256,10 +256,9 @@ describe('Navbar Component', () => {
         'href',
         '/login'
       );
-      expect(screen.getByRole('link', { name: /get started/i })).toHaveAttribute(
-        'href',
-        '/register'
-      );
+      expect(
+        screen.getByRole('link', { name: /get started/i })
+      ).toHaveAttribute('href', '/register');
     });
   });
 

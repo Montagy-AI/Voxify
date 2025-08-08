@@ -145,9 +145,11 @@ describe('HelpPage', () => {
     test('Apply correct container classes', () => {
       renderWithRouter(<HelpPage />);
       // Test that the component renders properly instead of testing specific DOM structure
-      const heading = screen.getByRole('heading', { name: /welcome to voxify/i });
+      const heading = screen.getByRole('heading', {
+        name: /welcome to voxify/i,
+      });
       expect(heading).toBeInTheDocument();
-      
+
       // The component renders without errors, indicating proper styling is applied
       const buttons = screen.getAllByRole('button');
       expect(buttons).toHaveLength(2);
@@ -156,9 +158,11 @@ describe('HelpPage', () => {
     test('Apply correct content wrapper classes', () => {
       renderWithRouter(<HelpPage />);
       // Test that the content is properly structured and accessible
-      const heading = screen.getByRole('heading', { name: /welcome to voxify/i });
+      const heading = screen.getByRole('heading', {
+        name: /welcome to voxify/i,
+      });
       expect(heading).toBeInTheDocument();
-      
+
       // Test that all expected content sections are rendered
       const sections = screen.getAllByRole('heading', { level: 2 });
       expect(sections).toHaveLength(3);
@@ -173,7 +177,7 @@ describe('HelpPage', () => {
       const cloneButton = screen.getByRole('button', {
         name: /clone your voice/i,
       });
-      
+
       // Test that both buttons are present and functional
       expect(dashboardButton).toBeInTheDocument();
       expect(cloneButton).toBeInTheDocument();
@@ -197,11 +201,11 @@ describe('HelpPage', () => {
       const cloneButton = screen.getByRole('button', {
         name: /clone your voice/i,
       });
-      
+
       // Test that buttons can receive focus (they should be focusable)
       expect(dashboardButton).toBeInTheDocument();
       expect(cloneButton).toBeInTheDocument();
-      
+
       // Test tabindex or other accessibility attributes if needed
       expect(dashboardButton.tagName).toBe('BUTTON');
       expect(cloneButton.tagName).toBe('BUTTON');

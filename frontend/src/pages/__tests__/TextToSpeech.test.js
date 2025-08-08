@@ -673,7 +673,9 @@ describe('TextToSpeech Component', () => {
         expect(screen.getByText('Generated Audio')).toBeInTheDocument();
       });
 
-      const downloadButton = screen.getByRole('button', { name: '⬇️ Download' });
+      const downloadButton = screen.getByRole('button', {
+        name: '⬇️ Download',
+      });
       expect(downloadButton).toBeInTheDocument();
       expect(downloadButton).not.toBeDisabled();
     });
@@ -701,7 +703,9 @@ describe('TextToSpeech Component', () => {
         expect(screen.getByText('Generated Audio')).toBeInTheDocument();
       });
 
-      const newGenerationButton = screen.getByRole('button', { name: '🔄 Generate New' });
+      const newGenerationButton = screen.getByRole('button', {
+        name: '🔄 Generate New',
+      });
       fireEvent.click(newGenerationButton);
 
       // Check that form is reset

@@ -499,7 +499,11 @@ describe('ForgotPassword Component', () => {
         expect(successElement).toHaveClass('text-green-200');
       });
       // Test that success styling is applied by checking the presence of success text in a green container
-      expect(screen.getByText('If an account with that email exists, a password reset link has been sent.')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'If an account with that email exists, a password reset link has been sent.'
+        )
+      ).toBeInTheDocument();
       await waitFor(() => {
         const successElement = screen.getByText(
           'If an account with that email exists, a password reset link has been sent.'

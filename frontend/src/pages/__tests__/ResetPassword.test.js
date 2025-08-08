@@ -756,7 +756,7 @@ describe('ResetPassword Component', () => {
       });
 
       // Submit form with Enter key
-      fireEvent.submit(passwordInput.closest('form'));
+      fireEvent.keyDown(confirmPasswordInput, { key: 'Enter', code: 'Enter' });
 
       await waitFor(() => {
         expect(authService.resetPassword).toHaveBeenCalledWith(

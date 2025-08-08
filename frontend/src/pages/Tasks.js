@@ -161,19 +161,6 @@ const Tasks = () => {
     }
   };
 
-  const handleCancel = async (jobId) => {
-    try {
-      await jobService.cancelSynthesisJob(jobId);
-      loadJobs(); // Reload jobs list
-    } catch (err) {
-      if (err.message === 'No authentication token found') {
-        navigate('/login');
-      } else {
-        console.error('Failed to cancel synthesis job:', err);
-      }
-    }
-  };
-
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
       case 'completed':

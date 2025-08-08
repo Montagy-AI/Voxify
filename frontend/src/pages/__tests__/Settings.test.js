@@ -44,7 +44,9 @@ describe('Settings Component', () => {
       render(<Settings />);
       // Should show loading state
       await waitFor(() => {
-        expect(screen.queryByText('Profile Information')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Profile Information')
+        ).not.toBeInTheDocument();
       });
     });
 

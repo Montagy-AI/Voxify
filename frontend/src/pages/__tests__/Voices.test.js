@@ -577,7 +577,7 @@ describe('Voices Component', () => {
       await waitFor(() => {
         // Check that voice clone cards have proper styling for hover effects
         expect(screen.getByText('Test Voice 1')).toBeInTheDocument();
-        // Since we can't easily test hover states without DOM access, 
+        // Since we can't easily test hover states without DOM access,
         // we'll just verify the element exists and is clickable
       });
     });

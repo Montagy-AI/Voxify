@@ -205,14 +205,14 @@ describe('Languages Configuration', () => {
     test('includes support level indicators when showSupportLevel is true', () => {
       const options = getLanguageOptions(false, true);
       options.forEach((option) => {
-        expect(option.label).toMatch(/[🔵🟡🟠]/); // Should contain emoji
+        expect(option.label).toMatch(/[🔵🟡🟠]/u); // Should contain emoji
       });
     });
 
     test('excludes support level indicators when showSupportLevel is false', () => {
       const options = getLanguageOptions(false, false);
       options.forEach((option) => {
-        expect(option.label).not.toMatch(/[🔵🟡🟠]/); // Should not contain emoji
+        expect(option.label).not.toMatch(/[🔵🟡🟠]/u); // Should not contain emoji
       });
     });
 
