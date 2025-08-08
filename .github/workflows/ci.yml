@@ -118,6 +118,7 @@ jobs:
             -v voxify_data:/data \
             -e DATABASE_URL=sqlite:////data/voxify.db \
             -e VECTOR_DB_PATH=data/chroma_db \
+            -e PYTHONPATH=/app \
             voxify-backend:latest python scripts/init_db.py
 
       - name: Start service
