@@ -51,7 +51,7 @@ jobs:
       - name: Run frontend linting
         run: |
           cd frontend
-          npm ci
+          npm install
           echo "Running ESLint..."
           npm run lint
           echo "✅ ESLint completed"
