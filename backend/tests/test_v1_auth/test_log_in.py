@@ -108,9 +108,6 @@ class TestLoginAPI(unittest.TestCase):
 
     def test_server_connectivity(self):
         """Test that we can connect to the server (debugging test)"""
-        host = os.getenv("FLASK_HOST", "127.0.0.1")
-        port = os.getenv("FLASK_PORT", "8000")
-
         try:
             response = requests.get(self.BASE_URL, timeout=10)
             # Should get 405 Method Not Allowed for GET on login endpoint
@@ -160,7 +157,7 @@ def test_configuration():
     port = os.getenv("FLASK_PORT", "8000")
     docker_env = os.getenv("DOCKER_ENV", "false")
 
-    print(f"Login API Test Configuration:")
+    print("Login API Test Configuration:")
     print(f"  Host: {host}")
     print(f"  Port: {port}")
     print(f"  Docker: {docker_env}")

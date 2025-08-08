@@ -60,14 +60,14 @@ def generate_voice_embedding(audio_path: str, user_id: str = None, **extra_metad
             },
         )
 
-        print(f"[DEBUG] Embedding stored successfully")
+        print("[DEBUG] Embedding stored successfully")
 
         # Verify storage
         verification = vector_db.get_embedding(embedding_id)
         if verification and verification.get("embeddings"):
-            print(f"[DEBUG] ✅ Verification successful - embedding can be retrieved")
+            print("[DEBUG] ✅ Verification successful - embedding can be retrieved")
         else:
-            print(f"[DEBUG] ❌ WARNING: Embedding storage verification failed")
+            print("[DEBUG] ❌ WARNING: Embedding storage verification failed")
             print(f"[DEBUG] Verification result: {verification}")
 
         return embedding_id, embedding

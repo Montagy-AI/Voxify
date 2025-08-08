@@ -176,21 +176,21 @@ def setup_ssl_context():
     # Check for SSL certificate environment variables first
     cert_file = os.getenv("SSL_CERT_FILE", "/etc/letsencrypt/live/milaniez-cheetah.duckdns.org/fullchain.pem")
     key_file = os.getenv("SSL_KEY_FILE", "/etc/letsencrypt/live/milaniez-cheetah.duckdns.org/privkey.pem")
-    
+
     # Check if certificate files exist
     if not os.path.exists(cert_file):
         print(f"⚠️  SSL certificate file not found: {cert_file}")
         return None
-    
+
     if not os.path.exists(key_file):
         print(f"⚠️  SSL private key file not found: {key_file}")
         return None
-    
+
     try:
         # Create SSL context
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         context.load_cert_chain(cert_file, key_file)
-        print(f"🔒 SSL certificates loaded successfully")
+        print("🔒 SSL certificates loaded successfully")
         print(f"   - Certificate: {cert_file}")
         print(f"   - Private Key: {key_file}")
         return context
@@ -248,12 +248,12 @@ def start_flask_app(skip_db_init=False, skip_file_init=False, seed_data=False, u
     print(f"Voice endpoints: {protocol}://{host}:{port}/api/v1/voice")
     print(f"Job endpoints: {protocol}://{host}:{port}/api/v1/jobs")
     print(f"File endpoints: {protocol}://{host}:{port}/api/v1/file")
-    
+
     if use_https and ssl_context:
         print("🔒 HTTPS encryption enabled")
     elif use_https:
         print("⚠️  HTTPS requested but SSL setup failed - running HTTP")
-    
+
     print("\nServer started! Press Ctrl+C to stop the server")
     print("=" * 50)
 

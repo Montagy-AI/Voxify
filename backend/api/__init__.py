@@ -32,7 +32,7 @@ def create_app(test_config=None):
     """
 
     # Load .env file from the backend directory (parent of api/)
-    load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+    load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
     # Create Flask app
     app = Flask(__name__, instance_relative_config=True)
@@ -59,47 +59,47 @@ def create_app(test_config=None):
     # Initialize Swagger/OpenAPI documentation
     api = Api(
         app,
-        version='1.0.0',
-        title='Voxify API',
-        description='''
+        version="1.0.0",
+        title="Voxify API",
+        description="""
         ## RESTful API for Voice Cloning and TTS Synthesis
-        
+
         Voxify provides advanced voice cloning and text-to-speech synthesis capabilities powered by F5-TTS technology.
-        
+
         ### Key Features
         - 🎙️ **Voice Sample Management**: Upload and process voice samples
-        - 🧬 **Voice Cloning**: Create custom voice models from samples  
+        - 🧬 **Voice Cloning**: Create custom voice models from samples
         - 🗣️ **Speech Synthesis**: Generate speech using cloned voices
         - 📊 **Job Monitoring**: Track synthesis progress in real-time
         - 📁 **File Management**: Download and manage generated audio files
-        
+
         ### Supported Languages
         - **Native Support** (🔵): Chinese (zh-CN, zh-TW), English (en-US, en-GB)
         - **Specialized Models** (🟡): Japanese, French, German, Spanish, Italian, Russian, Hindi
         - **Fallback Support** (🟠): Korean, Portuguese, Arabic, Thai, Vietnamese
-        
+
         ### Authentication
         All endpoints (except public info) require JWT authentication. Use the `/auth/login` endpoint to obtain tokens.
-        ''',
-        doc='/docs/',  # Swagger UI endpoint
-        prefix='/api/v1',
-        contact='Voxify API Team',
-        contact_email='support@voxify.app',
-        contact_url='https://voxify.app/support',
-        license='MIT License',
-        license_url='https://opensource.org/licenses/MIT',
-        terms_url='https://voxify.app/terms',
+        """,
+        doc="/docs/",  # Swagger UI endpoint
+        prefix="/api/v1",
+        contact="Voxify API Team",
+        contact_email="support@voxify.app",
+        contact_url="https://voxify.app/support",
+        license="MIT License",
+        license_url="https://opensource.org/licenses/MIT",
+        terms_url="https://voxify.app/terms",
         validate=True,  # Validate requests against schema
-        ordered=True,   # Maintain operation order
+        ordered=True,  # Maintain operation order
         authorizations={
-            'Bearer': {
-                'type': 'apiKey',
-                'in': 'header',
-                'name': 'Authorization',
-                'description': 'JWT token in format: Bearer {token}'
+            "Bearer": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "Authorization",
+                "description": "JWT token in format: Bearer {token}",
             }
         },
-        security=['Bearer']
+        security=["Bearer"],
     )
 
     # Configure CORS to allow frontend access
@@ -137,16 +137,16 @@ def create_app(test_config=None):
     # Import and register Swagger namespaces with full functionality
     try:
         from .v1.auth.swagger_routes import auth_ns
-        from .v1.voice.swagger_routes_full import voice_ns  
+        from .v1.voice.swagger_routes_full import voice_ns
         from .v1.job.swagger_routes_full import job_ns
         from .v1.file.swagger_routes_full import file_ns
 
         # Register namespaces with API (these provide both docs and functionality)
-        api.add_namespace(auth_ns, path='/auth')
-        api.add_namespace(voice_ns, path='/voice')
-        api.add_namespace(job_ns, path='/job')  
-        api.add_namespace(file_ns, path='/file')
-        
+        api.add_namespace(auth_ns, path="/auth")
+        api.add_namespace(voice_ns, path="/voice")
+        api.add_namespace(job_ns, path="/job")
+        api.add_namespace(file_ns, path="/file")
+
         print("✅ Swagger documentation with full functionality loaded successfully")
         print("📋 API endpoints: /api/v1/* | Swagger endpoints: /auth, /voice, /job, /file | Docs: /docs/")
     except ImportError as e:
@@ -161,7 +161,7 @@ def create_app(test_config=None):
             "version": "1.0.0",
             "documentation": "/docs/",
             "health": "/health",
-            "api_prefix": "/api/v1"
+            "api_prefix": "/api/v1",
         }
 
     # Health check endpoint
@@ -171,11 +171,7 @@ def create_app(test_config=None):
             "status": "healthy",
             "timestamp": datetime.utcnow().isoformat(),
             "version": "1.0.0",
-            "services": {
-                "database": "operational",
-                "f5_tts": "operational",
-                "storage": "operational"
-            }
+            "services": {"database": "operational", "f5_tts": "operational", "storage": "operational"},
         }, 200
 
     # API information endpoint
@@ -187,30 +183,25 @@ def create_app(test_config=None):
                 "version": "1.0.0",
                 "description": "Voice cloning and TTS synthesis platform",
                 "documentation": "/docs/",
-                "openapi_spec": "/docs/swagger.json"
+                "openapi_spec": "/docs/swagger.json",
             },
             "features": {
                 "voice_cloning": True,
                 "tts_synthesis": True,
                 "real_time_monitoring": True,
                 "file_management": True,
-                "multi_language_support": True
+                "multi_language_support": True,
             },
-            "supported_formats": {
-                "input": ["wav", "mp3"],
-                "output": ["wav", "mp3", "flac", "ogg"]
-            },
-            "rate_limits": {
-                "authenticated": "1000/hour",
-                "anonymous": "100/hour"
-            }
+            "supported_formats": {"input": ["wav", "mp3"], "output": ["wav", "mp3", "flac", "ogg"]},
+            "rate_limits": {"authenticated": "1000/hour", "anonymous": "100/hour"},
         }
 
     # Redirect old docs URLs
     @app.route("/api/docs")
-    @app.route("/api/documentation")  
+    @app.route("/api/documentation")
     def redirect_to_docs():
         from flask import redirect
+
         return redirect("/docs/", code=301)
 
     return app

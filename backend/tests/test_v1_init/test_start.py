@@ -143,6 +143,9 @@ class TestFileStorageCreation:
                 env=env,
             )
 
+            # Ensure the subprocess completed successfully
+            assert result.returncode in [0, None], f"Init failed: {result.stderr}\nStdout: {result.stdout}"
+
             # Check if directories were created
             expected_dirs = [
                 os.path.join(temp_dir, "data"),

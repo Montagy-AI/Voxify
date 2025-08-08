@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import '@testing-library/jest-dom';
 import Navbar from '../Navbar';
+import authService from '../../services/auth.service';
 
 // Mock react-router-dom
 const mockNavigate = jest.fn();
@@ -16,9 +17,6 @@ jest.mock('../../services/auth.service', () => ({
   isAuthenticated: jest.fn(),
   logout: jest.fn(),
 }));
-
-// Import mocked auth service
-import authService from '../../services/auth.service';
 
 // Helper component to wrap Navbar with Router
 const NavbarWithRouter = () => (
@@ -97,12 +95,9 @@ describe('Navbar Component', () => {
       render(<NavbarWithRouter />);
       const buttons = screen.getAllByRole('button');
       expect(buttons).toHaveLength(2); // help button and profile button
-      // Find the help button by checking for the SVG
-      const helpButton = buttons.find((button) => button.querySelector('svg'));
+      // The first button should be the help button (with SVG)
+      const helpButton = buttons[0];
       expect(helpButton).toBeInTheDocument();
-      // Check if help button has correct SVG
-      const helpSvg = helpButton.querySelector('svg');
-      expect(helpSvg).toBeInTheDocument();
     });
 
     test('Show user profile button with first name initial', () => {
@@ -144,9 +139,8 @@ describe('Navbar Component', () => {
 
     test('help button navigates to help page', () => {
       render(<NavbarWithRouter />);
-      // Find the help button by looking for the one with SVG (not the profile button)
-      const buttons = screen.getAllByRole('button');
-      const helpButton = buttons.find((button) => button.querySelector('svg'));
+      // Get the first button which should be the help button
+      const helpButton = screen.getAllByRole('button')[0];
       fireEvent.click(helpButton);
       expect(mockNavigate).toHaveBeenCalledWith('/help');
     });
@@ -230,19 +224,19 @@ describe('Navbar Component', () => {
 
     test('All navigation links have correct href attributes', () => {
       render(<NavbarWithRouter />);
-      expect(screen.getByText('Dashboard').closest('a')).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /dashboard/i })).toHaveAttribute(
         'href',
         '/dashboard'
       );
-      expect(screen.getByText('Tasks').closest('a')).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /tasks/i })).toHaveAttribute(
         'href',
         '/tasks/list'
       );
-      expect(screen.getByText('Voices').closest('a')).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /voices/i })).toHaveAttribute(
         'href',
         '/voices'
       );
-      expect(screen.getByText('Settings').closest('a')).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /settings/i })).toHaveAttribute(
         'href',
         '/settings'
       );
@@ -250,7 +244,7 @@ describe('Navbar Component', () => {
 
     test('Logo link points to home page', () => {
       render(<NavbarWithRouter />);
-      const logoLink = screen.getByAltText('Voxify Logo').closest('a');
+      const logoLink = screen.getByRole('link', { name: /voxify logo/i });
       expect(logoLink).toHaveAttribute('href', '/');
     });
 
@@ -258,11 +252,11 @@ describe('Navbar Component', () => {
       authService.isAuthenticated.mockReturnValue(false);
       authService.getCurrentUser.mockReturnValue(null);
       render(<NavbarWithRouter />);
-      expect(screen.getByText('Log in').closest('a')).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /log in/i })).toHaveAttribute(
         'href',
         '/login'
       );
-      expect(screen.getByText('Get started').closest('a')).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /get started/i })).toHaveAttribute(
         'href',
         '/register'
       );

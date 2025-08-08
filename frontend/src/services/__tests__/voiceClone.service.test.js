@@ -1,14 +1,14 @@
 import voiceCloneService from '../voiceClone.service';
 
+// Import the mocked api
+import api from '../api';
+
 // Mock the api module
 jest.mock('../api', () => ({
   post: jest.fn(),
   get: jest.fn(),
   delete: jest.fn(),
 }));
-
-// Import the mocked api
-import api from '../api';
 
 // Mock localStorage
 const localStorageMock = {

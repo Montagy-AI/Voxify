@@ -58,8 +58,8 @@ def migrate_database():
         # Update schema version
         cursor.execute(
             """
-            INSERT OR REPLACE INTO schema_version (version, applied_at, description) 
-            VALUES (?, ?, ?)
+            INSERT OR REPLACE INTO schema_version (version, applied_at, description)
+             VALUES (?, ?, ?)
         """,
             ("1.0.1", datetime.now().isoformat(), "Added password reset token columns"),
         )

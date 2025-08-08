@@ -25,70 +25,104 @@ from api.utils.password import (
 from api.utils.email_service import get_email_service
 
 # Create namespace
-auth_ns = Namespace('Authentication', description='User authentication and token management', path='/auth')
+auth_ns = Namespace("Authentication", description="User authentication and token management", path="/auth")
 
 # Define data models
-user_model = auth_ns.model('User', {
-    'id': fields.String(required=True, description='Unique user identifier'),
-    'email': fields.String(required=True, description='User email address'),
-    'first_name': fields.String(description='User first name'),
-    'last_name': fields.String(description='User last name'),
-    'is_active': fields.Boolean(description='Whether the user account is active'),
-    'email_verified': fields.Boolean(description='Whether the email is verified'),
-    'created_at': fields.String(description='Account creation timestamp'),
-    'updated_at': fields.String(description='Last update timestamp'),
-    'last_login_at': fields.String(description='Last login timestamp')
-})
+user_model = auth_ns.model(
+    "User",
+    {
+        "id": fields.String(required=True, description="Unique user identifier"),
+        "email": fields.String(required=True, description="User email address"),
+        "first_name": fields.String(description="User first name"),
+        "last_name": fields.String(description="User last name"),
+        "is_active": fields.Boolean(description="Whether the user account is active"),
+        "email_verified": fields.Boolean(description="Whether the email is verified"),
+        "created_at": fields.String(description="Account creation timestamp"),
+        "updated_at": fields.String(description="Last update timestamp"),
+        "last_login_at": fields.String(description="Last login timestamp"),
+    },
+)
 
-register_request = auth_ns.model('RegisterRequest', {
-    'email': fields.String(required=True, description='User email address', example='user@example.com'),
-    'password': fields.String(required=True, description='User password (min 8 characters)', example='SecurePass123!'),
-    'first_name': fields.String(description='User first name', example='John'),
-    'last_name': fields.String(description='User last name', example='Doe')
-})
+register_request = auth_ns.model(
+    "RegisterRequest",
+    {
+        "email": fields.String(required=True, description="User email address", example="user@example.com"),
+        "password": fields.String(
+            required=True, description="User password (min 8 characters)", example="SecurePass123!"
+        ),
+        "first_name": fields.String(description="User first name", example="John"),
+        "last_name": fields.String(description="User last name", example="Doe"),
+    },
+)
 
-login_request = auth_ns.model('LoginRequest', {
-    'email': fields.String(required=True, description='User email address', example='user@example.com'),
-    'password': fields.String(required=True, description='User password', example='SecurePass123!')
-})
+login_request = auth_ns.model(
+    "LoginRequest",
+    {
+        "email": fields.String(required=True, description="User email address", example="user@example.com"),
+        "password": fields.String(required=True, description="User password", example="SecurePass123!"),
+    },
+)
 
-token_response = auth_ns.model('TokenResponse', {
-    'access_token': fields.String(required=True, description='JWT access token'),
-    'refresh_token': fields.String(required=True, description='JWT refresh token'),
-    'user': fields.Nested(user_model, required=True, description='User information')
-})
+token_response = auth_ns.model(
+    "TokenResponse",
+    {
+        "access_token": fields.String(required=True, description="JWT access token"),
+        "refresh_token": fields.String(required=True, description="JWT refresh token"),
+        "user": fields.Nested(user_model, required=True, description="User information"),
+    },
+)
 
-profile_update_request = auth_ns.model('ProfileUpdateRequest', {
-    'email': fields.String(description='New email address'),
-    'first_name': fields.String(description='New first name'),
-    'last_name': fields.String(description='New last name')
-})
+profile_update_request = auth_ns.model(
+    "ProfileUpdateRequest",
+    {
+        "email": fields.String(description="New email address"),
+        "first_name": fields.String(description="New first name"),
+        "last_name": fields.String(description="New last name"),
+    },
+)
 
-forgot_password_request = auth_ns.model('ForgotPasswordRequest', {
-    'email': fields.String(required=True, description='User email address', example='user@example.com')
-})
+forgot_password_request = auth_ns.model(
+    "ForgotPasswordRequest",
+    {"email": fields.String(required=True, description="User email address", example="user@example.com")},
+)
 
-reset_password_request = auth_ns.model('ResetPasswordRequest', {
-    'token': fields.String(required=True, description='Password reset token'),
-    'new_password': fields.String(required=True, description='New password', example='NewSecurePass123!')
-})
+reset_password_request = auth_ns.model(
+    "ResetPasswordRequest",
+    {
+        "token": fields.String(required=True, description="Password reset token"),
+        "new_password": fields.String(required=True, description="New password", example="NewSecurePass123!"),
+    },
+)
 
-error_model = auth_ns.model('Error', {
-    'success': fields.Boolean(required=True, description='Always false for errors', example=False),
-    'error': fields.Nested(auth_ns.model('ErrorDetails', {
-        'message': fields.String(required=True, description='Human-readable error message'),
-        'code': fields.String(required=True, description='Machine-readable error code'),
-        'timestamp': fields.String(required=True, description='ISO timestamp of the error'),
-        'details': fields.Raw(description='Additional error details (optional)')
-    }), required=True)
-})
+error_model = auth_ns.model(
+    "Error",
+    {
+        "success": fields.Boolean(required=True, description="Always false for errors", example=False),
+        "error": fields.Nested(
+            auth_ns.model(
+                "ErrorDetails",
+                {
+                    "message": fields.String(required=True, description="Human-readable error message"),
+                    "code": fields.String(required=True, description="Machine-readable error code"),
+                    "timestamp": fields.String(required=True, description="ISO timestamp of the error"),
+                    "details": fields.Raw(description="Additional error details (optional)"),
+                },
+            ),
+            required=True,
+        ),
+    },
+)
 
-success_response = auth_ns.model('SuccessResponse', {
-    'success': fields.Boolean(required=True, description='Always true for successful responses', example=True),
-    'timestamp': fields.String(required=True, description='ISO timestamp of the response'),
-    'message': fields.String(description='Optional success message'),
-    'data': fields.Raw(description='Response data')
-})
+success_response = auth_ns.model(
+    "SuccessResponse",
+    {
+        "success": fields.Boolean(required=True, description="Always true for successful responses", example=True),
+        "timestamp": fields.String(required=True, description="ISO timestamp of the response"),
+        "message": fields.String(description="Optional success message"),
+        "data": fields.Raw(description="Response data"),
+    },
+)
+
 
 # Helper functions
 def error_response(message: str, code: str = None, details: dict = None, status_code: int = 400):
@@ -105,6 +139,7 @@ def error_response(message: str, code: str = None, details: dict = None, status_
         response["error"]["details"] = details
     return response, status_code
 
+
 def success_response_data(data=None, message: str = None, status_code: int = 200):
     """Create standardized success response"""
     response = {"success": True, "timestamp": datetime.utcnow().isoformat()}
@@ -114,14 +149,15 @@ def success_response_data(data=None, message: str = None, status_code: int = 200
         response["message"] = message
     return response, status_code
 
-@auth_ns.route('/register')
+
+@auth_ns.route("/register")
 class RegisterResource(Resource):
-    @auth_ns.doc('register_user')
+    @auth_ns.doc("register_user")
     @auth_ns.expect(register_request)
-    @auth_ns.marshal_with(success_response, code=201, description='User registered successfully')
-    @auth_ns.response(400, 'Invalid request data', error_model)
-    @auth_ns.response(409, 'Email already exists', error_model)
-    @auth_ns.response(500, 'Registration failed', error_model)
+    @auth_ns.marshal_with(success_response, code=201, description="User registered successfully")
+    @auth_ns.response(400, "Invalid request data", error_model)
+    @auth_ns.response(409, "Email already exists", error_model)
+    @auth_ns.response(500, "Registration failed", error_model)
     def post(self):
         """Register a new user account"""
         # Get request data
@@ -189,15 +225,16 @@ class RegisterResource(Resource):
         finally:
             session.close()
 
-@auth_ns.route('/login')
+
+@auth_ns.route("/login")
 class LoginResource(Resource):
-    @auth_ns.doc('login_user')
+    @auth_ns.doc("login_user")
     @auth_ns.expect(login_request)
-    @auth_ns.marshal_with(success_response, code=200, description='Authentication successful')
-    @auth_ns.response(400, 'Invalid request data', error_model)
-    @auth_ns.response(401, 'Invalid credentials', error_model)
-    @auth_ns.response(403, 'Account disabled', error_model)
-    @auth_ns.response(500, 'Login failed', error_model)
+    @auth_ns.marshal_with(success_response, code=200, description="Authentication successful")
+    @auth_ns.response(400, "Invalid request data", error_model)
+    @auth_ns.response(401, "Invalid credentials", error_model)
+    @auth_ns.response(403, "Account disabled", error_model)
+    @auth_ns.response(500, "Login failed", error_model)
     def post(self):
         """Authenticate user and issue JWT tokens"""
         # Get request data
@@ -256,12 +293,13 @@ class LoginResource(Resource):
         finally:
             session.close()
 
-@auth_ns.route('/refresh')
+
+@auth_ns.route("/refresh")
 class RefreshResource(Resource):
-    @auth_ns.doc('refresh_token', security='Bearer')
-    @auth_ns.marshal_with(success_response, code=200, description='Token refreshed successfully')
-    @auth_ns.response(401, 'Invalid or expired refresh token', error_model)
-    @auth_ns.response(500, 'Token refresh failed', error_model)
+    @auth_ns.doc("refresh_token", security="Bearer")
+    @auth_ns.marshal_with(success_response, code=200, description="Token refreshed successfully")
+    @auth_ns.response(401, "Invalid or expired refresh token", error_model)
+    @auth_ns.response(500, "Token refresh failed", error_model)
     @jwt_required(refresh=True)
     def post(self):
         """Refresh access token using valid refresh token"""
@@ -286,13 +324,14 @@ class RefreshResource(Resource):
         except Exception as e:
             return error_response(f"Failed to refresh token: {str(e)}", "TOKEN_REFRESH_ERROR", status_code=500)
 
-@auth_ns.route('/profile')
+
+@auth_ns.route("/profile")
 class ProfileResource(Resource):
-    @auth_ns.doc('get_profile', security='Bearer')
-    @auth_ns.marshal_with(success_response, code=200, description='Profile retrieved successfully')
-    @auth_ns.response(401, 'Invalid or expired access token', error_model)
-    @auth_ns.response(404, 'User not found', error_model)
-    @auth_ns.response(500, 'Failed to get profile', error_model)
+    @auth_ns.doc("get_profile", security="Bearer")
+    @auth_ns.marshal_with(success_response, code=200, description="Profile retrieved successfully")
+    @auth_ns.response(401, "Invalid or expired access token", error_model)
+    @auth_ns.response(404, "User not found", error_model)
+    @auth_ns.response(500, "Failed to get profile", error_model)
     @jwt_required()
     def get(self):
         """Get current user's profile information"""
@@ -331,14 +370,14 @@ class ProfileResource(Resource):
         except Exception as e:
             return error_response(f"Failed to get profile: {str(e)}", "PROFILE_ERROR", status_code=500)
 
-    @auth_ns.doc('update_profile', security='Bearer')
+    @auth_ns.doc("update_profile", security="Bearer")
     @auth_ns.expect(profile_update_request)
-    @auth_ns.marshal_with(success_response, code=200, description='Profile updated successfully')
-    @auth_ns.response(400, 'Invalid request data', error_model)
-    @auth_ns.response(401, 'Invalid or expired access token', error_model)
-    @auth_ns.response(404, 'User not found', error_model)
-    @auth_ns.response(409, 'Email already exists', error_model)
-    @auth_ns.response(500, 'Failed to update profile', error_model)
+    @auth_ns.marshal_with(success_response, code=200, description="Profile updated successfully")
+    @auth_ns.response(400, "Invalid request data", error_model)
+    @auth_ns.response(401, "Invalid or expired access token", error_model)
+    @auth_ns.response(404, "User not found", error_model)
+    @auth_ns.response(409, "Email already exists", error_model)
+    @auth_ns.response(500, "Failed to update profile", error_model)
     @jwt_required()
     def put(self):
         """Update current user's profile information"""
@@ -428,13 +467,14 @@ class ProfileResource(Resource):
                 status_code=500,
             )
 
-@auth_ns.route('/forgot-password')
+
+@auth_ns.route("/forgot-password")
 class ForgotPasswordResource(Resource):
-    @auth_ns.doc('forgot_password')
+    @auth_ns.doc("forgot_password")
     @auth_ns.expect(forgot_password_request)
-    @auth_ns.marshal_with(success_response, code=200, description='Reset email sent (or would be sent)')
-    @auth_ns.response(400, 'Invalid request data', error_model)
-    @auth_ns.response(500, 'Failed to process request', error_model)
+    @auth_ns.marshal_with(success_response, code=200, description="Reset email sent (or would be sent)")
+    @auth_ns.response(400, "Invalid request data", error_model)
+    @auth_ns.response(500, "Failed to process request", error_model)
     def post(self):
         """Request password reset email"""
         # Get request data
@@ -481,24 +521,29 @@ class ForgotPasswordResource(Resource):
                     print(f"Failed to send reset email: {error_msg}")
 
             # Always return success to prevent user enumeration
-            return success_response_data(message="If an account with that email exists, a password reset link has been sent.")
+            return success_response_data(
+                message="If an account with that email exists, a password reset link has been sent."
+            )
 
         except Exception as e:
             session.rollback()
             # Log the error but return generic message
             print(f"Password reset request failed: {str(e)}")
-            return success_response_data(message="If an account with that email exists, a password reset link has been sent.")
+            return success_response_data(
+                message="If an account with that email exists, a password reset link has been sent."
+            )
         finally:
             session.close()
 
-@auth_ns.route('/reset-password')
+
+@auth_ns.route("/reset-password")
 class ResetPasswordResource(Resource):
-    @auth_ns.doc('reset_password')
+    @auth_ns.doc("reset_password")
     @auth_ns.expect(reset_password_request)
-    @auth_ns.marshal_with(success_response, code=200, description='Password reset successful')
-    @auth_ns.response(400, 'Invalid request data or token', error_model)
-    @auth_ns.response(401, 'Invalid or expired token', error_model)
-    @auth_ns.response(500, 'Failed to reset password', error_model)
+    @auth_ns.marshal_with(success_response, code=200, description="Password reset successful")
+    @auth_ns.response(400, "Invalid request data or token", error_model)
+    @auth_ns.response(401, "Invalid or expired token", error_model)
+    @auth_ns.response(500, "Failed to reset password", error_model)
     def post(self):
         """Reset user password using reset token"""
         # Get request data

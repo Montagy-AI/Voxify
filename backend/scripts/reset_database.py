@@ -48,7 +48,7 @@ def reset_database():
 
         # Initialize vector database
         print("🔧 Initializing vector database...")
-        vector_db = create_vector_db()
+        create_vector_db()
         print("✅ Vector database initialized successfully")
 
         print("🎉 Database reset completed successfully!")
