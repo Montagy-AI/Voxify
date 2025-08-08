@@ -102,6 +102,8 @@ jobs:
           push: false
           load: true
           tags: voxify-backend:latest
+          build-args: |
+            INSTALL_DEV=true
 
       - name: Build frontend image
         uses: docker/build-push-action@v5
@@ -150,7 +152,7 @@ jobs:
             -e VECTOR_DB_PATH=data/chroma_db \
             -e DOCKER_ENV=true \
             -e FLASK_HOST=localhost \
-            voxify-backend:latest python -m pytest tests/ -v
+            voxify-backend:test python -m pytest tests/ -v
 
       - name: Cleanup
         if: always()
