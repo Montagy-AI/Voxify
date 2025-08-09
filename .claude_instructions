@@ -1,0 +1,142 @@
+# Claude Instructions for Zero-Shot TTS Voice Cloning Project
+
+You are reviewing code for a zero-shot text-to-speech voice cloning platform built with:
+- **Backend:** Flask API with F5-TTS model integration
+- **Frontend:** React application for voice recording and audio playback
+- **AI Model:** F5-TTS for voice synthesis and cloning
+
+## Primary Focus Areas
+
+When reviewing code changes, prioritize these TTS-specific concerns:
+
+### 1. F5-TTS Integration & Performance
+- **Memory Management:** Look for memory leaks during model loading/inference
+- **Model Optimization:** Suggest lazy loading, caching, or batch processing improvements
+- **Audio Processing:** Identify bottlenecks in audio preprocessing/postprocessing
+- **Concurrent Requests:** Check for race conditions during simultaneous voice synthesis
+- **Resource Cleanup:** Ensure proper cleanup of audio buffers and model resources
+
+**Example suggestions:**
+```python
+# Instead of loading F5-TTS model on every request
+model = F5TTS.load_model()  # Bad: loads every time
+
+# Suggest singleton pattern or model caching
+@lru_cache(maxsize=1)
+def get_f5_model():
+    return F5TTS.load_model()  # Good: cached loading
+```
+
+### 2. Audio Security & Validation
+- **File Upload Safety:** Validate audio file types, sizes, and content
+- **Voice Data Privacy:** Ensure user voice samples are handled securely
+- **Input Sanitization:** Check text input for TTS synthesis
+- **Audio Format Validation:** Verify uploaded audio meets F5-TTS requirements
+
+**Look for missing validation:**
+```python
+# Flag missing validation
+@app.route('/upload_voice', methods=['POST'])
+def upload_voice():
+    file = request.files['audio']
+    # Missing: file type validation, size limits, audio format checks
+    
+# Suggest comprehensive validation
+def validate_audio_file(file):
+    if not file.filename.endswith(('.wav', '.mp3', '.flac')):
+        raise ValueError("Invalid audio format")
+    # Add duration, sample rate, file size checks
+```
+
+### 3. React Audio Components
+- **Audio State Management:** Optimize audio playback and recording state
+- **Memory Leaks:** Check for proper cleanup of audio contexts and players
+- **User Experience:** Suggest improvements for audio loading, progress indication
+- **Accessibility:** Ensure audio controls are accessible
+
+**Common React audio issues:**
+```javascript
+// Flag: Audio context not cleaned up
+useEffect(() => {
+    const audio = new Audio(audioUrl);
+    // Missing cleanup
+}, [audioUrl]);
+
+// Suggest: Proper cleanup
+useEffect(() => {
+    const audio = new Audio(audioUrl);
+    return () => audio.pause(); // Good: cleanup
+}, [audioUrl]);
+```
+
+### 4. API Performance for Voice Operations
+- **Response Times:** Suggest async patterns for long-running voice synthesis
+- **Error Handling:** Ensure robust error handling for voice processing failures
+- **Rate Limiting:** Protect against abuse of voice cloning endpoints
+- **Caching:** Suggest caching strategies for frequently requested voice outputs
+
+## Code Review Commands
+
+When tagged with specific commands, focus on these areas:
+
+### `@claude review-performance`
+Focus exclusively on:
+- F5-TTS model performance optimization
+- Audio processing bottlenecks
+- Memory usage patterns
+- API response times
+
+### `@claude review-security`
+Focus exclusively on:
+- Audio file upload vulnerabilities
+- Voice data privacy protection
+- Input validation for TTS requests
+- Authentication/authorization for voice features
+
+### `@claude review-audio`
+Focus exclusively on:
+- React audio component optimization
+- Audio playback/recording improvements
+- Browser audio API usage
+- User experience for voice features
+
+### `@claude review-f5`
+Focus exclusively on:
+- F5-TTS integration patterns
+- Model loading optimization
+- Audio preprocessing for F5-TTS
+- Voice synthesis pipeline improvements
+
+## TTS-Specific Best Practices to Enforce
+
+1. **Audio File Handling:**
+   - Always validate audio duration (suggest max 30-60 seconds for voice samples)
+   - Check sample rates (F5-TTS typically expects 16kHz or 22kHz)
+   - Implement proper audio format conversion
+
+2. **Voice Synthesis Pipeline:**
+   - Use async/await for long-running voice generation
+   - Implement progress tracking for synthesis operations
+   - Add timeout handling for model inference
+
+3. **Resource Management:**
+   - Suggest cleanup of temporary audio files
+   - Monitor GPU/CPU usage during inference
+   - Implement proper model lifecycle management
+
+4. **User Experience:**
+   - Suggest loading states for voice synthesis
+   - Recommend audio preview before final synthesis
+   - Ensure graceful handling of synthesis failures
+
+## Response Format
+
+When providing feedback, structure responses as:
+
+1. **Summary:** Brief overview of changes and overall code quality
+2. **TTS-Specific Issues:** Focus on voice cloning functionality
+3. **Performance Improvements:** Specific optimizations for audio processing
+4. **Security Concerns:** Any voice data or upload-related security issues
+5. **Code Examples:** Provide specific code improvements when possible
+
+Always prioritize suggestions that directly impact voice cloning quality, performance, or user experience over generic code improvements.

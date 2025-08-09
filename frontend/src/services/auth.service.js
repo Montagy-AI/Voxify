@@ -5,6 +5,7 @@ class AuthService {
     try {
       const response = await api.post('/auth/login', { email, password });
 
+
       if (response.data.success) {
         const { access_token, refresh_token, user } = response.data.data;
         localStorage.setItem('access_token', access_token);
@@ -18,6 +19,7 @@ class AuthService {
         success: false,
         error: err.message || 'Login failed',
         errorCode: err.code
+
       };
     } catch (error) {
       const err = error.response?.data?.error || {};
@@ -25,6 +27,7 @@ class AuthService {
         success: false,
         error: err.message || 'Login failed',
         errorCode: err.code
+
       };
     }
   }
@@ -35,13 +38,14 @@ class AuthService {
         email: userData.email,
         password: userData.password,
         first_name: userData.firstName,
-        last_name: userData.lastName
+        last_name: userData.lastName,
       });
 
       if (response.data.success) {
         return {
           success: true,
           user: response.data.data.user
+
         };
       }
 
@@ -50,6 +54,7 @@ class AuthService {
         success: false,
         error: err.message || 'Registration failed',
         errorCode: err.code
+
       };
     } catch (error) {
       const err = error.response?.data?.error || {};
@@ -57,6 +62,7 @@ class AuthService {
         success: false,
         error: err.message || 'Registration failed',
         errorCode: err.code
+
       };
     }
   }
@@ -89,11 +95,15 @@ class AuthService {
         throw new Error('No refresh token available');
       }
 
-      const response = await api.post('/auth/refresh', {}, {
-        headers: {
-          'Authorization': `Bearer ${refreshToken}`
+      const response = await api.post(
+        '/auth/refresh',
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${refreshToken}`,
+          },
         }
-      });
+      );
 
       if (response.data.success) {
         const { access_token, refresh_token } = response.data.data;
@@ -104,45 +114,95 @@ class AuthService {
 
       return {
         success: false,
-        error: response.data.error?.message || 'Token refresh failed'
+        error: response.data.error?.message || 'Token refresh failed',
       };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.error?.message || 'Token refresh failed'
+        error: error.response?.data?.error?.message || 'Token refresh failed',
       };
     }
   }
 
   async getUserProfile() {
-    try {
-      const response = await api.get('/auth/profile');
-      if (response.data.success && response.data.data && response.data.data.user) {
-        return {
-          data: response.data.data.user
-        };
-      }
-      throw new Error('Invalid response format');
-    } catch (error) {
-      throw error;
+    const response = await api.get('/auth/profile');
+    if (
+      response.data.success &&
+      response.data.data &&
+      response.data.data.user
+    ) {
+      return {
+        data: response.data.data.user,
+      };
     }
+    throw new Error('Invalid response format');
   }
 
   async updateUserProfile(userData) {
+    const response = await api.put('/auth/profile', userData);
+    if (response.data.success && response.data.data) {
+      return {
+        data: response.data.data.user || response.data.data,
+        message: response.data.message,
+      };
+    }
+    throw new Error('Invalid response format');
+  }
+
+  async forgotPassword(email) {
     try {
-      const response = await api.put('/auth/profile', userData);
-      if (response.data.success && response.data.data) {
+      const response = await api.post('/auth/forgot-password', {
+        email,
+      });
+
+      if (response.data.success) {
         return {
-          data: response.data.data.user || response.data.data,
-          message: response.data.message
+          success: true,
+          message: response.data.message,
         };
       }
-      throw new Error('Invalid response format');
+
+      return {
+        success: false,
+        error: response.data.error?.message || 'Failed to send reset email',
+      };
     } catch (error) {
-      throw error;
+      return {
+        success: false,
+        error:
+          error.response?.data?.error?.message || 'Failed to send reset email',
+      };
+    }
+  }
+
+  async resetPassword(token, newPassword) {
+    try {
+      const response = await api.post('/auth/reset-password', {
+        token,
+        new_password: newPassword,
+      });
+
+      if (response.data.success) {
+        return {
+          success: true,
+          message: response.data.message,
+        };
+      }
+
+      return {
+        success: false,
+        error: response.data.error?.message || 'Failed to reset password',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error.response?.data?.error?.message || 'Failed to reset password',
+      };
     }
   }
 }
 
 const authService = new AuthService();
 export default authService;
+

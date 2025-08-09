@@ -1,5 +1,25 @@
-#Python
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
 # Database
 *.db
@@ -37,12 +57,16 @@ yarn-error.log*
 frontend/build/
 frontend/dist/
 frontend/.next/
+frontend/coverage/
+frontend/package-lock.json
 
 # Logs
 logs
 *.log
+.coverage
 
 # Temporary files
 *.tmp
 *.temp
 .cache/
+backend/.coverage

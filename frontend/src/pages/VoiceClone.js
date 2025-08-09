@@ -25,25 +25,33 @@ const VoiceClone = () => {
     setFiles(selectedFiles);
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleCreateClone(e);
+  };
+
   const handleFileUpload = async () => {
     if (files.length === 0) return;
-    
+
     setIsUploading(true);
     setUploadProgress(0);
-    
+
     try {
       const uploadedIds = [];
-      
+
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        
+
         try {
           // Ensure we have a valid sample name
           const sampleName = file.name?.trim() || `Voice Sample ${Date.now()}`;
-          const result = await voiceCloneService.uploadVoiceSample(file, sampleName);
+          const result = await voiceCloneService.uploadVoiceSample(
+            file,
+            sampleName
+          );
           if (result.success) {
             uploadedIds.push(result.data.sample_id);
-            setUploadedSamples(prev => [...prev, result.data]);
+            setUploadedSamples((prev) => [...prev, result.data]);
           } else {
             console.error(`Failed to upload ${file.name}:`, result.error);
             alert(`Failed to upload ${file.name}: ${result.error}`);
@@ -52,10 +60,10 @@ const VoiceClone = () => {
           console.error(`Failed to upload ${file.name}:`, error);
           alert(`Failed to upload ${file.name}: ${error.message || error}`);
         }
-        
+
         setUploadProgress(((i + 1) / files.length) * 100);
       }
-      
+
       setFiles([]);
       if (uploadedIds.length > 0) {
         alert(`Successfully uploaded ${uploadedIds.length} file(s)`);
@@ -70,35 +78,35 @@ const VoiceClone = () => {
 
   const handleCreateClone = async (e) => {
     e.preventDefault();
-    
+
     if (uploadedSamples.length === 0) {
       alert('Please upload voice samples first');
       return;
     }
-    
+
     if (!refText.trim()) {
       alert('Please enter reference text (must match audio content exactly)');
       return;
     }
-    
+
     if (!name.trim()) {
       alert('Please enter a name for your voice clone');
       return;
     }
-    
+
     setIsCreating(true);
-    
+
     try {
       const cloneData = {
-        sample_ids: uploadedSamples.map(s => s.sample_id),
+        sample_ids: uploadedSamples.map((s) => s.sample_id),
         name: name.trim(),
         description: description.trim(),
         ref_text: refText.trim(),
-        language: language
+        language: language,
       };
-      
+
       const result = await voiceCloneService.createVoiceClone(cloneData);
-      
+
       if (result.success) {
         alert('Voice clone created successfully! 🎉');
         navigate('/dashboard');
@@ -118,10 +126,13 @@ const VoiceClone = () => {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold mb-12">Clone your voice</h1>
 
-        <form onSubmit={handleCreateClone} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-8">
           {/* Name Input */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-300 mb-2"
+            >
               Clone Name *
             </label>
             <input
@@ -137,7 +148,10 @@ const VoiceClone = () => {
 
           {/* Description Input */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-2">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-300 mb-2"
+            >
               Description
             </label>
             <textarea
@@ -151,12 +165,16 @@ const VoiceClone = () => {
 
           {/* Reference Text Input */}
           <div>
-            <label htmlFor="refText" className="block text-sm font-medium text-gray-300 mb-2">
+            <label
+              htmlFor="refText"
+              className="block text-sm font-medium text-gray-300 mb-2"
+            >
               Reference Text *
             </label>
             <div className="mb-2">
               <p className="text-sm text-gray-400">
-                Enter the exact text spoken in your audio file, including punctuation
+                Enter the exact text spoken in your audio file, including
+                punctuation
               </p>
             </div>
             <textarea
@@ -171,7 +189,10 @@ const VoiceClone = () => {
 
           {/* Language Selection */}
           <div>
-            <label htmlFor="language" className="block text-sm font-medium text-gray-300 mb-2">
+            <label
+              htmlFor="language"
+              className="block text-sm font-medium text-gray-300 mb-2"
+            >
               Language
             </label>
             <select
@@ -180,8 +201,34 @@ const VoiceClone = () => {
               onChange={(e) => setLanguage(e.target.value)}
               className="w-full rounded border border-zinc-800 bg-zinc-900 px-4 py-2 text-white focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
             >
-              <option value="zh-CN">Chinese</option>
-              <option value="en-US">English</option>
+              {/* Native multilingual support */}
+              <optgroup label="Native Support (Best Quality)">
+                <option value="zh-CN">Chinese (Simplified)</option>
+                <option value="zh-TW">Chinese (Traditional)</option>
+                <option value="en-US">English (US)</option>
+                <option value="en-GB">English (UK)</option>
+              </optgroup>
+
+              {/* Specialized model support */}
+              <optgroup label="Specialized Models (High Quality)">
+                <option value="ja-JP">Japanese</option>
+                <option value="fr-FR">French</option>
+                <option value="de-DE">German</option>
+                <option value="es-ES">Spanish</option>
+                <option value="it-IT">Italian</option>
+                <option value="ru-RU">Russian</option>
+                <option value="hi-IN">Hindi</option>
+                <option value="fi-FI">Finnish</option>
+              </optgroup>
+
+              {/* Fallback support */}
+              <optgroup label="Basic Support (Limited Quality)">
+                <option value="ko-KR">Korean</option>
+                <option value="pt-BR">Portuguese</option>
+                <option value="ar-SA">Arabic</option>
+                <option value="th-TH">Thai</option>
+                <option value="vi-VN">Vietnamese</option>
+              </optgroup>
             </select>
           </div>
 
@@ -189,7 +236,9 @@ const VoiceClone = () => {
           <div>
             <h2 className="text-xl font-semibold mb-2">Upload voice samples</h2>
             <p className="text-gray-400 mb-4">
-              Upload 3-30 seconds of high-quality audio for F5-TTS. Clear speech with minimal background noise works best. One good sample is sufficient.
+              Upload 3-30 seconds of high-quality audio for F5-TTS. Clear speech
+              with minimal background noise works best. One good sample is
+              sufficient.
             </p>
 
             {/* Drop Zone */}
@@ -208,6 +257,7 @@ const VoiceClone = () => {
                   onChange={handleFileSelect}
                   className="hidden"
                   id="file-upload"
+                  aria-label="Upload voice samples"
                 />
                 <button
                   type="button"
@@ -223,9 +273,14 @@ const VoiceClone = () => {
             {files.length > 0 && (
               <div className="mt-4 space-y-2">
                 {files.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between bg-zinc-900 p-3 rounded">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between bg-zinc-900 p-3 rounded"
+                  >
                     <span className="text-gray-300">{file.name}</span>
-                    <span className="text-gray-400">{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
+                    <span className="text-gray-400">
+                      {(file.size / (1024 * 1024)).toFixed(2)} MB
+                    </span>
                   </div>
                 ))}
                 <button
@@ -245,7 +300,10 @@ const VoiceClone = () => {
                 <h3 className="text-lg font-medium mb-2">Uploaded Samples</h3>
                 <div className="space-y-2">
                   {uploadedSamples.map((sample, index) => (
-                    <div key={index} className="flex items-center justify-between bg-green-900/20 border border-green-800 p-3 rounded">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-green-900/20 border border-green-800 p-3 rounded"
+                    >
                       <span className="text-gray-300">{sample.name}</span>
                       <span className="text-green-400">Ready</span>
                     </div>
@@ -275,9 +333,19 @@ const VoiceClone = () => {
           <div>
             <button
               type="submit"
-              disabled={uploadedSamples.length === 0 || isCreating || !name.trim() || !refText.trim()}
+              disabled={
+                uploadedSamples.length === 0 ||
+                isCreating ||
+                !name.trim() ||
+                !refText.trim()
+              }
               className={`w-full px-6 py-3 rounded text-center font-semibold border-2 border-white hover:bg-white hover:text-black transition-colors ${
-                (uploadedSamples.length === 0 || isCreating || !name.trim() || !refText.trim()) ? 'opacity-50 cursor-not-allowed' : ''
+                uploadedSamples.length === 0 ||
+                isCreating ||
+                !name.trim() ||
+                !refText.trim()
+                  ? 'opacity-50 cursor-not-allowed'
+                  : ''
               }`}
             >
               {isCreating ? 'Creating Clone...' : 'Create Voice Clone'}
@@ -289,4 +357,4 @@ const VoiceClone = () => {
   );
 };
 
-export default VoiceClone; 
+export default VoiceClone;

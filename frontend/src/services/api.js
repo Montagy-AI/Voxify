@@ -17,12 +17,12 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     // For FormData, remove Content-Type to let browser set it with boundary
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type'];
     }
-    
+
     return config;
   },
   (error) => {
@@ -42,6 +42,7 @@ api.interceptors.response.use(
     if (status === 401 && (url.includes('/auth/login') || url.includes('/auth/register'))) {
       return Promise.reject(error); // let caller handle error message
     }
+
 
     // Refresh logic only if:
     // - 401
@@ -80,8 +81,11 @@ api.interceptors.response.use(
 // Helper function to create audio URL for playback
 export const createAudioUrl = (jobId, isVoiceClone = false) => {
   const token = localStorage.getItem('access_token');
-  const endpoint = isVoiceClone ? `/file/voice-clone/${jobId}` : `/file/synthesis/${jobId}`;
+  const endpoint = isVoiceClone
+    ? `/file/voice-clone/${jobId}`
+    : `/file/synthesis/${jobId}`;
   return `${api.defaults.baseURL}${endpoint}?token=${token}`;
 };
 
 export default api;
+
