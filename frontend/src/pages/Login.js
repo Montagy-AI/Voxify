@@ -16,6 +16,19 @@ const Login = () => {
     }
   }, [navigate]);
 
+  const mapAuthError = (code, fallback) => {
+    switch (code) {
+      case 'EMAIL_NOT_FOUND':
+        return 'No account found with that email';
+      case 'PASSWORD_INCORRECT':
+        return 'Incorrect password';
+      case 'ACCOUNT_DISABLED':
+        return 'Your account is disabled. Contact support.';
+      default:
+        return fallback || 'Login failed';
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -27,7 +40,7 @@ const Login = () => {
       if (result.success) {
         navigate('/');
       } else {
-        setError(result.error);
+        setError(mapAuthError(result.errorCode, result.error));
       }
     } catch (err) {
       setError('Login failed. Please try again.');
@@ -150,4 +163,4 @@ const Login = () => {
   );
 };
 
-export default Login; 
+export default Login;

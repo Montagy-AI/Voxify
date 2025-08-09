@@ -35,28 +35,40 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const status = error.response?.status;
+    const url = originalRequest?.url || '';
 
-    // If error is 401 and not a refresh token request
-    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/refresh')) {
+    // If 401 from auth endpoints (login/register) just pass through
+    if (status === 401 && (url.includes('/auth/login') || url.includes('/auth/register'))) {
+      return Promise.reject(error); // let caller handle error message
+    }
+
+    // Refresh logic only if:
+    // - 401
+    // - Not already retried
+    // - Not refresh endpoint itself
+    // - We have a refresh token stored
+    if (
+      status === 401 &&
+      !originalRequest._retry &&
+      !url.includes('/auth/refresh') &&
+      localStorage.getItem('refresh_token')
+    ) {
       originalRequest._retry = true;
-
       try {
-        // Try to refresh token
         const refreshResult = await authService.refreshToken();
-        if (!refreshResult.success) {
-          throw new Error('Token refresh failed');
-        }
-
-        // Get new token and retry original request
+        if (!refreshResult.success) throw new Error('Token refresh failed');
         const newToken = localStorage.getItem('access_token');
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        // If refresh fails, clear tokens and redirect to login
+        // Clear tokens and only redirect if not already on login page
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user');
-        window.location.href = '/login';
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       }
     }
@@ -72,4 +84,4 @@ export const createAudioUrl = (jobId, isVoiceClone = false) => {
   return `${api.defaults.baseURL}${endpoint}?token=${token}`;
 };
 
-export default api; 
+export default api;
