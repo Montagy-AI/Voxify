@@ -3,27 +3,31 @@ import api from './api';
 class AuthService {
   async login(email, password) {
     try {
-      const response = await api.post('/auth/login', {
-        email,
-        password,
-      });
+      const response = await api.post('/auth/login', { email, password });
+
 
       if (response.data.success) {
         const { access_token, refresh_token, user } = response.data.data;
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', refresh_token);
         localStorage.setItem('user', JSON.stringify(user));
-        return { success: true, user };
+        return { success: true, user, accessToken: access_token, refreshToken: refresh_token };
       }
 
+      const err = response.data.error || {};
       return {
         success: false,
-        error: response.data.error?.message || 'Login failed',
+        error: err.message || 'Login failed',
+        errorCode: err.code
+
       };
     } catch (error) {
+      const err = error.response?.data?.error || {};
       return {
         success: false,
-        error: error.response?.data?.error?.message || 'Login failed',
+        error: err.message || 'Login failed',
+        errorCode: err.code
+
       };
     }
   }
@@ -40,18 +44,25 @@ class AuthService {
       if (response.data.success) {
         return {
           success: true,
-          user: response.data.data.user,
+          user: response.data.data.user
+
         };
       }
 
+      const err = response.data.error || {};
       return {
         success: false,
-        error: response.data.error?.message || 'Registration failed',
+        error: err.message || 'Registration failed',
+        errorCode: err.code
+
       };
     } catch (error) {
+      const err = error.response?.data?.error || {};
       return {
         success: false,
-        error: error.response?.data?.error?.message || 'Registration failed',
+        error: err.message || 'Registration failed',
+        errorCode: err.code
+
       };
     }
   }
@@ -194,3 +205,4 @@ class AuthService {
 
 const authService = new AuthService();
 export default authService;
+
