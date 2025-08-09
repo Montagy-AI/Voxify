@@ -364,7 +364,9 @@ describe('Voices Component', () => {
         // Check that date is formatted correctly regardless of timezone
         // The component should show "Created: Jan 15, 2025, [time]" format
         expect(
-          screen.getByText(/Created:\s*Jan\s*15,\s*2025,\s*\d{1,2}:\d{2}\s*(AM|PM)/)
+          screen.getByText(
+            /Created:\s*Jan\s*15,\s*2025,\s*\d{1,2}:\d{2}\s*(AM|PM)/
+          )
         ).toBeInTheDocument();
       });
     });

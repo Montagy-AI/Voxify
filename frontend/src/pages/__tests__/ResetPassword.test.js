@@ -756,7 +756,7 @@ describe('ResetPassword Component', () => {
       });
 
       // Find and submit the form directly
-      const form = screen.getByRole('form') || passwordInput.closest('form');
+      const form = screen.getByRole('form');
       fireEvent.submit(form);
 
       await waitFor(() => {
