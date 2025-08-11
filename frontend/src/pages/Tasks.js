@@ -13,6 +13,8 @@ const Tasks = () => {
   const [playingJobId, setPlayingJobId] = useState(null);
   const [, setCurrentlyPlaying] = useState(null);
   const audioRef = useRef(null);
+  const [audioProgress, setAudioProgress] = useState(0); // in seconds
+  const [audioDuration, setAudioDuration] = useState(0); // in seconds
 
   const loadJobs = useCallback(async () => {
     try {
@@ -159,19 +161,6 @@ const Tasks = () => {
     }
   };
 
-  const handleCancel = async (jobId) => {
-    try {
-      await jobService.cancelSynthesisJob(jobId);
-      loadJobs(); // Reload jobs list
-    } catch (err) {
-      if (err.message === 'No authentication token found') {
-        navigate('/login');
-      } else {
-        console.error('Failed to cancel synthesis job:', err);
-      }
-    }
-  };
-
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
       case 'completed':
@@ -220,11 +209,25 @@ const Tasks = () => {
         <h1 className="text-4xl font-bold mb-12">Generated Audio Files</h1>
 
         {/* Hidden audio element for playback */}
-        <audio ref={audioRef} onEnded={handleAudioEnded} className="hidden" />
+        <audio
+          ref={audioRef}
+          onEnded={handleAudioEnded}
+          onTimeUpdate={() =>
+            setAudioProgress(audioRef.current?.currentTime || 0)
+          }
+          onLoadedMetadata={() =>
+            setAudioDuration(audioRef.current?.duration || 0)
+          }
+          className="hidden"
+        />
 
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+            <div
+              className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"
+              role="status"
+              aria-label="loading"
+            ></div>
           </div>
         ) : error ? (
           <div className="text-red-500 text-center bg-red-500/10 py-4 rounded border border-red-500/20">
@@ -313,50 +316,36 @@ const Tasks = () => {
                   </div>
                 )}
 
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-4">
-                    {job.status === 'completed' && (
-                      <div className="flex items-center space-x-3">
-                        <button
-                          onClick={() => handlePlayPause(job)}
-                          className="flex items-center space-x-2 px-4 py-2 text-sm border border-white rounded hover:bg-white hover:text-black transition-colors"
-                        >
-                          {playingJobId === job.id ? (
-                            <>
-                              <svg
-                                className="w-4 h-4"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              <span>Pause</span>
-                            </>
-                          ) : (
-                            <>
-                              <svg
-                                className="w-4 h-4"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              <span>Play</span>
-                            </>
-                          )}
-                        </button>
-                        <button
-                          onClick={() => handleDownload(job)}
-                          className="flex items-center space-x-2 px-4 py-2 text-sm border border-zinc-600 text-gray-300 rounded hover:border-white hover:text-white transition-colors"
-                        >
+                <div className="flex items-center space-x-4">
+                  {/* Download Button */}
+                  <button
+                    onClick={() => handleDownload(job)}
+                    className="flex items-center space-x-2 px-4 py-2 text-sm border border-zinc-600 text-gray-300 rounded hover:border-white hover:text-white transition-colors"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    <span>Download</span>
+                  </button>
+
+                  {/* Play/Pause Button */}
+                  {job.status === 'completed' && (
+                    <button
+                      onClick={() => handlePlayPause(job)}
+                      className="flex items-center space-x-2 px-4 py-2 text-sm border border-zinc-600 text-gray-300 rounded hover:border-white hover:text-white transition-colors"
+                    >
+                      {playingJobId === job.id ? (
+                        <>
                           <svg
                             className="w-4 h-4"
                             fill="none"
@@ -367,25 +356,66 @@ const Tasks = () => {
                               strokeLinecap="round"
                               strokeLinejoin="round"
                               strokeWidth={2}
-                              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                              d="M10 9v6m4-6v6" // Pause icon
                             />
                           </svg>
-                          <span>Download</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                          <span>Pause</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M14.752 11.168l-5.197-3.028A1 1 0 008 9v6a1 1 0 001.555.832l5.197-3.028a1 1 0 000-1.664z" // Play icon
+                            />
+                          </svg>
+                          <span>Play</span>
+                        </>
+                      )}
+                    </button>
+                  )}
 
-                  <div className="flex items-center space-x-2">
-                    {job.status === 'processing' && (
-                      <button
-                        onClick={() => handleCancel(job.id)}
-                        className="px-4 py-2 text-sm border border-red-500 text-red-500 rounded hover:bg-red-500 hover:text-white transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    )}
-                  </div>
+                  {/* Scrubber */}
+                  {job.status === 'completed' && (
+                    <div className="flex flex-col flex-1 max-w-xs">
+                      <input
+                        type="range"
+                        min={0}
+                        max={audioDuration}
+                        step={0.1}
+                        value={playingJobId === job.id ? audioProgress : 0}
+                        onChange={(e) => {
+                          const newTime = parseFloat(e.target.value);
+                          if (audioRef.current && playingJobId === job.id) {
+                            audioRef.current.currentTime = newTime;
+                          }
+                          setAudioProgress(newTime);
+                        }}
+                        className="w-full h-1.5 appearance-none bg-zinc-800 rounded-full overflow-hidden cursor-pointer accent-white"
+                        style={{
+                          /* Webkit styles for thinner scrollbar */
+                          WebkitAppearance: 'none',
+                        }}
+                      />
+                      <div className="flex justify-between text-xs text-gray-400 mt-1">
+                        <span>
+                          {(playingJobId === job.id
+                            ? audioProgress
+                            : 0
+                          ).toFixed(1)}
+                          s
+                        </span>
+                        <span>{audioDuration.toFixed(1)}s</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {job.error_message && (

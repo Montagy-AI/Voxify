@@ -273,7 +273,7 @@ def get_voice_clone_synthesis_info(job_id: str):
                 "output_path": job.output_path,
                 "duration": job.duration,
                 "created_at": job.created_at.isoformat() if job.created_at else None,
-                "completed_at": job.completed_at.isoformat() if job.completed_at else None,
+                "completed_at": (job.completed_at.isoformat() if job.completed_at else None),
             }
 
             # Check if file exists

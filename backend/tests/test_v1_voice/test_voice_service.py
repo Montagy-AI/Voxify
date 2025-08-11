@@ -98,11 +98,12 @@ class TestVoiceServiceAPI:
     def test_upload_voice_sample_valid(self, server_url, auth_tokens, test_audio_files):
         """Test uploading a valid voice sample"""
         import time
+
         timestamp = int(time.time() * 1000)
-        
+
         # Use the first audio file
         test_audio_file = test_audio_files[0]
-        
+
         curl_cmd = [
             "curl",
             "-X",
@@ -149,7 +150,7 @@ class TestVoiceServiceAPI:
         """Test uploading a voice sample without name"""
         # Use the second audio file
         test_audio_file = test_audio_files[1]
-        
+
         curl_cmd = [
             "curl",
             "-X",
@@ -624,8 +625,9 @@ class TestVoiceServiceAPI:
         test_audio_file = test_audio_files[2]
 
         import time
+
         timestamp = int(time.time() * 1000)
-        
+
         # Upload sample
         upload_cmd = [
             "curl",
@@ -646,7 +648,7 @@ class TestVoiceServiceAPI:
         assert result.returncode == 0, f"Upload failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
-        
+
         # Check if upload was successful
         if upload_response.get("success") is False:
             error_msg = upload_response.get("error", "")
@@ -656,7 +658,7 @@ class TestVoiceServiceAPI:
             else:
                 # For other upload errors, fail the test
                 assert False, f"Upload failed: {error_msg}"
-        
+
         sample_id = upload_response.get("data", {}).get("sample_id")
         assert sample_id is not None, "No sample_id in response"
 
@@ -748,8 +750,9 @@ class TestVoiceServiceAPI:
         test_audio_file = test_audio_files[3]
 
         import time
+
         timestamp = int(time.time() * 1000)
-        
+
         # Upload sample
         upload_cmd = [
             "curl",
@@ -770,7 +773,7 @@ class TestVoiceServiceAPI:
         assert result.returncode == 0, f"Upload failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
-        
+
         # Check if upload was successful
         if upload_response.get("success") is False:
             error_msg = upload_response.get("error", "")
@@ -780,7 +783,7 @@ class TestVoiceServiceAPI:
             else:
                 # For other upload errors, fail the test
                 assert False, f"Upload failed: {error_msg}"
-        
+
         sample_id = upload_response.get("data", {}).get("sample_id")
 
         # Wait for processing
@@ -844,8 +847,9 @@ class TestVoiceServiceAPI:
         test_audio_file = test_audio_files[4]
 
         import time
+
         timestamp = int(time.time() * 1000)
-        
+
         # Upload sample
         upload_cmd = [
             "curl",
@@ -866,7 +870,7 @@ class TestVoiceServiceAPI:
         assert result.returncode == 0, f"Upload failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
-        
+
         # Check if upload was successful
         if upload_response.get("success") is False:
             error_msg = upload_response.get("error", "")
@@ -876,7 +880,7 @@ class TestVoiceServiceAPI:
             else:
                 # For other upload errors, fail the test
                 assert False, f"Upload failed: {error_msg}"
-        
+
         sample_id = upload_response.get("data", {}).get("sample_id")
 
         # Wait for processing
@@ -950,8 +954,9 @@ class TestVoiceServiceAPI:
         test_audio_file = test_audio_files[5]
 
         import time
+
         timestamp = int(time.time() * 1000)
-        
+
         # Upload sample
         upload_cmd = [
             "curl",
@@ -972,7 +977,7 @@ class TestVoiceServiceAPI:
         assert result.returncode == 0, f"Upload failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
-        
+
         # Check if upload was successful
         if upload_response.get("success") is False:
             error_msg = upload_response.get("error", "")
@@ -982,7 +987,7 @@ class TestVoiceServiceAPI:
             else:
                 # For other upload errors, fail the test
                 assert False, f"Upload failed: {error_msg}"
-        
+
         sample_id = upload_response.get("data", {}).get("sample_id")
 
         # Wait for processing
@@ -1040,8 +1045,9 @@ class TestVoiceServiceAPI:
         test_audio_file = test_audio_files[6]
 
         import time
+
         timestamp = int(time.time() * 1000)
-        
+
         # Upload sample
         upload_cmd = [
             "curl",
@@ -1062,7 +1068,7 @@ class TestVoiceServiceAPI:
         assert result.returncode == 0, f"Upload failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
-        
+
         # Check if upload was successful
         if upload_response.get("success") is False:
             error_msg = upload_response.get("error", "")
@@ -1072,7 +1078,7 @@ class TestVoiceServiceAPI:
             else:
                 # For other upload errors, fail the test
                 assert False, f"Upload failed: {error_msg}"
-        
+
         sample_id = upload_response.get("data", {}).get("sample_id")
 
         # Wait for processing
@@ -1145,8 +1151,9 @@ class TestVoiceServiceAPI:
         test_audio_file = test_audio_files[7]
 
         import time
+
         timestamp = int(time.time() * 1000)
-        
+
         # Upload sample
         upload_cmd = [
             "curl",
@@ -1234,7 +1241,7 @@ class TestVoiceServiceAPI:
             # Use different audio files for each clone, wrap around if needed
             audio_index = (i + 8) % len(test_audio_files)
             test_audio_file = test_audio_files[audio_index]
-            
+
             # Upload sample
             upload_cmd = [
                 "curl",

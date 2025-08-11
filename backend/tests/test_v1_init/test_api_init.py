@@ -132,7 +132,11 @@ class TestCreateAppFunction:
         except ImportError:
             pytest.skip("Could not import create_app from api")
 
-        test_config = {"TESTING": True, "SECRET_KEY": "test_override_secret", "DATABASE_URL": "sqlite:///:memory:"}
+        test_config = {
+            "TESTING": True,
+            "SECRET_KEY": "test_override_secret",
+            "DATABASE_URL": "sqlite:///:memory:",
+        }
 
         with (
             patch("api.load_dotenv"),
@@ -299,7 +303,10 @@ class TestConfigurationErrorHandling:
         except ImportError:
             pytest.skip("Could not import create_app from api")
 
-        invalid_env = {"JWT_ACCESS_TOKEN_EXPIRES": "not_a_number", "JWT_REFRESH_TOKEN_EXPIRES": "also_not_a_number"}
+        invalid_env = {
+            "JWT_ACCESS_TOKEN_EXPIRES": "not_a_number",
+            "JWT_REFRESH_TOKEN_EXPIRES": "also_not_a_number",
+        }
 
         with (
             patch("api.load_dotenv"),

@@ -413,8 +413,6 @@ class TestDatabaseOperations:
         finally:
             session.close()
 
-
-
     def test_usage_stat_workflow(self, temp_db_path):
         """Test usage statistics workflow"""
         db_url = f"sqlite:///{temp_db_path}"

@@ -120,7 +120,7 @@ def register():
             "email": new_user.email,
             "first_name": new_user.first_name,
             "last_name": new_user.last_name,
-            "created_at": new_user.created_at.isoformat() if new_user.created_at else None,
+            "created_at": (new_user.created_at.isoformat() if new_user.created_at else None),
         }
 
         return success_response(
@@ -281,7 +281,7 @@ def get_profile():
                 "email_verified": user.email_verified,
                 "created_at": user.created_at.isoformat() if user.created_at else None,
                 "updated_at": user.updated_at.isoformat() if user.updated_at else None,
-                "last_login_at": user.last_login_at.isoformat() if user.last_login_at else None,
+                "last_login_at": (user.last_login_at.isoformat() if user.last_login_at else None),
             }
 
             return success_response(data={"user": user_data}, message="Profile retrieved successfully")
@@ -378,7 +378,7 @@ def update_profile():
                 "email_verified": user.email_verified,
                 "created_at": user.created_at.isoformat() if user.created_at else None,
                 "updated_at": user.updated_at.isoformat() if user.updated_at else None,
-                "last_login_at": user.last_login_at.isoformat() if user.last_login_at else None,
+                "last_login_at": (user.last_login_at.isoformat() if user.last_login_at else None),
             }
 
             return success_response(
@@ -448,9 +448,7 @@ def forgot_password():
             # Send reset email
             email_service = get_email_service()
             success, error_msg = email_service.send_password_reset_email(
-                to_email=user.email,
-                reset_token=reset_token,
-                user_name=user.first_name
+                to_email=user.email, reset_token=reset_token, user_name=user.first_name
             )
 
             if not success:
@@ -459,17 +457,13 @@ def forgot_password():
 
         # Always return success to prevent user enumeration
         # This prevents attackers from discovering valid email addresses
-        return success_response(
-            message="If an account with that email exists, a password reset link has been sent."
-        )
+        return success_response(message="If an account with that email exists, a password reset link has been sent.")
 
     except Exception as e:
         session.rollback()
         # Log the error but return generic message
         print(f"Password reset request failed: {str(e)}")
-        return success_response(
-            message="If an account with that email exists, a password reset link has been sent."
-        )
+        return success_response(message="If an account with that email exists, a password reset link has been sent.")
     finally:
         session.close()
 
@@ -520,7 +514,7 @@ def reset_password():
         is_valid, error_message = is_reset_token_valid(
             token=token,
             stored_token=user.reset_token,
-            expires_at=user.reset_token_expires_at
+            expires_at=user.reset_token_expires_at,
         )
 
         if not is_valid:
@@ -547,7 +541,7 @@ def reset_password():
         return error_response(
             f"Failed to reset password: {str(e)}",
             "PASSWORD_RESET_ERROR",
-            status_code=500
+            status_code=500,
         )
     finally:
         session.close()

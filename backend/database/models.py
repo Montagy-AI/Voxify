@@ -59,7 +59,7 @@ class User(Base, TimestampMixin):
     is_active = Column(Boolean, default=True, nullable=False)
     email_verified = Column(Boolean, default=False, nullable=False)
     last_login_at = Column(DateTime)
-    
+
     # Password reset fields
     reset_token = Column(String, nullable=True)
     reset_token_expires_at = Column(DateTime, nullable=True)
@@ -95,7 +95,7 @@ class User(Base, TimestampMixin):
             "is_active": self.is_active,
             "email_verified": self.email_verified,
             "created_at": self.created_at.isoformat() if self.created_at else None,
-            "last_login_at": self.last_login_at.isoformat() if self.last_login_at else None,
+            "last_login_at": (self.last_login_at.isoformat() if self.last_login_at else None),
         }
 
 
@@ -388,7 +388,7 @@ class SynthesisJob(Base, TimestampMixin):
             "processing_time_ms": self.processing_time_ms,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "started_at": self.started_at.isoformat() if self.started_at else None,
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "completed_at": (self.completed_at.isoformat() if self.completed_at else None),
         }
 
 
@@ -533,7 +533,7 @@ class DatabaseManager:
         self.engine = create_engine(
             database_url,
             echo=False,  # Set to True for SQL debugging
-            connect_args={"check_same_thread": False} if "sqlite" in database_url else {},
+            connect_args=({"check_same_thread": False} if "sqlite" in database_url else {}),
         )
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
 

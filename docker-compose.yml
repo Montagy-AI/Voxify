@@ -31,13 +31,21 @@ services:
     environment:
       - FLASK_ENV=development
       - DATABASE_URL=sqlite:////data/voxify.db
-      - VECTOR_DB_PATH=data/chroma_db
+      - VECTOR_DB_PATH=/data/chroma_db
       - JWT_SECRET_KEY=Majick
       - SECRET_KEY=Majick
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USERNAME=voxifynoreply@gmail.com
+      - SMTP_PASSWORD=uhxxrskdlliidcyg
+      - SMTP_USE_TLS=true
+      - SMTP_FROM_EMAIL=voxifynoreply@gmail.com
+      - SMTP_FROM_NAME=Voxify
+      - FRONTEND_URL=https://voxify-prod.vercel.app
     volumes:
       - data_volume:/data
     restart: unless-stopped
-    healthcheck: # Add health check for the API
+    healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
@@ -72,7 +80,7 @@ services:
     working_dir: /app/backend
     environment:
       - DATABASE_URL=sqlite:////data/voxify.db
-      - VECTOR_DB_PATH=data/chroma_db
+      - VECTOR_DB_PATH=/data/chroma_db
       - DOCKER_ENV=true
       - FLASK_HOST=voxify_api
     command:
@@ -88,9 +96,6 @@ services:
       context: ./frontend/
       dockerfile: Dockerfile.test
     container_name: voxify_frontend_tests
-    depends_on:
-      api:
-        condition: service_healthy
     volumes:
       - ./frontend:/app
       - /app/node_modules

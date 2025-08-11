@@ -29,24 +29,26 @@ class EmailService:
             SMTP configuration dictionary. If None, uses environment variables.
         """
         if smtp_config:
-            self.smtp_host = smtp_config.get('host')
-            self.smtp_port = smtp_config.get('port', 587)
-            self.smtp_username = smtp_config.get('username')
-            self.smtp_password = smtp_config.get('password')
-            self.smtp_use_tls = smtp_config.get('use_tls', True)
-            self.from_email = smtp_config.get('from_email', self.smtp_username)
-            self.from_name = smtp_config.get('from_name', 'Voxify')
+            self.smtp_host = smtp_config.get("host")
+            self.smtp_port = smtp_config.get("port", 587)
+            self.smtp_username = smtp_config.get("username")
+            self.smtp_password = smtp_config.get("password")
+            self.smtp_use_tls = smtp_config.get("use_tls", True)
+            self.from_email = smtp_config.get("from_email", self.smtp_username)
+            self.from_name = smtp_config.get("from_name", "Voxify")
         else:
             # Load from environment variables
-            self.smtp_host = os.getenv('SMTP_HOST')
-            self.smtp_port = int(os.getenv('SMTP_PORT', '587'))
-            self.smtp_username = os.getenv('SMTP_USERNAME')
-            self.smtp_password = os.getenv('SMTP_PASSWORD')
-            self.smtp_use_tls = os.getenv('SMTP_USE_TLS', 'true').lower() == 'true'
-            self.from_email = os.getenv('SMTP_FROM_EMAIL', self.smtp_username)
-            self.from_name = os.getenv('SMTP_FROM_NAME', 'Voxify')
+            self.smtp_host = os.getenv("SMTP_HOST")
+            self.smtp_port = int(os.getenv("SMTP_PORT", "587"))
+            self.smtp_username = os.getenv("SMTP_USERNAME")
+            self.smtp_password = os.getenv("SMTP_PASSWORD")
+            self.smtp_use_tls = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
+            self.from_email = os.getenv("SMTP_FROM_EMAIL", self.smtp_username)
+            self.from_name = os.getenv("SMTP_FROM_NAME", "Voxify")
 
-    def send_password_reset_email(self, to_email: str, reset_token: str, user_name: Optional[str] = None) -> Tuple[bool, str]:
+    def send_password_reset_email(
+        self, to_email: str, reset_token: str, user_name: Optional[str] = None
+    ) -> Tuple[bool, str]:
         """
         Send password reset email to user
 
@@ -67,16 +69,22 @@ class EmailService:
         try:
             # Generate email content
             subject, html_content, text_content = self._get_reset_email_template(reset_token, user_name)
-            
+
             # Send email
             return self._send_email(to_email, subject, html_content, text_content)
-            
+
         except Exception as e:
             error_msg = f"Failed to send password reset email: {str(e)}"
             logger.error(error_msg)
             return False, error_msg
 
-    def _send_email(self, to_email: str, subject: str, html_content: str, text_content: Optional[str] = None) -> Tuple[bool, str]:
+    def _send_email(
+        self,
+        to_email: str,
+        subject: str,
+        html_content: str,
+        text_content: Optional[str] = None,
+    ) -> Tuple[bool, str]:
         """
         Send email via SMTP
 
@@ -102,25 +110,25 @@ class EmailService:
                 return False, "SMTP configuration is incomplete"
 
             # Create message
-            msg = MIMEMultipart('alternative')
-            msg['From'] = f"{self.from_name} <{self.from_email}>"
-            msg['To'] = to_email
-            msg['Subject'] = subject
+            msg = MIMEMultipart("alternative")
+            msg["From"] = f"{self.from_name} <{self.from_email}>"
+            msg["To"] = to_email
+            msg["Subject"] = subject
 
             # Add text content
             if text_content:
-                text_part = MIMEText(text_content, 'plain', 'utf-8')
+                text_part = MIMEText(text_content, "plain", "utf-8")
                 msg.attach(text_part)
 
             # Add HTML content
-            html_part = MIMEText(html_content, 'html', 'utf-8')
+            html_part = MIMEText(html_content, "html", "utf-8")
             msg.attach(html_part)
 
             # Connect to SMTP server and send email
             with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
                 if self.smtp_use_tls:
                     server.starttls()
-                
+
                 server.login(self.smtp_username, self.smtp_password)
                 server.send_message(msg)
 
@@ -162,9 +170,9 @@ class EmailService:
         """
         # Determine greeting
         greeting = f"Hello {user_name}," if user_name else "Hello,"
-        
+
         # Generate reset URL (this should be configurable)
-        base_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+        base_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
         reset_url = f"{base_url}/reset-password?token={reset_token}"
 
         # Email subject
@@ -283,32 +291,41 @@ class EmailService:
             <h1>🎙️ Voxify</h1>
             <h2>Password Reset Request</h2>
         </div>
-        
+
         <div class="content">
             <p>{greeting}</p>
-            
-            <p>We received a request to reset your password for your Voxify account. If you made this request, click the button below to reset your password:</p>
-            
+
+            <p>
+                We received a request to reset your password for your Voxify account.
+                 If you made this request, click the button below to reset your password:
+            </p>
+
             <p style="text-align: center;">
                 <a href="{reset_url}" class="button">Reset My Password</a>
             </p>
-            
+
             <p><strong>⚠️ If the button doesn't work properly:</strong></p>
-            <p>Some email clients may redirect links through security services. If you're redirected to an unexpected page, please copy and paste this link directly into your browser address bar:</p>
+            <p>
+                Some email clients may redirect links through security services. If
+                 you're redirected to an unexpected page, please copy and paste this link
+                  directly into your browser address bar:
+            </p>
             <div class="url-box">
                 {reset_url}
             </div>
-            
+
             <div class="warning">
                 <strong>⚠️ Important:</strong>
                 <ul>
                     <li>This link will expire in <strong>15 minutes</strong></li>
-                    <li>If the button redirects to an unexpected page, <strong>copy the link above and paste it directly into your browser</strong></li>
+                    <li>If the button redirects to an unexpected page,
+                         <strong>copy the link above and paste it directly into your browser</strong>
+                    </li>
                     <li>If you didn't request this password reset, please ignore this email</li>
                     <li>Your password will remain unchanged until you create a new one</li>
                 </ul>
             </div>
-            
+
             <div class="footer">
                 <p>If you're having trouble clicking the button, copy and paste the URL above into your web browser.</p>
                 <p>This is an automated message from Voxify. Please do not reply to this email.</p>
@@ -377,4 +394,4 @@ def get_email_service() -> EmailService:
     EmailService
         Configured email service instance
     """
-    return EmailService() 
+    return EmailService()

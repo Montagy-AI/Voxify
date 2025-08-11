@@ -231,6 +231,7 @@ const VoiceClone = () => {
                   onChange={handleFileSelect}
                   className="hidden"
                   id="file-upload"
+                  aria-label="Upload voice samples"
                 />
                 <button
                   type="button"

@@ -316,7 +316,7 @@ class TestVoiceServiceIntegration:
             assert result.returncode == 0, f"Upload {i+1} failed: {result.stderr}"
 
             upload_response = json.loads(result.stdout)
-            
+
             # Check if upload was successful or if there's a duplicate detection
             if upload_response.get("success") is False:
                 error_msg = upload_response.get("error", "")
@@ -448,7 +448,7 @@ class TestVoiceServiceIntegration:
 
             result = subprocess.run(upload_cmd, capture_output=True, text=True)
             response = json.loads(result.stdout)
-            
+
             # Check if upload was successful or if there's a duplicate detection
             if response.get("success") is False:
                 error_msg = response.get("error", "")
@@ -473,17 +473,19 @@ class TestVoiceServiceIntegration:
         # Check results
         successful_uploads = [r for r in results if r[1]]
         duplicate_detections = [r for r in results if r[2] == "duplicate"]
-        
+
         # If all uploads failed due to duplicate detection, skip the test
         if len(duplicate_detections) == len(results):
             pytest.skip("All concurrent uploads failed due to duplicate detection")
-        
+
         # Otherwise, check that at least some uploads succeeded
         assert len(successful_uploads) > 0, "No successful concurrent uploads"
 
     def test_performance_metrics(self, server_url, auth_tokens, test_audio_file):
         """Test performance metrics collection"""
         # Upload sample
+        start_time = time.time()
+
         upload_cmd = [
             "curl",
             "-X",
@@ -498,10 +500,11 @@ class TestVoiceServiceIntegration:
         ]
 
         result = subprocess.run(upload_cmd, capture_output=True, text=True)
+        upload_time = time.time() - start_time
         assert result.returncode == 0, f"Upload failed: {result.stderr}"
 
         upload_response = json.loads(result.stdout)
-        
+
         # Check if upload was successful or if there's a duplicate detection
         if upload_response.get("success") is False:
             error_msg = upload_response.get("error", "")

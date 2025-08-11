@@ -19,8 +19,8 @@ voice_encoder = VoiceEncoder()
 # Get the existing ChromaVectorDB instance
 vector_db = create_vector_db()
 
-def generate_voice_embedding(audio_path: str, user_id: str = None, **extra_metadata) -> Tuple[str, np.ndarray]:
 
+def generate_voice_embedding(audio_path: str, user_id: str = None, **extra_metadata) -> Tuple[str, np.ndarray]:
     """
     Generate voice embedding from audio file using Resemblyzer.
 
@@ -28,25 +28,25 @@ def generate_voice_embedding(audio_path: str, user_id: str = None, **extra_metad
         audio_path: Path to the audio file
         user_id: User ID for the embedding (optional)
         **extra_metadata: Additional metadata for the embedding
-        
+
 
     Returns:
         Tuple of (embedding_id, embedding_vector)
     """
     try:
         print(f"[DEBUG] Generating embedding for: {audio_path}")
-        
+
         # Load and preprocess audio
         wav = preprocess_wav(audio_path)
         print(f"[DEBUG] Preprocessed audio shape: {wav.shape}")
-        
+
         # Generate embedding
         embedding = voice_encoder.embed_utterance(wav)
         print(f"[DEBUG] Generated embedding shape: {embedding.shape}")
         # Store in ChromaDB using the existing vector_db
         embedding_id = str(uuid.uuid4())
         print(f"[DEBUG] Storing embedding with ID: {embedding_id}")
-        
+
         # Use the existing ChromaVectorDB's add_voice_embedding method
         vector_db.add_voice_embedding(
             voice_sample_id=embedding_id,
@@ -56,20 +56,19 @@ def generate_voice_embedding(audio_path: str, user_id: str = None, **extra_metad
                 "model": "resemblyzer",
                 "embedding_dim": len(embedding),
                 "user_id": user_id,
-                **extra_metadata
-            }
+                **extra_metadata,
+            },
         )
-        
-        print(f"[DEBUG] Embedding stored successfully")
-        
+
+        print("[DEBUG] Embedding stored successfully")
+
         # Verify storage
         verification = vector_db.get_embedding(embedding_id)
-        if verification and verification.get('embeddings'):
-            print(f"[DEBUG] ✅ Verification successful - embedding can be retrieved")
+        if verification and verification.get("embeddings"):
+            print("[DEBUG] ✅ Verification successful - embedding can be retrieved")
         else:
-            print(f"[DEBUG] ❌ WARNING: Embedding storage verification failed")
+            print("[DEBUG] ❌ WARNING: Embedding storage verification failed")
             print(f"[DEBUG] Verification result: {verification}")
-        
 
         return embedding_id, embedding
 
@@ -91,9 +90,9 @@ def get_voice_embedding(embedding_id: str) -> Optional[np.ndarray]:
         print(f"[DEBUG] Attempting to retrieve embedding: {embedding_id}")
         result = vector_db.get_embedding(embedding_id)
         print(f"[DEBUG] ChromaDB result keys: {result.keys() if result else 'None'}")
-        
-        if result and result.get('embeddings') and len(result['embeddings']) > 0:
-            embedding_data = result['embeddings'][0]
+
+        if result and result.get("embeddings") and len(result["embeddings"]) > 0:
+            embedding_data = result["embeddings"][0]
             if embedding_data:
                 embedding_array = np.array(embedding_data)
                 print(f"[DEBUG] Successfully retrieved embedding, shape: {embedding_array.shape}")
@@ -108,6 +107,7 @@ def get_voice_embedding(embedding_id: str) -> Optional[np.ndarray]:
     except Exception as e:
         print(f"[DEBUG] Error retrieving embedding {embedding_id}: {e}")
         import traceback
+
         traceback.print_exc()
     return None
 
@@ -149,19 +149,19 @@ def compare_embeddings(embedding1: np.ndarray, embedding2: np.ndarray) -> float:
     similarity = np.dot(embedding1, embedding2)
     return float(similarity)
 
+
 def debug_chromadb_status():
     """Debug function to check ChromaDB status"""
     try:
         collection_info = vector_db.get_collection_count()
         print(f"[DEBUG] ChromaDB collection info: {collection_info}")
-        
+
         # Get all embeddings
         all_data = vector_db.get_collection().get()
         print(f"[DEBUG] All stored IDs: {all_data.get('ids', [])}")
         print(f"[DEBUG] Total embeddings in collection: {len(all_data.get('embeddings', []))}")
-        
-        return collection_info.get('item count', 0)
+
+        return collection_info.get("item count", 0)
     except Exception as e:
         print(f"[DEBUG] Error checking ChromaDB status: {e}")
         return -1
-

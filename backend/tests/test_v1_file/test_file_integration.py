@@ -68,7 +68,7 @@ def temp_file_storage():
     with open(test_file_path, "wb") as f:
         f.write(
             b"RIFF\x24\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00"
-            b"D\xAC\x00\x00\x88X\x01\x00\x02\x00\x10\x00data\x00\x00\x00\x00"
+            b"D\xac\x00\x00\x88X\x01\x00\x02\x00\x10\x00data\x00\x00\x00\x00"
         )
 
     yield {"temp_dir": temp_dir, "test_file_path": test_file_path}
@@ -83,13 +83,13 @@ def test_db():
     # Use in-memory database for testing
     test_db_url = "sqlite:///:memory:"
     db_manager = get_database_manager(test_db_url)
-    
+
     # Create tables
     db_manager.create_tables()
     db_manager.init_default_data()
-    
+
     yield db_manager
-    
+
     # Cleanup is automatic for in-memory database
 
 
@@ -180,7 +180,7 @@ class TestFileIntegrationFinal:
         """Test basic file download with JWT authentication"""
 
         # Mock the database manager to use test database
-        with patch('api.v1.file.routes.get_database_manager', return_value=test_db):
+        with patch("api.v1.file.routes.get_database_manager", return_value=test_db):
             # Create test data
             session = test_db.get_session()
 
@@ -260,7 +260,7 @@ class TestFileIntegrationFinal:
         """Test file info endpoint with JWT authentication"""
 
         # Mock the database manager to use test database
-        with patch('api.v1.file.routes.get_database_manager', return_value=test_db):
+        with patch("api.v1.file.routes.get_database_manager", return_value=test_db):
             # Create test data
             session = test_db.get_session()
 
@@ -334,7 +334,7 @@ class TestFileIntegrationFinal:
         """Test file delete with JWT authentication"""
 
         # Mock the database manager to use test database
-        with patch('api.v1.file.routes.get_database_manager', return_value=test_db):
+        with patch("api.v1.file.routes.get_database_manager", return_value=test_db):
             # Create test data
             session = test_db.get_session()
 
@@ -407,7 +407,7 @@ class TestFileIntegrationFinal:
         """Test file access control between different users"""
 
         # Mock the database manager to use test database
-        with patch('api.v1.file.routes.get_database_manager', return_value=test_db):
+        with patch("api.v1.file.routes.get_database_manager", return_value=test_db):
             # Create test data
             session = test_db.get_session()
 
@@ -499,7 +499,7 @@ class TestFileIntegrationFinal:
         """Test file not found scenarios"""
 
         # Mock the database manager to use test database
-        with patch('api.v1.file.routes.get_database_manager', return_value=test_db):
+        with patch("api.v1.file.routes.get_database_manager", return_value=test_db):
             # Create test data
             session = test_db.get_session()
 

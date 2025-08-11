@@ -769,10 +769,10 @@ def generate_job_progress_events(job_id):
                     "status": job.status,
                     "progress": job.progress or 0.0,
                     "progress_percentage": round((job.progress or 0.0) * 100, 2),
-                    "message": job.error_message if job.status == "failed" else "Processing...",
-                    "created_at": job.created_at.isoformat() if job.created_at else None,
-                    "started_at": job.started_at.isoformat() if job.started_at else None,
-                    "updated_at": job.updated_at.isoformat() if job.updated_at else None,
+                    "message": (job.error_message if job.status == "failed" else "Processing..."),
+                    "created_at": (job.created_at.isoformat() if job.created_at else None),
+                    "started_at": (job.started_at.isoformat() if job.started_at else None),
+                    "updated_at": (job.updated_at.isoformat() if job.updated_at else None),
                     "estimated_completion": None,
                 }
 
@@ -780,10 +780,10 @@ def generate_job_progress_events(job_id):
                 if job.status in ["completed", "failed", "cancelled"]:
                     progress_data.update(
                         {
-                            "completed_at": job.completed_at.isoformat() if job.completed_at else None,
+                            "completed_at": (job.completed_at.isoformat() if job.completed_at else None),
                             "processing_time_ms": job.processing_time_ms,
-                            "output_path": job.output_path if job.status == "completed" else None,
-                            "duration": job.duration if job.status == "completed" else None,
+                            "output_path": (job.output_path if job.status == "completed" else None),
+                            "duration": (job.duration if job.status == "completed" else None),
                         }
                     )
 

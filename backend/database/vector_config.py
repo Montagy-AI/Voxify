@@ -133,7 +133,7 @@ class ChromaVectorDB:
             documents=[document],
             metadatas=[enhanced_metadata],
         )
-        
+
         logger.debug(f"Added voice embedding for sample: {voice_sample_id}")
 
     def get_embedding(self, sample_id: str) -> Dict[str, List]:

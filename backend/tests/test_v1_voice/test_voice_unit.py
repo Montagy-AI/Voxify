@@ -165,7 +165,7 @@ class TestVoiceEmbeddingOperations:
         mock_vector_db.add_voice_embedding.return_value = None
         mock_vector_db.get_embedding.return_value = {
             "embeddings": [np.random.rand(256).tolist()],
-            "metadatas": [{"audio_path": "/test/path.wav"}]
+            "metadatas": [{"audio_path": "/test/path.wav"}],
         }
 
         embedding_id, embedding = generate_voice_embedding("/path/to/audio.wav")

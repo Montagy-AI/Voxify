@@ -31,21 +31,21 @@ from database.models import (
 def setup_database():
     """Initialize database tables for all tests"""
     import os
-    
+
     # Use a test-specific database path
     test_db_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "test_voxify.db")
     test_db_url = f"sqlite:///{test_db_path}"
-    
+
     # Set environment variable for this test session
     os.environ["DATABASE_URL"] = test_db_url
-    
+
     db_manager = get_database_manager(test_db_url)
-    
+
     # Force recreate tables
     db_manager.drop_tables()
     db_manager.create_tables()
     db_manager.init_default_data()
-    
+
     return db_manager
 
 
@@ -89,7 +89,7 @@ def temp_file_storage():
     with open(test_file_path, "wb") as f:
         f.write(
             b"RIFF\x24\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00"
-            b"D\xAC\x00\x00\x88X\x01\x00\x02\x00\x10\x00data\x00\x00\x00\x00"
+            b"D\xac\x00\x00\x88X\x01\x00\x02\x00\x10\x00data\x00\x00\x00\x00"
         )
 
     yield {"temp_dir": temp_dir, "test_file_path": test_file_path}
