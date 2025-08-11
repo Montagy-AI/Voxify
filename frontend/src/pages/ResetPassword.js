@@ -194,7 +194,7 @@ const ResetPassword = () => {
                     name="password"
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="new-password"
-                    required
+    
                     className="relative block w-full rounded-lg border border-gray-600 bg-gray-800 px-3 py-2 pr-10 text-white placeholder-gray-400 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
                     placeholder="New password"
                     value={password}
@@ -254,7 +254,7 @@ const ResetPassword = () => {
                     name="confirmPassword"
                     type={showConfirmPassword ? 'text' : 'password'}
                     autoComplete="new-password"
-                    required
+    
                     className="relative block w-full rounded-lg border border-gray-600 bg-gray-800 px-3 py-2 pr-10 text-white placeholder-gray-400 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
                     placeholder="Confirm new password"
                     value={confirmPassword}

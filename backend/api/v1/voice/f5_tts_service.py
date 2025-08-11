@@ -32,6 +32,7 @@ class VoiceCloneConfig:
     description: Optional[str] = None
     language: str = "en-US"
     speed: float = 1.0
+    clone_type: str = "upload"  # 'upload' or 'record'
 
 
 @dataclass
@@ -211,6 +212,7 @@ class F5TTSService:
                 "ref_text": config.ref_text,
                 "language": config.language,
                 "speed": config.speed,
+                "clone_type": config.clone_type,  # 'upload' or 'record'
                 "sample_ids": sample_ids,
                 "status": "ready",  # F5-TTS doesn't require training
                 "created_at": datetime.now(timezone.utc).isoformat(),
@@ -362,13 +364,23 @@ class F5TTSService:
         try:
             clone_path = self.base_path / clone_id
             if not clone_path.exists():
+                # Don't log error for missing clones - this is expected during cleanup
                 raise ValueError(f"Voice clone not found: {clone_id}")
 
-            with open(clone_path / "clone_info.json", "r", encoding="utf-8") as f:
+            clone_info_path = clone_path / "clone_info.json"
+            if not clone_info_path.exists():
+                # Don't log error for missing clone info - this is expected during cleanup
+                raise ValueError(f"Clone info not found: {clone_id}")
+
+            with open(clone_info_path, "r", encoding="utf-8") as f:
                 return json.load(f)
 
+        except ValueError:
+            # Re-raise ValueError without logging (expected for missing clones)
+            raise
         except Exception as e:
-            logger.error(f"Failed to get clone info: {e}")
+            # Log only unexpected errors (file system errors, JSON parsing errors, etc.)
+            logger.error(f"Failed to get clone info for {clone_id}: {e}")
             raise
 
     def list_clones(self) -> List[Dict]:

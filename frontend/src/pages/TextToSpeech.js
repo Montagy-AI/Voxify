@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import voiceCloneService from '../services/voiceClone.service';
 // import { createAudioUrl } from '../services/api';
 import apiConfig from '../config/api.config';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const TextToSpeech = () => {
+  const [searchParams] = useSearchParams();
   const [text, setText] = useState('');
   const [voice, setVoice] = useState('');
   const [voiceClones, setVoiceClones] = useState([]);
@@ -41,6 +44,18 @@ const TextToSpeech = () => {
 
     loadVoiceClones();
   }, []);
+
+  // Handle voice pre-selection from URL parameters
+  useEffect(() => {
+    const preselectedVoice = searchParams.get('voice');
+    if (preselectedVoice && voiceClones.length > 0) {
+      // Check if the voice clone exists in the list
+      const voiceExists = voiceClones.some(clone => clone.clone_id === preselectedVoice);
+      if (voiceExists) {
+        setVoice(preselectedVoice);
+      }
+    }
+  }, [searchParams, voiceClones]);
 
   // Audio control functions
   const handlePlayPause = async () => {
@@ -187,7 +202,24 @@ const TextToSpeech = () => {
   return (
     <div className="min-h-screen bg-black text-white p-8">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold mb-12">Text to Speech</h1>
+        <h1 className="text-4xl font-bold mb-8">Text to Speech</h1>
+
+        {/* Pre-selected Voice Notification */}
+        {searchParams.get('voice') && voice && (
+          <div className="mb-8 bg-blue-900/20 border border-blue-800 rounded-lg p-4">
+            <div className="flex items-center space-x-3">
+              <svg className="w-5 h-5 text-blue-400 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p className="text-blue-300 font-medium">Voice Clone Pre-selected</p>
+                <p className="text-blue-200 text-sm">
+                  {voiceClones.find(clone => clone.clone_id === voice)?.name} has been automatically selected for you.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Text Input */}
@@ -408,20 +440,9 @@ const TextToSpeech = () => {
             </div>
           </div>
 
-          {/* Generation Progress */}
+          {/* Loading Spinner */}
           {isGenerating && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Generating</span>
-                <span>{progress}% complete</span>
-              </div>
-              <div className="h-2 bg-zinc-900 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-white transition-all duration-500"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            </div>
+            <LoadingSpinner message="Generating... This might take a while" />
           )}
 
           {/* Submit Button */}

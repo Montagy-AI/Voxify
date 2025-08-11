@@ -1,0 +1,15 @@
+{
+  "id": "72cbbeb6-7bd3-4cfd-96e8-a8b58c93f461",
+  "name": "Jun",
+  "description": "",
+  "ref_audio_path": "backend\\data\\voice_clones\\72cbbeb6-7bd3-4cfd-96e8-a8b58c93f461\\reference.wav",
+  "ref_text": "The quick brown fox jumps over the lazy dog, she sells seashells by the seashore.",
+  "language": "en-US",
+  "speed": 1.0,
+  "sample_ids": [
+    "fb14796f-dc22-4f9b-92f3-a69f695efa4b"
+  ],
+  "status": "ready",
+  "created_at": "2025-08-11T00:19:42.031678+00:00",
+  "model_type": "f5_tts"
+}

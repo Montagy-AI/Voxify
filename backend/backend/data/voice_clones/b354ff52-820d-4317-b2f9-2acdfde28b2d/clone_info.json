@@ -1,0 +1,15 @@
+{
+  "id": "b354ff52-820d-4317-b2f9-2acdfde28b2d",
+  "name": "Jun(2)",
+  "description": "",
+  "ref_audio_path": "backend\\data\\voice_clones\\b354ff52-820d-4317-b2f9-2acdfde28b2d\\reference.wav",
+  "ref_text": "I love listening to music, especially classical pieces.",
+  "language": "en-US",
+  "speed": 1.0,
+  "sample_ids": [
+    "3aa818b1-5c9f-4adc-9a25-3f0757d0ac25"
+  ],
+  "status": "ready",
+  "created_at": "2025-08-11T01:13:29.099713+00:00",
+  "model_type": "f5_tts"
+}
