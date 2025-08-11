@@ -18,6 +18,7 @@ import Voices from './pages/Voices';
 import VoiceDetail from './pages/VoiceDetail';
 import Settings from './pages/Settings';
 import HelpPage from './pages/HelpPage';
+import Landing from './pages/Landing';
 import authService from './services/auth.service';
 
 // Protected Route Component
@@ -182,14 +183,15 @@ function App() {
 
           <Route path="/help" element={<HelpPage />} />
 
-          {/* Redirect root to dashboard or login */}
+          {/* Landing page for non-authenticated users */}
           <Route
             path="/"
             element={
-              <Navigate
-                to={authService.isAuthenticated() ? '/dashboard' : '/login'}
-                replace
-              />
+              authService.isAuthenticated() ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <Landing />
+              )
             }
           />
         </Routes>

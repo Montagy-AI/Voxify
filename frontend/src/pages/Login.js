@@ -12,7 +12,7 @@ const Login = () => {
 
   useEffect(() => {
     if (authService.isAuthenticated()) {
-      navigate('/');
+      navigate('/dashboard');
     }
   }, [navigate]);
 
@@ -38,7 +38,7 @@ const Login = () => {
       const result = await authService.login(email, password);
 
       if (result.success) {
-        navigate('/');
+        navigate('/dashboard');
       } else {
         setError(mapAuthError(result.errorCode, result.error));
       }
