@@ -116,6 +116,29 @@ class JobService {
       throw error.response?.data?.error || error;
     }
   }
+
+  async deleteJob(jobId) {
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await api.delete(`/job/${jobId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // DELETE endpoint returns 204 No Content on success
+      return { success: true };
+    } catch (error) {
+      if (error.response?.status === 204) {
+        return { success: true };
+      }
+      throw error.response?.data?.error || error;
+    }
+  }
 }
 
 const jobService = new JobService();

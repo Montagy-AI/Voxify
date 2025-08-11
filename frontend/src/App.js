@@ -15,6 +15,7 @@ import VoiceClone from './pages/VoiceClone';
 import TextToSpeech from './pages/TextToSpeech';
 import Tasks from './pages/Tasks';
 import Voices from './pages/Voices';
+import VoiceDetail from './pages/VoiceDetail';
 import Settings from './pages/Settings';
 import HelpPage from './pages/HelpPage';
 import authService from './services/auth.service';
@@ -127,6 +128,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Voices />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/voices/:cloneId"
+            element={
+              <ProtectedRoute>
+                <VoiceDetail />
               </ProtectedRoute>
             }
           />

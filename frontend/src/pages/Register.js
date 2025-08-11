@@ -141,7 +141,6 @@ const Register = () => {
                   id="firstName"
                   name="firstName"
                   type="text"
-                  required
                   value={formData.firstName}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded border border-zinc-800 bg-zinc-900 px-3 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
@@ -162,7 +161,6 @@ const Register = () => {
                   id="lastName"
                   name="lastName"
                   type="text"
-                  required
                   value={formData.lastName}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded border border-zinc-800 bg-zinc-900 px-3 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
@@ -184,7 +182,6 @@ const Register = () => {
                   name="email"
                   type="email"
                   autoComplete="email"
-                  required
                   value={formData.email}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded border border-zinc-800 bg-zinc-900 px-3 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
@@ -207,7 +204,6 @@ const Register = () => {
                     name="password"
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="new-password"
-                    required
                     value={formData.password}
                     onChange={handleChange}
                     onFocus={() => setShowPasswordRequirements(true)}
@@ -326,7 +322,6 @@ const Register = () => {
                     name="confirmPassword"
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="new-password"
-                    required
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     className="mt-1 block w-full rounded border border-zinc-800 bg-zinc-900 px-3 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors pr-10"

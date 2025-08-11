@@ -207,6 +207,8 @@ def get_voice_models(api):
             "description": fields.String(description="Clone description"),
             "status": fields.String(description="Clone status", enum=["training", "ready", "failed"]),
             "language": fields.String(description="Primary language code"),
+            "clone_type": fields.String(description="Clone creation method", enum=["upload", "record"]),
+            "ref_text": fields.String(description="Reference text used for cloning"),
             "created_at": fields.String(description="Creation timestamp"),
             "is_active": fields.Boolean(description="Whether the clone is active"),
             "model_type": fields.String(description="Voice model type", example="f5_tts"),
@@ -232,6 +234,7 @@ def get_voice_models(api):
             "ref_text": fields.String(required=True, description="Reference text for the primary sample"),
             "description": fields.String(description="Clone description"),
             "language": fields.String(description="Language code", example="en-US"),
+            "clone_type": fields.String(description="Clone creation method", example="upload", enum=["upload", "record"]),
         },
     )
 

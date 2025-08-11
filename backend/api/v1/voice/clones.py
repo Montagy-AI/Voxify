@@ -118,6 +118,7 @@ def create_voice_clone():
             ref_text=data["ref_text"],
             description=data.get("description"),
             language=data.get("language", "zh-CN"),
+            clone_type=data.get("clone_type", "upload"),  # 'upload' or 'record'
         )
 
         # Create voice clone using F5-TTS
@@ -209,6 +210,8 @@ def list_voice_clones():
             f5_service = get_f5_tts_service()
 
             clones = []
+            orphaned_models = []
+            
             for model in voice_models:
                 try:
                     # Get clone info from F5-TTS service
@@ -224,8 +227,15 @@ def list_voice_clones():
                         "model_type": model.model_type,
                     }
                     clones.append(clone_data)
+                except ValueError as e:
+                    # Clone files don't exist - this is an orphaned record
+                    if "not found" in str(e):
+                        orphaned_models.append(model)
+                        continue
+                    else:
+                        raise
                 except Exception:
-                    # If F5-TTS service fails, use database info only
+                    # If F5-TTS service fails for other reasons, use database info only
                     clone_data = {
                         "clone_id": model.id,
                         "name": model.name,
@@ -237,6 +247,23 @@ def list_voice_clones():
                         "model_type": model.model_type,
                     }
                     clones.append(clone_data)
+            
+            # Clean up orphaned models if any were found
+            if orphaned_models:
+                for model in orphaned_models:
+                    # Delete related synthesis jobs first
+                    from database.models import SynthesisJob
+                    synthesis_jobs = session.query(SynthesisJob).filter(
+                        SynthesisJob.voice_model_id == model.id
+                    ).all()
+                    for job in synthesis_jobs:
+                        session.delete(job)
+                    
+                    # Delete the orphaned voice model
+                    session.delete(model)
+                
+                session.commit()
+                print(f"🧹 Auto-cleaned {len(orphaned_models)} orphaned voice clone records")
 
             return jsonify(
                 {
@@ -336,6 +363,7 @@ def get_voice_clone(clone_id: str):
                             "status": voice_model.status,
                             "language": clone_info.get("language", "zh-CN"),
                             "ref_text": clone_info.get("ref_text"),
+                            "clone_type": clone_info.get("clone_type", "upload"),
                             "quality_metrics": {
                                 "similarity_score": 0.95,  # Default similarity score for F5-TTS
                                 "stability_score": 0.92,  # F5-TTS generally stable

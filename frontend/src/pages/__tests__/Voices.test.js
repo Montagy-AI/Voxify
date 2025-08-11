@@ -487,7 +487,7 @@ describe('Voices Component', () => {
       });
     });
 
-    test('navigates to text-to-speech when completed voice clone is clicked', async () => {
+    test('navigates to voice detail when completed voice clone is clicked', async () => {
       renderWithRouter(<Voices />);
 
       await waitFor(() => {
@@ -498,10 +498,10 @@ describe('Voices Component', () => {
       const voiceElement = screen.getByText('Test Voice 1');
       fireEvent.click(voiceElement);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/tasks/text-to-speech/');
+      expect(mockNavigate).toHaveBeenCalledWith('/voices/test-clone-1');
     });
 
-    test('navigates to text-to-speech when any voice clone is clicked', async () => {
+    test('navigates to voice detail when any voice clone is clicked', async () => {
       renderWithRouter(<Voices />);
 
       await waitFor(() => {
@@ -512,7 +512,7 @@ describe('Voices Component', () => {
       const voiceElement = screen.getByText('Test Voice 2');
       fireEvent.click(voiceElement);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/tasks/text-to-speech/');
+      expect(mockNavigate).toHaveBeenCalledWith('/voices/test-clone-2');
     });
   });
 

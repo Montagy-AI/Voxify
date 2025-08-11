@@ -1,0 +1,16 @@
+{
+  "id": "c03123fb-268c-4e41-b546-6b6204fa85a5",
+  "name": "Jun（3）",
+  "description": "",
+  "ref_audio_path": "backend\\data\\voice_clones\\c03123fb-268c-4e41-b546-6b6204fa85a5\\reference.wav",
+  "ref_text": "与朋友聊天是一件非常愉快的事情。",
+  "language": "zh-CN",
+  "speed": 1.0,
+  "clone_type": "record",
+  "sample_ids": [
+    "6adf1b28-538b-4dfb-a752-2704f322dc01"
+  ],
+  "status": "ready",
+  "created_at": "2025-08-11T02:16:50.828921+00:00",
+  "model_type": "f5_tts"
+}
