@@ -25,11 +25,11 @@ const Navbar = () => {
 
   const handleLogout = () => {
     authService.logout();
-    navigate('/login');
+    navigate('/');
   };
 
   return (
-    <nav className="bg-black border-b border-zinc-800 px-4">
+    <nav className="bg-black border-b border-zinc-800 px-4 relative z-50">
       <div className="h-16 flex items-center justify-between">
         {/* Left section with logo */}
         <div className="flex items-center space-x-2">
@@ -151,13 +151,13 @@ const Navbar = () => {
           <div className="flex items-center space-x-4">
             <Link
               to="/login"
-              className="text-gray-400 hover:text-white transition-colors px-3 py-2"
+              className="text-gray-400 hover:text-white transition-colors px-3 py-2 rounded hover:bg-zinc-800 cursor-pointer"
             >
               Log in
             </Link>
             <Link
               to="/register"
-              className="border-2 border-white text-white hover:bg-white hover:text-black transition-colors px-4 py-2 rounded"
+              className="border-2 border-white text-white hover:bg-white hover:text-black transition-all duration-200 px-4 py-2 rounded cursor-pointer transform hover:scale-105 active:scale-95"
             >
               Get started
             </Link>

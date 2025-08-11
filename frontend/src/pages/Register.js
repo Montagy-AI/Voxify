@@ -19,7 +19,7 @@ const Register = () => {
 
   useEffect(() => {
     if (authService.isAuthenticated()) {
-      navigate('/');
+      navigate('/dashboard');
     }
   }, [navigate]);
 
@@ -63,7 +63,7 @@ const Register = () => {
           formData.password
         );
         if (loginResult.success) {
-          navigate('/');
+          navigate('/dashboard');
         } else {
           navigate('/login');
         }
