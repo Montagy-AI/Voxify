@@ -12,9 +12,6 @@ const TextToSpeech = () => {
   const [voiceClones, setVoiceClones] = useState([]);
   const [loadingClones, setLoadingClones] = useState(true);
   const [config, setConfig] = useState({
-    speed: 1.0,
-    pitch: 1.0,
-    volume: 1.0,
     outputFormat: 'wav',
     sampleRate: 22050,
     language: 'en-US',
@@ -363,78 +360,6 @@ const TextToSpeech = () => {
                     <option value="th-TH">Thai</option>
                     <option value="vi-VN">Vietnamese</option>
                   </optgroup>
-                </select>
-              </div>
-
-              {/* Speed Control */}
-              <div>
-                <label
-                  htmlFor="speed"
-                  className="block text-sm font-medium text-gray-300 mb-2"
-                >
-                  Speed
-                </label>
-                <select
-                  id="speed"
-                  value={config.speed}
-                  onChange={(e) =>
-                    setConfig((prev) => ({
-                      ...prev,
-                      speed: parseFloat(e.target.value),
-                    }))
-                  }
-                  className="w-full rounded border border-zinc-800 bg-zinc-900 px-4 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
-                  disabled={isGenerating}
-                >
-                  <option value="1.0">Normal</option>
-                </select>
-              </div>
-
-              {/* Pitch Control */}
-              <div>
-                <label
-                  htmlFor="pitch"
-                  className="block text-sm font-medium text-gray-300 mb-2"
-                >
-                  Pitch
-                </label>
-                <select
-                  id="pitch"
-                  value={config.pitch}
-                  onChange={(e) =>
-                    setConfig((prev) => ({
-                      ...prev,
-                      pitch: parseFloat(e.target.value),
-                    }))
-                  }
-                  className="w-full rounded border border-zinc-800 bg-zinc-900 px-4 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
-                  disabled={isGenerating}
-                >
-                  <option value="1.0">Normal</option>
-                </select>
-              </div>
-
-              {/* Volume Control */}
-              <div>
-                <label
-                  htmlFor="volume"
-                  className="block text-sm font-medium text-gray-300 mb-2"
-                >
-                  Volume
-                </label>
-                <select
-                  id="volume"
-                  value={config.volume}
-                  onChange={(e) =>
-                    setConfig((prev) => ({
-                      ...prev,
-                      volume: parseFloat(e.target.value),
-                    }))
-                  }
-                  className="w-full rounded border border-zinc-800 bg-zinc-900 px-4 py-2 text-white placeholder-gray-400 focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
-                  disabled={isGenerating}
-                >
-                  <option value="1.0">Normal</option>
                 </select>
               </div>
             </div>
