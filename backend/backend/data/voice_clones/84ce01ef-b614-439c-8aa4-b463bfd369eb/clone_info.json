@@ -1,0 +1,16 @@
+{
+  "id": "84ce01ef-b614-439c-8aa4-b463bfd369eb",
+  "name": "Muzi Zhao",
+  "description": "",
+  "ref_audio_path": "backend\\data\\voice_clones\\84ce01ef-b614-439c-8aa4-b463bfd369eb\\reference.wav",
+  "ref_text": "Learning new skills makes me feel fulfilled and happy.",
+  "language": "en-US",
+  "speed": 1.0,
+  "clone_type": "record",
+  "sample_ids": [
+    "1b01acae-c222-41c9-a640-cd13030802d5"
+  ],
+  "status": "ready",
+  "created_at": "2025-08-11T03:34:13.043340+00:00",
+  "model_type": "f5_tts"
+}
