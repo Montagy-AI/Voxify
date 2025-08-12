@@ -78,13 +78,15 @@ After logging in, you will be navigated to the dashboard. Click **"Clone your vo
   <img src="frontend/src/components/userstep6.png" alt="userstep6">
   </p>
 
-You may choose to upload your existing voice file(should in wav.format). Pls enter correct reference text of the conctent of sample.
+You may choose to upload your existing voice file (should be in **.wav** format). Please enter the correct reference text for the content of the sample.
 
   <p align="center">
   <img src="frontend/src/components/userstep7.png" alt="userstep6">
   </p>
 
-Or choose to record your own sample at our website. Read the sentence we provide and click generate voice clone.
+Or choose to **record your own sample** on our website. Read the sentence we provide and click **Generate Voice Clone**. 
+
+**Notice**: Please choose the language as **Chinese** or **English**, since we are still improving models for other languages.
 
   <p align="center">
   <img src="frontend/src/components/userstep8.png" alt="userstep6">
@@ -108,6 +110,7 @@ Or choose to record your own sample at our website. Read the sentence we provide
 **A:** Only voices you have permission to use. Using others' voices without consent may violate laws.
 
 ---
+
 
 
 
