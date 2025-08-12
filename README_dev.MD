@@ -163,6 +163,7 @@ Get:/file/synthesis/{job_id}
 ## Overall Structure
 
 
+```mermaid
 %%{init: {
   "theme": "base",
   "flowchart": { "curve": "linear" },
@@ -297,7 +298,7 @@ graph TB
     class F5TTSEngine,EmbeddingEngine,ModelManager aiLayer
     class Docker,DockerCompose,GitHub,GitHubActions,Testing,HealthCheck,Snyk,Logging infraLayer
     class Nginx backendLayer
-
+```
 
 ## Backend Structure
 
