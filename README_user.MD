@@ -100,11 +100,25 @@ At the dashboard page, click **Text-To-Speech**. Select the **voice clone** you 
 **Recommended**: Choose **English** or **Chinese**, as the quality for other languages might not be as good at the moment.
 
   <p align="center">
-  <img src="frontend/src/components/userstep9.png" alt="userstep9">
+  <img src="frontend/src/components/task.png" alt="task">
   </p>
 
 4. **Manage Your Tasks**  
-   Access your task dashboard to download, delete, or play your generated audio.
+ Click **Tasks** to access your voice clone tasks. From here, you can:
+- Download generated audio.
+- Delete unwanted files.
+- Play audio directly.
+
+<p align="center">
+  <img src="frontend/src/components/userstep9.png" alt="Voice Clone Tasks">
+</p>
+
+  Click **Voices** to see all the voice samples you have uploaded.
+
+<p align="center">
+  <img src="frontend/src/components/userstep10.png" alt="Voice Samples">
+</p>
+
 
 ---
 
@@ -117,6 +131,7 @@ At the dashboard page, click **Text-To-Speech**. Select the **voice clone** you 
 **A:** Only voices you have permission to use. Using others' voices without consent may violate laws.
 
 ---
+
 
 
 
