@@ -132,10 +132,10 @@ At the dashboard page, click **Text-To-Speech**. Select the **voice clone** you 
 **Q:** Why can’t I upload my voice sample?  
 **A:** Our system includes a duplicate voice sample detection feature. This means you may already have uploaded the same voice sample before. Try clearing your existing voice list or uploading a completely new voice sample.
 
-**Q:** The quality of my generated voice clone audio is not good — why?  
+**Q:** The quality of my generated voice clone audio is not good, why?  
 **A:** This may be because the reference text you used for your voice sample was not suitable. Try using a different voice sample to improve the quality of the generated audio.
 
-**Q:** I can’t create a voice clone — what’s wrong?  
+**Q:** I can’t create a voice clone, what’s wrong?  
 **A:** Make sure you clicked the **Generate Voice Clone** button at the bottom of the page after selecting your voice sample and settings.
 
 **Q:** How long does it take to create a voice clone?  
@@ -170,6 +170,7 @@ By using the Software, you agree to the terms of this license.
 
 Email: voxifys0@gmail.com
 ---
+
 
 
 
