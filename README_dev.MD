@@ -346,8 +346,41 @@ Voxify was not initially planned to have a frontend, and tests were not as rigor
 
 A global test setup is defined in `frontend/src/setupTests.js` to ensure compatability with the React environment. Tests live alongside components using the `.test.js` extension.
 
-For D3, frontend test coverage reached 42% line coverage in 250 tests. For D4, there are plans to achieve at *least* 50% coverage.
+For D3, frontend test coverage reached 42% line coverage in 250 tests. For D4, coverage reached to 81% over about 500 tests; see coverage report below.
 
+```
+------------------------|---------|----------|---------|---------|----------------------------------------
+File                    | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                      
+------------------------|---------|----------|---------|---------|----------------------------------------
+All files               |   79.95 |    77.83 |   81.72 |   80.54 |                                        
+ src                    |       0 |        0 |       0 |       0 |                                        
+  App.js                |       0 |        0 |       0 |       0 | 23-45                                  
+  index.js              |       0 |      100 |     100 |       0 | 6-7                                    
+ src/components         |     100 |     87.5 |     100 |     100 |                                        
+  Navbar.js             |     100 |     87.5 |     100 |     100 | 15,124                                 
+ src/config             |     100 |    66.66 |     100 |     100 |                                        
+  api.config.js         |     100 |       75 |     100 |     100 | 6-22                                   
+  languages.js          |     100 |     62.5 |     100 |     100 | 170-171,195-275                        
+ src/pages              |   77.28 |    76.26 |   78.26 |   78.35 |                                        
+  Dashboard.js          |     100 |      100 |     100 |     100 |                                        
+  ForgotPassword.js     |     100 |      100 |     100 |     100 |                                        
+  HelpPage.js           |     100 |      100 |     100 |     100 |                                        
+  Login.js              |     100 |      100 |     100 |     100 |                                        
+  Register.js           |     100 |      100 |     100 |     100 |                                        
+  ResetPassword.js      |    96.2 |    97.91 |     100 |    96.2 | 87-89                                  
+  Settings.js           |     100 |    94.44 |     100 |     100 | 25                                     
+  Tasks.js              |   45.08 |    45.97 |      45 |   45.83 | ...165-172,182,186-188,229-232,331-408 
+  TextToSpeech.js       |   50.43 |    55.07 |   51.85 |   53.27 | ...105-107,111-128,149-153,280,349-397 
+  VoiceClone.js         |   85.18 |       80 |   93.75 |   85.89 | 72-73,83-84,88-89,93-94,117-118,247    
+  Voices.js             |     100 |    97.05 |     100 |     100 | 35                                     
+ src/services           |   85.24 |    85.09 |   86.36 |   84.87 |                                        
+  api.js                |   22.58 |    21.42 |      20 |   22.58 | 16-29,35-68                            
+  auth.service.js       |      80 |    71.11 |      80 |   79.66 | 142-186                                
+  job.service.js        |     100 |      100 |     100 |     100 |                                        
+  language.service.js   |     100 |      100 |     100 |     100 |                                        
+  voiceClone.service.js |     100 |      100 |     100 |     100 |                                        
+------------------------|---------|----------|---------|---------|----------------------------------------
+```
 **Testing Setup Inclusions:**
 - `@testing-library/jest-dom` for extended matchers like `.toBeInTheDocument()`.
 - Mocks for browser APIs unavailable in Jest by default:
