@@ -81,7 +81,7 @@ After logging in, you will be navigated to the dashboard. Click **"Clone your vo
 You may choose to upload your existing voice file (should be in **.wav** format). Please enter the correct reference text for the content of the sample.
 
   <p align="center">
-  <img src="frontend/src/components/userstep7.png" alt="userstep6">
+  <img src="frontend/src/components/userstep7.png" alt="userstep7">
   </p>
 
 Or choose to **record your own sample** on our website. Read the sentence we provide and click **Generate Voice Clone**. 
@@ -89,12 +89,19 @@ Or choose to **record your own sample** on our website. Read the sentence we pro
 **Notice**: Please choose the language as **Chinese** or **English**, since we are still improving models for other languages.
 
   <p align="center">
-  <img src="frontend/src/components/userstep8.png" alt="userstep6">
+  <img src="frontend/src/components/userstep8.png" alt="userstep8">
   </p>
 
 
 3. **Generate Speech**  
-   Enter your desired text, select a language, and let the AI create your voice output.
+
+At the dashboard page, click **Text-To-Speech**. Select the **voice clone** you created and the **language** you want to try. 
+
+**Recommended**: Choose **English** or **Chinese**, as the quality for other languages might not be as good at the moment.
+
+  <p align="center">
+  <img src="frontend/src/components/userstep9.png" alt="userstep9">
+  </p>
 
 4. **Manage Your Tasks**  
    Access your task dashboard to download, delete, or play your generated audio.
@@ -110,6 +117,7 @@ Or choose to **record your own sample** on our website. Read the sentence we pro
 **A:** Only voices you have permission to use. Using others' voices without consent may violate laws.
 
 ---
+
 
 
 
