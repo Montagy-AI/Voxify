@@ -89,10 +89,10 @@ Users can clone their voice using a `.wav` audio sample of their own voice. A 10
 The text-to-speech page allows users to input any text they want converted to audio using either a voice clone or the system voice(s). The user can also change the language spoken, as well as the speed, pitch, and volume the generated audio output will be when generated.
 
 <p align="center">
-<img src="https://imgur.com/GAMdDbm.png" width=75% alt="Voxify TTS page" />
+<img src="frontend/src/components/task.png" width=75% alt="Voxify TTS page" />
 </p>
 
-Generated audio recordings are saved in the "Generated Voices" tab, and users can then download/play previously generated sound recordings.
+Generated audio recordings are saved in the "Tasks" tab, and users can then download/play previously generated sound recordings.
 
 <p align="center">
 <img src="https://imgur.com/I1BCVjR.png" width=75% alt="Voxify jobs page" />
