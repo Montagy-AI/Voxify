@@ -118,7 +118,11 @@ At the dashboard page, click **Text-To-Speech**. Select the **voice clone** you 
   <img src="frontend/src/components/userstep10.png" alt="Voice Samples">
 </p>
 
-
+5. **Settings**  
+ The settings is accessible through the top right tool bar. Here, you can change your email and your first and last name. For changing your password, see part 1.
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/4b4184bf-b111-40d7-a4d5-0559bb1607f3" alt="Settings">
+</p>
 ---
 
 ## ✨ FAQ
@@ -185,6 +189,7 @@ In no event shall Mehdi Zeinali be liable for any indirect, incidental, conseque
 Email: voxifys0@gmail.com
 
 ---
+
 
 
 
