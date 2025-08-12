@@ -160,7 +160,7 @@ Get:/file/synthesis/{job_id}
 
 <img width="870" height="961" alt="image" src="https://github.com/user-attachments/assets/95b0cde8-2aca-4ec6-9eaf-6a1d252a4f93" />
 ## Overall Structure
-
+```mermaid
 graph TB
     %% External Services & Users
     User[👤 User] 
@@ -290,6 +290,7 @@ graph TB
     class F5TTSEngine,EmbeddingEngine,ModelManager aiLayer
     class Docker,DockerCompose,GitHub,GitHubActions,Testing,HealthCheck,Snyk,Logging infraLayer
     class Nginx backendLayer
+```
 
 ## Backend Structure
 
