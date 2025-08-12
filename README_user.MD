@@ -92,10 +92,9 @@ Or choose to **record your own sample** on our website. Read the sentence we pro
   <img src="frontend/src/components/userstep8.png" alt="userstep8">
   </p>
 
-
 3. **Generate Speech**  
-At the dashboard page, click **Text-To-Speech**. Select the **voice clone** you created and the **language** you want to try. 
 
+At the dashboard page, click **Text-To-Speech**. Select the **voice clone** you created and the **language** you want to try. 
 **Recommended**: Choose **English** or **Chinese**, as the quality for other languages might not be as good at the moment.
 
   <p align="center">
@@ -103,6 +102,7 @@ At the dashboard page, click **Text-To-Speech**. Select the **voice clone** you 
   </p>
 
 4. **Manage Your Tasks**  
+
  Click **Tasks** to access your voice clone tasks. From here, you can:
 - Download generated audio.
 - Delete unwanted files.
@@ -166,9 +166,11 @@ By using the Software, you agree to the terms of this license.
 
 ---
 
-Contact：
+## ✨Contact：
+
 Email: voxifys0@gmail.com
 ---
+
 
 
 
