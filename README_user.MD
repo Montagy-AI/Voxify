@@ -144,32 +144,48 @@ At the dashboard page, click **Text-To-Speech**. Select the **voice clone** you 
 ---
 
 ## ✨ License
-Academic Evaluation License Agreement
+
+**Propietary Software License Agreement**
 
 Copyright (c) 2025 Majick
 
-This license governs the use of the software product named "Voxify" (the "Software") developed by Majick and Mehdi Zeinali for academic purposes as part of the CSC301 course.
+All rights reserved.
 
-Grant of License - You are hereby granted a limited, non-exclusive, non-transferable, revocable license to use the Software solely for the purpose of academic evaluation and coursework related to CSC301.
+This Proprietary Software License Agreement (the “Agreement”) governs the use of the software, source code, documentation, and other files contained in the private GitHub repository “Voxify” (the “Software”), owned by Mehdi Zeinali.
 
-Restrictions - You may not: (a) Use the Software for any commercial purpose; (b) Modify, reverse engineer, decompile, disassemble, or create derivative works based on the Software; (c) Distribute, sublicense, rent, lease, or transfer the Software or any portion thereof to any third party; (d) Use the Software beyond the scope of CSC301 coursework without prior written permission from the Majick team.
+**1. Grant of License -**
+You are granted a limited, non-exclusive, non-transferable, revocable license to access and use the Software solely for internal business purposes as authorized by Mehdi Zeinali. This license applies only while you have authorized access to the private GitHub repository.
 
-Ownership - All intellectual property rights in and to the Software remain the sole property of Maijck. This license does not convey any ownership rights to you.
+**2. Restrictions -**
+Without prior written consent from Mehdi Zeinali, you may NOT:
+- Share, fork, clone, copy, or distribute the repository or any part of its contents to any unauthorized party;
+- Use the Software for any commercial purpose outside the scope of authorization;
+- Modify, adapt, translate, reverse engineer, decompile, disassemble, or create derivative works based on the Software;
+- Remove or alter any copyright, trademark, or proprietary notices.
 
-Term - This license is effective from the date of access and shall automatically terminate upon conclusion of the CSC301 course, or earlier if you fail to comply with any of the terms. Upon termination, you must cease all use of the Software and destroy any copies in your possession.
+**3. Ownership -**
+All intellectual property rights in and to the Software remain the exclusive property of Mehdi Zeinali. Access to the private GitHub repository does not convey any ownership or open-source licensing rights.
 
-Disclaimer of Warranty - The Software is provided "as is" without warranty of any kind, express or implied. Majick will make no warranties, including but not limited to the implied warranties of merchantability or fitness for a particular purpose.
+**4. Confidentiality -**
+The Software and all related materials are proprietary and confidential. You agree to protect the confidentiality of the Software and not disclose any portion to unauthorized individuals or entities.
 
-Limitation of Liability - In no event shall Majick be liable for any damages arising from the use or inability to use the Software, including but not limited to incidental, consequential, or special damages.
+**5. Term and Termination -**
+This Agreement is effective from the date you are granted access to the repository and will terminate automatically if you violate any terms. Upon termination, you must immediately stop using the Software, delete all local copies, and remove any forks or clones.
 
-By using the Software, you agree to the terms of this license.
+**6. Disclaimer of Warranties -**
+The Software is provided "as is", without warranties of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, or non-infringement.
+
+**7. Limitation of Liability -**
+In no event shall Mehdi Zeinali be liable for any indirect, incidental, consequential, special, or punitive damages, even if advised of the possibility of such damages. Liability shall not exceed the amount paid (if any) for the Software.
 
 ---
 
 ## ✨Contact：
 
 Email: voxifys0@gmail.com
+
 ---
+
 
 
 
