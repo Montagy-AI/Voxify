@@ -335,15 +335,14 @@ const Landing = () => {
             Ready to Clone Your Voice?
           </h2>
           <p className="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">
-            Join thousands of users creating professional voice content with Voxify. 
-            Start your free trial today.
+            Join us in creating professional voice content with Voxify. 
           </p>
                      <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
              <Link
                to="/register"
                className="rounded-md bg-white px-8 py-3 text-base font-semibold text-black shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-all duration-200 cursor-pointer transform hover:scale-105 active:scale-95"
              >
-               Start Free Trial
+               Start Trial
              </Link>
              <Link
                to="/help"
