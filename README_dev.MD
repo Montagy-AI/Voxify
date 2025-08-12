@@ -92,10 +92,10 @@ The text-to-speech page allows users to input any text they want converted to au
 <img src="frontend/src/components/task.png" width=75% alt="Voxify TTS page" />
 </p>
 
-Generated audio recordings are saved in the "Tasks" tab, and users can then download/play previously generated sound recordings.
+Generated audio recordings are saved in the "Tasks" tab, and users can then download/play/delete previously generated sound recordings.
 
 <p align="center">
-<img src="https://imgur.com/I1BCVjR.png" width=75% alt="Voxify jobs page" />
+<img src="frontend/src/components/joblist.png" width=75% alt="Voxify jobs page" />
 </p>
 
 <details>
