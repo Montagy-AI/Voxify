@@ -474,7 +474,7 @@ Dependabot (via GitHub) and linting will typically check for many of these depen
 
 # License
 
-**Academic Evaluation License Agreement**
+**Propietary Software License Agreement**
 
 Copyright (c) 2025 Majick
 All rights reserved.
