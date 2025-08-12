@@ -34,13 +34,13 @@ The platform's value lies in its ability to capture human vocal identity digital
 - View all your generated speech tasks in the task dashboard.  
 - Easily download, delete, or play the audio files.
 ---
-## 📦 Installation
+## ✨ Installation
 
 > **No installation required**, VoiceClone runs in your browser.  
 > Visit our website: **[https://voxify-prod.vercel.app](https://voxify-prod.vercel.app)**
 ---
 
-## 🚀 How to Use
+## ✨ How to Use
 
 1. **Sign Up / Log In**  
    Create a free account or log in to your existing account.
@@ -56,7 +56,7 @@ The platform's value lies in its ability to capture human vocal identity digital
 
 ---
 
-## ❓ FAQ
+## ✨ FAQ
 
 **Q:** Is my voice data safe?  
 **A:** Yes. All data is securely stored and can be deleted at any time.
@@ -65,6 +65,7 @@ The platform's value lies in its ability to capture human vocal identity digital
 **A:** Only voices you have permission to use. Using others' voices without consent may violate laws.
 
 ---
+
 
 
 
