@@ -59,7 +59,9 @@ Beyond professional use, Voxify enables personal expression and memory preservat
 --- 
 
 Here is our landing Page, where users can find related information of our platform:
-
+<p align="center">
+  <img src="frontend/src/assets/landing.png" width="80%" alt="Voxify landing page">
+</p>
 
 Users can create an account and log in. Once they do so, they will be redirected to the user dashboard.
 
