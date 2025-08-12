@@ -39,6 +39,7 @@ The platform's value lies in its ability to capture human vocal identity digital
 > **No installation required**, VoiceClone runs in your browser.  
 > Visit our website: **[https://voxify-prod.vercel.app](https://voxify-prod.vercel.app)**
 ---
+
 ## 🚀 How to Use
 
 1. **Sign Up / Log In**  
@@ -64,6 +65,7 @@ The platform's value lies in its ability to capture human vocal identity digital
 **A:** Only voices you have permission to use. Using others' voices without consent may violate laws.
 
 ---
+
 
 
 
