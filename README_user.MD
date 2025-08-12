@@ -43,7 +43,10 @@ The platform's value lies in its ability to capture human vocal identity digital
 ## ✨ How to Use
 
 1. **Sign Up / Log In**  
-   Create a free account or log in to your existing account.
+   At our landing page, Click get started to create a account or click log in to your existing account.
+   <p align="center">
+  <img src="frontend/src/components/userstep1" alt="userstep1">
+  </p>
 
 2. **Build Your Voice Model**  
    Upload voice samples or record directly in your browser.
@@ -65,6 +68,7 @@ The platform's value lies in its ability to capture human vocal identity digital
 **A:** Only voices you have permission to use. Using others' voices without consent may violate laws.
 
 ---
+
 
 
 
