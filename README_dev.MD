@@ -76,11 +76,15 @@ The dashboard has access to cloning your voice and the text-to-speech option, as
 <img src="https://imgur.com/Iczav58.png" width=75% alt="Voxify dashboard" />
 </p>
 
-Users can clone their voice using a `.wav` audio sample of their own voice. A 10-second audio file is recommened. Once you name the voice, write a description, and include the reference text of what was said in the audio sample, it will be saved to your account.
+Users can clone their voice using a `.wav` audio sample of their own voice. A 10-second audio file is recommened. Once you name the voice, write a description, and include the reference text of what was said in the audio sample, it will be saved to your account. Users can also record their own voices directly on our website.
 
 <p align="center">
-<img src="https://imgur.com/Ua78aC5.png" width=75% alt="Voxify voice generation page" />
+<img src= "frontend/src/components/upload.png"  width=75% alt="Voxify voice generation page1"/>
 </p>
+<p align="center">
+<img src= "frontend/src/components/record.png"  width=75% alt="Voxify voice generation page2"/>
+</p>
+
 
 The text-to-speech page allows users to input any text they want converted to audio using either a voice clone or the system voice(s). The user can also change the language spoken, as well as the speed, pitch, and volume the generated audio output will be when generated.
 
