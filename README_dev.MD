@@ -159,77 +159,83 @@ Post:/voice/samples -> Post:/voice/clones -> Post:/voice/clones/{clone_id}/selec
 Get:/file/synthesis/{job_id}
 
 <img width="870" height="961" alt="image" src="https://github.com/user-attachments/assets/95b0cde8-2aca-4ec6-9eaf-6a1d252a4f93" />
+
 ## Overall Structure
-```mermaid
+%%{init: {
+  "theme": "base",
+  "flowchart": { "htmlLabels": true, "curve": "linear" },
+  "fontFamily": "Inter, Arial, sans-serif"
+}}%%
+
 graph TB
     %% External Services & Users
-    User[👤 User] 
-    Vercel[🌐 Vercel Frontend<br/>Production: voxify-prod.vercel.app<br/>Preview: voxify-dev.vercel.app]
-    HomeServer[🖥️ Partner Home Server<br/>Backend: milaniez-montagy.duckdns.org]
-    F5TTS[🤖 F5-TTS AI Service<br/>Voice Synthesis Engine]
+    User[User]
+    Vercel[Vercel Frontend<br/>Production: voxify-prod.vercel.app<br/>Preview: voxify-dev.vercel.app]
+    HomeServer[Partner Home Server<br/>Backend: milaniez-montagy.duckdns.org]
+    F5TTS[F5-TTS AI Service<br/>Voice Synthesis Engine]
     
     %% Frontend Layer
     subgraph "Frontend Layer - React 18.2.0"
-        React[📱 React Frontend<br/>Port: 3000]
+        React[React Frontend<br/>Port: 3000]
         
         subgraph "Frontend Components"
-            Pages[📄 Pages<br/>Dashboard, VoiceClone,<br/>TextToSpeech, Voices,<br/>Tasks, Settings]
-            Components[🧩 Components<br/>Navbar, VoiceRecorder,<br/>TabSelector, LoadingSpinner]
-            Services[⚙️ Services<br/>API, Auth, Job,<br/>Language, VoiceClone]
+            Pages[Pages<br/>Dashboard, VoiceClone,<br/>TextToSpeech, Voices,<br/>Tasks, Settings]
+            Components[Components<br/>Navbar, VoiceRecorder,<br/>TabSelector, LoadingSpinner]
+            Services[Services<br/>API, Auth, Job,<br/>Language, VoiceClone]
         end
         
-        TailwindCSS[🎨 Styling<br/>Tailwind CSS + Material UI]
+        TailwindCSS[Styling<br/>Tailwind CSS + Material UI]
     end
     
     %% API Gateway & Load Balancer
-    Nginx[🔄 Nginx Reverse Proxy<br/>Load Balancer & SSL]
+    Nginx[Nginx Reverse Proxy<br/>Load Balancer & SSL]
     
     %% Backend Layer
     subgraph "Backend Layer - Flask + Python"
-        FlaskAPI[🌐 Flask API Server<br/>Port: 8000<br/>RESTful Architecture]
+        FlaskAPI[Flask API Server<br/>Port: 8000<br/>RESTful Architecture]
         
         subgraph "API Modules"
-            AuthAPI[🔐 Authentication API<br/>/api/v1/auth/*<br/>JWT Token Management]
-            VoiceAPI[🎤 Voice API<br/>/api/v1/voice/*<br/>Samples, Clones, Synthesis]
-            FileAPI[📁 File Management API<br/>/api/v1/file/*<br/>Upload/Download]
-            JobAPI[⚡ Job Management API<br/>/api/v1/job/*<br/>Progress Tracking]
+            AuthAPI[Authentication API<br/>/api/v1/auth/*<br/>JWT Token Management]
+            VoiceAPI[Voice API<br/>/api/v1/voice/*<br/>Samples, Clones, Synthesis]
+            FileAPI[File Management API<br/>/api/v1/file/*<br/>Upload/Download]
+            JobAPI[Job Management API<br/>/api/v1/job/*<br/>Progress Tracking]
         end
         
         subgraph "Core Services"
-            F5TTSService[🎯 F5-TTS Service<br/>Voice Processing<br/>Multilingual Support]
-            EmailService[📧 Email Service<br/>SMTP Integration]
-            AuthService[🛡️ Auth Service<br/>Password Management]
+            F5TTSService[F5-TTS Service<br/>Voice Processing<br/>Multilingual Support]
+            EmailService[Email Service<br/>SMTP Integration]
+            AuthService[Auth Service<br/>Password Management]
         end
     end
     
     %% Database Layer
     subgraph "Database Layer"
-        SQLite[(🗄️ SQLite Database<br/>User Profiles<br/>Voice Metadata<br/>Authentication Data)]
-        ChromaDB[(🧠 ChromaDB Vector Database<br/>Voice Embeddings<br/>Similarity Search)]
+        SQLite[(SQLite Database<br/>User Profiles<br/>Voice Metadata<br/>Authentication Data)]
+        ChromaDB[(ChromaDB Vector DB<br/>Voice Embeddings<br/>Similarity Search)]
     end
     
     %% AI Processing Layer
     subgraph "AI Processing Layer"
-        F5TTSEngine[🤖 F5-TTS Engine<br/>Diffusion Transformers<br/>Voice Synthesis]
-        EmbeddingEngine[🎯 Embedding Generator<br/>Voice Feature Extraction]
-        ModelManager[📦 Model Manager<br/>Version Control<br/>Fine-tuning]
+        F5TTSEngine[F5-TTS Engine<br/>Diffusion Transformers<br/>Voice Synthesis]
+        EmbeddingEngine[Embedding Generator<br/>Voice Feature Extraction]
+        ModelManager[Model Manager<br/>Version Control<br/>Fine-tuning]
     end
     
     %% Infrastructure Layer
     subgraph "Infrastructure & DevOps"
-        Docker[🐳 Docker Containers<br/>Multi-service Orchestration]
-        DockerCompose[🔧 Docker Compose<br/>Service Management]
+        Docker[Docker Containers<br/>Multi-service Orchestration]
+        DockerCompose[Docker Compose<br/>Service Management]
         
         subgraph "CI/CD Pipeline"
-            GitHub[📂 GitHub Repository<br/>Version Control]
-            GitHubActions[⚡ GitHub Actions<br/>Automated Testing<br/>Linting & Formatting]
-            Testing[🧪 Testing Suite<br/>Backend: pytest 512 tests<br/>Frontend: Jest 250 tests]
+            GitHub[GitHub Repository<br/>Version Control]
+            GitHubActions[GitHub Actions<br/>Automated Testing<br/>Linting & Formatting]
+            Testing[Testing Suite<br/>Backend: pytest 512 tests<br/>Frontend: Jest 250 tests]
         end
         
         subgraph "Monitoring & Security"
-            HealthCheck[💚 Health Monitoring<br/>/health endpoint]
-            Snyk[🔒 Snyk Security<br/>Vulnerability Scanning]
-            Logging[📊 Logging System<br/>Container Logs]
+            HealthCheck[Health Monitoring<br/>/health endpoint]
+            Snyk[Snyk Security<br/>Vulnerability Scanning]
+            Logging[Logging System<br/>Container Logs]
         end
     end
     
@@ -274,14 +280,14 @@ graph TB
     VoiceAPI -.->|Multilingual Support| F5TTSEngine
     F5TTSEngine -.->|Native: zh-CN, en-US<br/>Specialized: ja-JP, fr-FR<br/>Fallback: ko-KR, pt-BR| ModelManager
     
-    %% Styling with black text
-    classDef userLayer fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000000
-    classDef frontendLayer fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000000
-    classDef backendLayer fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px,color:#000000
-    classDef databaseLayer fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000000
-    classDef aiLayer fill:#fce4ec,stroke:#880e4f,stroke-width:2px,color:#000000
-    classDef infraLayer fill:#f1f8e9,stroke:#33691e,stroke-width:2px,color:#000000
-    classDef externalLayer fill:#e0f2f1,stroke:#004d40,stroke-width:2px,color:#000000
+    %% Styling (no emojis)
+    classDef userLayer fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
+    classDef frontendLayer fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000
+    classDef backendLayer fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px,color:#000
+    classDef databaseLayer fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef aiLayer fill:#fce4ec,stroke:#880e4f,stroke-width:2px,color:#000
+    classDef infraLayer fill:#f1f8e9,stroke:#33691e,stroke-width:2px,color:#000
+    classDef externalLayer fill:#e0f2f1,stroke:#004d40,stroke-width:2px,color:#000
     
     class User,Vercel,HomeServer,F5TTS externalLayer
     class React,Pages,Components,Services,TailwindCSS frontendLayer
@@ -290,7 +296,7 @@ graph TB
     class F5TTSEngine,EmbeddingEngine,ModelManager aiLayer
     class Docker,DockerCompose,GitHub,GitHubActions,Testing,HealthCheck,Snyk,Logging infraLayer
     class Nginx backendLayer
-```
+
 
 ## Backend Structure
 
