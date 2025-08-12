@@ -467,11 +467,11 @@ This Proprietary Software License Agreement (the “Agreement”) governs the us
 Subject to your compliance with this Agreement, you are granted a limited, non-exclusive, non-transferable, revocable license to access and use the Software solely for internal business purposes as authorized by Mehdi Zeinali. This license applies only while you have authorized access to the private GitHub repository.
 
 3. **Restrictions** -
-You may not without prior written consent from Mehdi Zeinali: 
-(a) Share, fork, clone, copy, or distribute the repository or any part of its contents to any unauthorized party;
-(b) Use the Software for any commercial purpose outside the scope of authorization;
-(c) Modify, adapt, translate, reverse engineer, decompile, disassemble, or create derivative works based on the Software;
-(d) Remove or alter any copyright, trademark, or proprietary notices.
+You may not without prior written consent from Mehdi Zeinali:
+- (a) Share, fork, clone, copy, or distribute the repository or any part of its contents to any unauthorized party;
+- (b) Use the Software for any commercial purpose outside the scope of authorization;
+- (c) Modify, adapt, translate, reverse engineer, decompile, disassemble, or create derivative works based on the Software;
+- (d) Remove or alter any copyright, trademark, or proprietary notices.
 
 4. **Ownership** -
 All intellectual property rights in and to the Software remain the exclusive property of Mehdi Zeinali. Access to the private GitHub repository does not convey any ownership or open-source licensing rights.
