@@ -44,15 +44,21 @@ The platform's value lies in its ability to capture human vocal identity digital
 
 1. **Sign Up / Log In**  
    At our landing page, Click get started to create a account or click log in to your existing account.
-   <p align="center">
+
+  <p align="center">
   <img src="frontend/src/components/userstep1.png" alt="userstep1">
   </p>
-    
+
+  This is our sign-up page. Please note that you need to enter a valid password and an email address that has never been used before.
+
    <p align="center">
-  <img src="frontend/src/components/userstep2.png" alt="userstep1">
+  <img src="frontend/src/components/userstep2.png" alt="userstep2">
   </p>
+
+  Or directly log in. If you don't remember your password, no worries! Click **"Forget your password"** to reset it.
+
    <p align="center">
-  <img src="frontend/src/components/userstep3.png" alt="userstep1">
+  <img src="frontend/src/components/userstep3.png" alt="userstep3">
   </p>
 
 2. **Build Your Voice Model**  
@@ -75,6 +81,7 @@ The platform's value lies in its ability to capture human vocal identity digital
 **A:** Only voices you have permission to use. Using others' voices without consent may violate laws.
 
 ---
+
 
 
 
