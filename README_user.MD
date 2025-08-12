@@ -62,17 +62,22 @@ At our landing page, Click get started to create a account or click log in to yo
   </p>
 
   <p align="center">
-  <img src="frontend/src/components/userstep4.png" alt="userstep3">
+  <img src="frontend/src/components/userstep4.png" alt="userstep4">
   </p>
 
 The reset email will be send to your email! Click the embeded link to reset password.
 
   <p align="center">
-  <img src="frontend/src/components/userstep5.png" alt="userstep3">
+  <img src="frontend/src/components/userstep5.png" alt="userstep5">
   </p>
 
 2. **Build Your Voice Model**  
    Upload voice samples or record directly in your browser.
+After logging in, you will be narvigated to the dashboard. click 
+
+  <p align="center">
+  <img src="frontend/src/components/userstep6.png" alt="userstep5">
+  </p>
 
 3. **Generate Speech**  
    Enter your desired text, select a language, and let the AI create your voice output.
@@ -91,6 +96,7 @@ The reset email will be send to your email! Click the embeded link to reset pass
 **A:** Only voices you have permission to use. Using others' voices without consent may violate laws.
 
 ---
+
 
 
 
