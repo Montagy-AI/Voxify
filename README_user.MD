@@ -34,6 +34,10 @@ The platform's value lies in its ability to capture human vocal identity digital
 - View all your generated speech tasks in the task dashboard.  
 - Easily download, delete, or play the audio files.
 ---
+## 📦 Installation
+
+> **No installation required** — VoiceClone runs in your browser.  
+> Visit our website: **[https://voxify-prod.vercel.app](https://voxify-prod.vercel.app)**
 
 
 
