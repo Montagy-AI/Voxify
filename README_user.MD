@@ -36,8 +36,34 @@ The platform's value lies in its ability to capture human vocal identity digital
 ---
 ## 📦 Installation
 
-> **No installation required** — VoiceClone runs in your browser.  
+> **No installation required**, VoiceClone runs in your browser.  
 > Visit our website: **[https://voxify-prod.vercel.app](https://voxify-prod.vercel.app)**
+---
+## 🚀 How to Use
+
+1. **Sign Up / Log In**  
+   Create a free account or log in to your existing account.
+
+2. **Build Your Voice Model**  
+   Upload voice samples or record directly in your browser.
+
+3. **Generate Speech**  
+   Enter your desired text, select a language, and let the AI create your voice output.
+
+4. **Manage Your Tasks**  
+   Access your task dashboard to download, delete, or play your generated audio.
+
+---
+
+## ❓ FAQ
+
+**Q:** Is my voice data safe?  
+**A:** Yes. All data is securely stored and can be deleted at any time.
+
+**Q:** Can I clone any voice?  
+**A:** Only voices you have permission to use. Using others' voices without consent may violate laws.
+
+---
 
 
 
