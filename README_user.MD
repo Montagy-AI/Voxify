@@ -1,4 +1,4 @@
-# Hi new developer, welcome to Voxify!
+# Hi new user, welcome to Voxify!
 
 <p align="center">
 <img src="https://voxify-prod.vercel.app/logo.png" width=50%>
@@ -47,3 +47,4 @@ Beyond professional use, Voxify enables personal expression and memory preservat
 - Model versioning and management capabilities.
 
 ---
+
