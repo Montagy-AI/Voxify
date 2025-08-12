@@ -57,6 +57,10 @@ Beyond professional use, Voxify enables personal expression and memory preservat
 **Backend Service Link:** https://milaniez-montagy.duckdns.org/
 
 --- 
+
+Here is our landing Page, where users can find related information of our platform:
+
+
 Users can create an account and log in. Once they do so, they will be redirected to the user dashboard.
 
 <p align="center">
