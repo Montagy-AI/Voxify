@@ -1,4 +1,4 @@
-#Hi new developer, welcome to Voxify!
+# Hi new developer, welcome to Voxify!
 
 <p align="center">
 <img src="https://voxify-prod.vercel.app/logo.png" width=50%>
@@ -50,9 +50,9 @@ Beyond professional use, Voxify enables personal expression and memory preservat
 
 # Getting Started
 
-**Frontend Production Link:** https://voxify-prod.vercel.app/login
+**Frontend Production Link:** https://voxify-prod.vercel.app
 
-**Frontend Preview Link:** https://voxify-dev.vercel.app/login
+**Frontend Preview Link:** https://voxify-dev.vercel.app
 
 **Backend Service Link:** https://milaniez-montagy.duckdns.org/
 
