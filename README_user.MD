@@ -72,12 +72,24 @@ The reset email will be send to your email! Click the embeded link to reset pass
   </p>
 
 2. **Build Your Voice Model**  
-   Upload voice samples or record directly in your browser.
-After logging in, you will be narvigated to the dashboard. click 
+After logging in, you will be navigated to the dashboard. Click **"Clone your voice"** to start uploading your voice sample.
 
   <p align="center">
-  <img src="frontend/src/components/userstep6.png" alt="userstep5">
+  <img src="frontend/src/components/userstep6.png" alt="userstep6">
   </p>
+
+You may choose to upload your existing voice file(should in wav.format). Pls enter correct reference text of the conctent of sample.
+
+  <p align="center">
+  <img src="frontend/src/components/userstep7.png" alt="userstep6">
+  </p>
+
+Or choose to record your own sample at our website. Read the sentence we provide and click generate voice clone.
+
+  <p align="center">
+  <img src="frontend/src/components/userstep8.png" alt="userstep6">
+  </p>
+
 
 3. **Generate Speech**  
    Enter your desired text, select a language, and let the AI create your voice output.
@@ -96,6 +108,7 @@ After logging in, you will be narvigated to the dashboard. click
 **A:** Only voices you have permission to use. Using others' voices without consent may violate laws.
 
 ---
+
 
 
 
