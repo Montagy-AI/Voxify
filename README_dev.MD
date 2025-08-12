@@ -1,4 +1,4 @@
-# Welcome to Voxify!
+#Hi new developer, welcome to Voxify!
 
 <p align="center">
 <img src="https://voxify-prod.vercel.app/logo.png" width=50%>
