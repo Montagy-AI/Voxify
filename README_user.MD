@@ -104,6 +104,7 @@ At the dashboard page, click **Text-To-Speech**. Select the **voice clone** you 
   </p>
 
 4. **Manage Your Tasks**  
+
  Click **Tasks** to access your voice clone tasks. From here, you can:
 - Download generated audio.
 - Delete unwanted files.
@@ -130,7 +131,20 @@ At the dashboard page, click **Text-To-Speech**. Select the **voice clone** you 
 **Q:** Can I clone any voice?  
 **A:** Only voices you have permission to use. Using others' voices without consent may violate laws.
 
+**Q:** Why can’t I upload my voice sample?  
+**A:** Our system includes a duplicate voice sample detection feature. This means you may already have uploaded the same voice sample before. Try clearing your existing voice list or uploading a completely new voice sample.
+
+**Q:** The quality of my generated voice clone audio is not good — why?  
+**A:** This may be because the reference text you used for your voice sample was not suitable. Try using a different voice sample to improve the quality of the generated audio.
+
+**Q:** I can’t create a voice clone — what’s wrong?  
+**A:** Make sure you clicked the **Generate Voice Clone** button at the bottom of the page after selecting your voice sample and settings.
+
+**Q:** How long does it take to create a voice clone?  
+**A:** For shorter text inputs, the process usually takes less than 30 seconds.
+
 ---
+
 
 
 
