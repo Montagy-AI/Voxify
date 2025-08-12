@@ -19,22 +19,21 @@ The platform's value lies in its ability to capture human vocal identity digital
 ---
 ## ✨ Features
 
-### 🎙 Voice Cloning and Synthesis
-- Upload audio samples to create personalized voice models.
-- Generate natural-sounding speech from any text input using cloned voices.
+### 1. Account Management & Authorization
+- Secure account registration, storage, and authentication.  
+- Users can recover their accounts via email if they forget their credentials.
 
-### 👤 User Management and Security
-- Secure user authentication and profile management.
-- Job status tracking for synthesis requests.
+### 2. Voice Model Building
+- Upload your own voice recordings or record directly on our website to create a personalized voice model.
 
-### 🛠 Technical Infrastructure
-- RESTful API architecture for easy integration.
-- Dual database system and CI/CD pipeline for automated testing and quality assurance.
+### 3. Voice Cloning
+- Generate speech content using your custom voice model.  
+- Choose the output language for the generated voice.
 
-### 🤖 AI-Powered Processing
-- F5-TTS diffusion transformation technology, with fine-tuning options for improved voice quality.
-- Model versioning and management capabilities.
-
+### 4. Task Management
+- View all your generated speech tasks in the task dashboard.  
+- Easily download, delete, or play the audio files.
 ---
+
 
 
